@@ -52,17 +52,20 @@ const instaImages = [
 const Home = () => {
   const heroRef = useRef(null);
   const collectionsRef = useRef(null);
+  const lookbookRef = useRef(null);
   const brandStatementRef = useRef(null);
   const [customers, setCustomers] = useState(0);
 
   // Mouse Parallax Logic
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
-  const springConfig = { damping: 30, stiffness: 100, mass: 0.5 };
-  const springX = useSpring(mouseX, springConfig);
-  const springY = useSpring(mouseY, springConfig);
-  const parallaxX = useTransform(springX, [-0.5, 0.5], [-15, 15]);
-  const parallaxY = useTransform(springY, [-0.5, 0.5], [-15, 15]);
+  const springConfig = { damping: 25, stiffness: 120 };
+  const parallaxX = useSpring(useTransform(mouseX, [-0.5, 0.5], [-15, 15]), springConfig);
+  const parallaxY = useSpring(useTransform(mouseY, [-0.5, 0.5], [-15, 15]), springConfig);
+  
+  // Tilt for Craftsmanship BounceCards
+  const tiltX = useSpring(useTransform(mouseY, [-0.5, 0.5], [5, -5]), springConfig);
+  const tiltY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-5, 5]), springConfig);
 
   const handleMouseMove = (e) => {
     const { innerWidth, innerHeight } = window;
@@ -103,20 +106,27 @@ const Home = () => {
         });
       }
 
-      // Categories Subtle Reveal
-      gsap.fromTo(`.${styles.cardWrapper}`,
-        { y: 50, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.8,
-          stagger: 0.15,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: collectionsRef.current,
-            start: "top 75%",
-          }
+      // Craftsmanship Reveal
+      const craftTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: lookbookRef.current,
+          start: "top 60%",
         }
+      });
+
+      craftTl.fromTo(".craft-fade", 
+        { y: 30, opacity: 0 }, 
+        { y: 0, opacity: 1, duration: 1, stagger: 0.1, ease: "power2.out" }
+      )
+      .fromTo(`.${styles.craftBgTextLine}`, 
+        { x: -50, opacity: 0 }, 
+        { x: 0, opacity: 0.04, duration: 1.2, stagger: 0.1, ease: "power3.out" }, 
+        "-=0.8"
+      )
+      .fromTo(`.${styles.craftSpecsPanel}`, 
+        { x: 50, opacity: 0 }, 
+        { x: 0, opacity: 1, duration: 1, ease: "power3.out" }, 
+        "-=1"
       );
       
       // Brand Statement Typography Reveal
@@ -379,15 +389,123 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 4. CRAFTSMANSHIP (Essentials via BounceCards) */}
-      <section style={{ padding: '150px 0', backgroundColor: 'var(--surface-color)', overflow: 'hidden' }}>
-        <div className="container" style={{ textAlign: 'center', marginBottom: '80px' }}>
-          <h2 style={{ fontSize: '2.5rem', textTransform: 'uppercase', marginBottom: '24px' }}>Uncompromising <span className="text-accent">Materials</span></h2>
-          <p className="text-muted" style={{ maxWidth: '600px', margin: '0 auto', fontSize: '1.2rem' }}>
-            The foundation of every wardrobe. Sourced globally, crafted flawlessly. Only the highest grade heavyweights make the cut.
-          </p>
+      {/* 4. MATERIAL & CRAFTSMANSHIP (BounceCards Redesign) */}
+      <section ref={lookbookRef} className={styles.craftsmanshipSection} onMouseMove={handleMouseMove}>
+        
+        {/* Dust Particles */}
+        <div className={styles.dustParticles}>
+          {[...Array(20)].map((_, i) => (
+            <motion.div
+              key={i}
+              className={styles.particle}
+              style={{
+                width: Math.random() * 4 + 2 + 'px',
+                height: Math.random() * 4 + 2 + 'px',
+                left: Math.random() * 100 + '%',
+                top: Math.random() * 100 + '%'
+              }}
+              animate={{
+                y: [0, -100, 0],
+                x: [0, Math.random() * 50 - 25, 0],
+                opacity: [0, 0.3, 0]
+              }}
+              transition={{
+                duration: Math.random() * 15 + 10,
+                repeat: Infinity,
+                ease: "linear",
+                delay: Math.random() * 10
+              }}
+            />
+          ))}
         </div>
-        <BounceCards images={bounceImages} />
+
+        <div className={styles.craftsmanshipContainer}>
+          <div className={styles.craftsmanshipLayout}>
+            
+            {/* Background Typography (Absolute Behind Everything) */}
+            <div className={styles.craftBgText}>
+              <div className={styles.craftBgTextLine}>100% COTTON</div>
+              <div className={styles.craftBgTextLine}>480 GSM</div>
+              <div className={styles.craftBgTextLine}>PREMIUM FLEECE</div>
+            </div>
+
+            {/* LEFT COLUMN: Editorial & Specs */}
+            <div className={`${styles.craftLeft} craft-fade`}>
+              <div className={styles.craftHeader}>
+                <h2 className={styles.craftTitle}>Material &<br/><span className={styles.craftTitleAccent}>Craftsmanship</span></h2>
+                <p className={styles.craftDesc}>
+                  Explore the textures and details that define our latest collection. Sourced globally, crafted flawlessly.
+                </p>
+              </div>
+
+              {/* Specifications Panel */}
+              <div className={styles.craftSpecsPanel}>
+                <div className={styles.specItem}>
+                  <span className={styles.specTitle}>Construction</span>
+                  <span className={styles.specDesc}>Double-Stitched Seams</span>
+                </div>
+                <div className={styles.specItem}>
+                  <span className={styles.specTitle}>Fabric Weight</span>
+                  <span className={styles.specDesc}>Heavyweight 480 GSM</span>
+                </div>
+                <div className={styles.specItem}>
+                  <span className={styles.specTitle}>Process</span>
+                  <span className={styles.specDesc}>Premium Pigment Dye</span>
+                </div>
+                <div className={styles.specItem}>
+                  <span className={styles.specTitle}>Guarantee</span>
+                  <span className={styles.specDesc}>Built For Longevity</span>
+                </div>
+              </div>
+            </div>
+
+            {/* RIGHT COLUMN: Interactive Fashion Collage */}
+            <div className={`${styles.craftRight} craft-fade`}>
+              <div className={styles.collageGlow}></div>
+              <motion.div 
+                className={styles.collageWrapper}
+                style={{ rotateX: tiltX, rotateY: tiltY }}
+              >
+                {/* Collage Card 1: Foreground Left */}
+                <motion.div 
+                  className={`${styles.collageCard} ${styles.card1}`}
+                  animate={{ y: [0, -15, 0] }}
+                  transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <img src="https://images.unsplash.com/photo-1550246140-5119ae4790b8?q=80&w=800&auto=format&fit=crop" alt="Premium Apparel" className={styles.collageImg} />
+                </motion.div>
+
+                {/* Collage Card 2: Background Left */}
+                <motion.div 
+                  className={`${styles.collageCard} ${styles.card2}`}
+                  animate={{ y: [0, 10, 0] }}
+                  transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                >
+                  <img src="https://images.unsplash.com/photo-1492288991661-058aa541ff43?q=80&w=800&auto=format&fit=crop" alt="Editorial Fashion" className={styles.collageImg} />
+                </motion.div>
+
+                {/* Collage Card 3: Foreground Right */}
+                <motion.div 
+                  className={`${styles.collageCard} ${styles.card3}`}
+                  animate={{ y: [0, -20, 0] }}
+                  transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                >
+                  <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800&auto=format&fit=crop" alt="Luxury Fit" className={styles.collageImg} />
+                </motion.div>
+
+                {/* Collage Card 4: Background Right */}
+                <motion.div 
+                  className={`${styles.collageCard} ${styles.card4}`}
+                  animate={{ y: [0, 15, 0] }}
+                  transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
+                >
+                  <img src="https://images.unsplash.com/photo-1475179515904-946777b7cc8b?q=80&w=800&auto=format&fit=crop" alt="Heavyweight Fabric" className={styles.collageImg} />
+                </motion.div>
+              </motion.div>
+            </div>
+
+          </div>
+        </div>
       </section>
 
       {/* 5. CAMPAIGN */}
