@@ -500,7 +500,7 @@ const Home = () => {
                   animate={{ y: [0, 15, 0] }}
                   transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
                 >
-                  <img src="https://images.unsplash.com/photo-1475179515904-946777b7cc8b?q=80&w=800&auto=format&fit=crop" alt="Heavyweight Fabric" className={styles.collageImg} />
+                  <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800&auto=format&fit=crop" alt="Heavyweight Fabric" className={styles.collageImg} />
                 </motion.div>
               </motion.div>
             </div>
