@@ -124,6 +124,8 @@ React Router DOM
 Context API
 Framer Motion
 GSAP
+Lenis Smooth Scroll
+React Bits Components
 Swiper
 React Icons
 React Hot Toast
@@ -386,10 +388,10 @@ npm run preview
 
 ### Phase I
 
-- Luxury Streetwear Collections
-- Premium Sneakers
-- Order Management
-- Customer Dashboard
+- Luxury Landing Page Experience
+- Cinematic, editorial-driven UX
+- Interactive product showcasing (Lookbook)
+- Premium animated component architecture
 
 ### Phase II
 

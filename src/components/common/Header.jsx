@@ -34,7 +34,9 @@ const Header = () => {
 
         {/* Navigation - Desktop */}
         <nav className={styles.nav}>
-          <Link to="/shop" className={styles.navLink}>Shop</Link>
+          <Link to="/shop" className={styles.navLink}>New Arrivals</Link>
+          <Link to="/shop?category=men" className={styles.navLink}>Men</Link>
+          <Link to="/shop?category=footwear" className={styles.navLink}>Footwear</Link>
           <Link to="/collections" className={styles.navLink}>Collections</Link>
           <Link to="/about" className={styles.navLink}>Brand</Link>
         </nav>

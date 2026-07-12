@@ -1,9 +1,10 @@
 :root {
   --primary-color: #000000;
   --secondary-color: #0F0F0F;
+  --surface-color: #151515;
   --accent-color: #D4AF37;
   --text-color: #FFFFFF;
-  --text-muted: #888888;
+  --text-muted: #B0B0B0;
   --border-color: #333333;
   --danger-color: #FF3B30;
   --success-color: #34C759;
@@ -181,3 +182,96 @@ input::placeholder, textarea::placeholder {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+/* Premium Product Card Hover Styles */
+.product-card {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.product-card:hover {
+  transform: translateY(-8px);
+}
+
+.product-card-image-wrapper {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--secondary-color);
+  border-radius: 12px;
+  aspect-ratio: 3/4;
+  margin-bottom: 20px;
+}
+
+.product-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.product-card-image-wrapper:hover .product-card-image {
+  transform: scale(1.05);
+}
+
+.product-card-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.product-card-image-wrapper:hover .product-card-overlay {
+  opacity: 1;
+}
+
+/* Campaign & Lookbook Section Optimization */
+.campaign-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+.campaign-image-wrapper {
+  overflow: hidden;
+  border-radius: 16px;
+  position: relative;
+}
+
+.campaign-image {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.campaign-image-wrapper:hover .campaign-image {
+  transform: scale(1.03);
+}
+
+/* Instant-render utility classes */
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+/* Instagram Community Grid */
+.insta-card:hover .insta-img {
+  transform: scale(1.05);
+  opacity: 1 !important;
+}
+
+.insta-card:hover .insta-overlay {
+  opacity: 1 !important;
+}
+
