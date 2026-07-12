@@ -359,12 +359,13 @@ const Home = () => {
                 type: 'Side'
               }
             ].map((item, i) => (
-              <ClickSpark key={i} sparkColor="#D4AF37" sparkCount={12} sparkRadius={25}>
-                <motion.div 
-                  className={styles.cardWrapper}
-                  style={{ x: parallaxX, y: parallaxY }}
-                >
-                  <div className={`${styles.card} ${item.type === 'Center' ? styles.cardCenter : styles.cardSide}`}>
+              <motion.div 
+                key={i}
+                className={styles.cardWrapper}
+                style={{ x: parallaxX, y: parallaxY }}
+              >
+                <div className={`${styles.card} ${item.type === 'Center' ? styles.cardCenter : styles.cardSide}`}>
+                  <ClickSpark sparkColor="#D4AF37" sparkCount={12} sparkRadius={25}>
                     <Link to="/shop" style={{ display: 'block', height: '100%' }}>
                       <img 
                         src={item.img} 
@@ -381,9 +382,9 @@ const Home = () => {
                         </span>
                       </div>
                     </Link>
-                  </div>
-                </motion.div>
-              </ClickSpark>
+                  </ClickSpark>
+                </div>
+              </motion.div>
             ))}
           </div>
         </div>
