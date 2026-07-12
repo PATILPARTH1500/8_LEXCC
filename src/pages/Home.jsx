@@ -120,19 +120,30 @@ const Home = () => {
       );
       
       // Brand Statement Typography Reveal
-      gsap.fromTo(".statement-text",
-        { y: 40, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 1.2,
-          stagger: 0.2,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: brandStatementRef.current,
-            start: "top 75%",
-          }
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: brandStatementRef.current,
+          start: "top 60%",
         }
+      });
+
+      tl.fromTo(".manifestoLine1", 
+        { y: 50, opacity: 0 }, 
+        { y: 0, opacity: 1, duration: 1.2, ease: "power3.out" }
+      )
+      .fromTo(".manifestoLine2", 
+        { y: 50, opacity: 0 }, 
+        { y: 0, opacity: 1, duration: 1.2, ease: "power3.out" }, 
+        "-=0.9"
+      )
+      .to(`.${styles.manifestoDivider}`, 
+        { scaleX: 1, duration: 1.2, ease: "power4.out" }, 
+        "-=0.8"
+      )
+      .fromTo(".manifestoRightContent", 
+        { y: 30, opacity: 0 }, 
+        { y: 0, opacity: 1, duration: 1, ease: "power2.out" }, 
+        "-=1"
       );
     });
 
@@ -268,18 +279,32 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 2. BRAND STATEMENT (Typography Focus) */}
-      <section ref={brandStatementRef} style={{ padding: '200px 0', backgroundColor: 'var(--primary-color)', borderBottom: '1px solid var(--border-color)' }}>
-        <div className="container" style={{ textAlign: 'center', maxWidth: '1000px' }}>
-          <h2 className="statement-text" style={{ fontSize: '5vw', lineHeight: 1.1, textTransform: 'uppercase', fontWeight: 700, fontFamily: 'var(--font-heading)', color: 'var(--text-color)', marginBottom: '20px' }}>
-            NOT TRENDS.
-          </h2>
-          <h2 className="statement-text" style={{ fontSize: '5vw', lineHeight: 1.1, textTransform: 'uppercase', fontWeight: 700, fontFamily: 'var(--font-heading)', color: 'var(--accent-color)' }}>
-            LEGACY.
-          </h2>
-          <p className="statement-text text-muted" style={{ fontSize: '1.4rem', marginTop: '60px', maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto' }}>
-            We don't chase the culture. We craft it. Every piece is an investment in uncompromising quality and timeless design.
-          </p>
+      {/* 2. BRAND STATEMENT (MANIFESTO) */}
+      <section ref={brandStatementRef} className={styles.manifestoSection}>
+        <div className={styles.manifestoBgText}>CRAFT</div>
+        
+        <div className={styles.manifestoContainer}>
+          <div className={styles.manifestoLeft}>
+            <h2 className={styles.manifestoHeading}>
+              <span className={`manifestoLine1 ${styles.manifestoLine1}`}>NOT TRENDS.</span>
+              <span className={`manifestoLine2 ${styles.manifestoLine2}`}>LEGACY.</span>
+            </h2>
+          </div>
+          
+          <div className={styles.manifestoRight}>
+            <div className={styles.manifestoDivider}></div>
+            <div className="manifestoRightContent">
+              <p className={styles.manifestoCopy}>
+                We don't chase the culture. We craft it. Every piece is an investment in uncompromising quality and timeless design. Built for those who demand the standard.
+              </p>
+              
+              <div className={styles.manifestoMeta}>
+                <div className={styles.metaItem}>EST. 2026</div>
+                <div className={styles.metaItem}>GLOBAL STREETWEAR</div>
+                <div className={styles.metaItem}>LIMITED DROPS</div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
