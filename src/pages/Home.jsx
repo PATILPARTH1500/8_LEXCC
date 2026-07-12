@@ -104,17 +104,17 @@ const Home = () => {
       }
 
       // Categories Subtle Reveal
-      gsap.fromTo(`.${styles.card}`,
-        { y: 40, opacity: 0 },
+      gsap.fromTo(`.${styles.cardWrapper}`,
+        { y: 50, opacity: 0 },
         {
           y: 0,
           opacity: 1,
-          duration: 1,
-          stagger: 0.1,
-          ease: "power2.out",
+          duration: 0.8,
+          stagger: 0.15,
+          ease: "power3.out",
           scrollTrigger: {
             trigger: collectionsRef.current,
-            start: "top 80%",
+            start: "top 75%",
           }
         }
       );
@@ -309,38 +309,70 @@ const Home = () => {
       </section>
 
       {/* 3. COLLECTIONS */}
-      <section ref={collectionsRef} className={styles.collectionsSection} style={{ paddingTop: '150px', paddingBottom: '150px' }}>
+      <section ref={collectionsRef} className={styles.collectionsSection} onMouseMove={handleMouseMove}>
+        <div className={styles.collectionsBgText}>SIGNATURE</div>
+        <div className={styles.collectionsRadialGlow}></div>
+        
         <div className="container">
-          <div className={styles.sectionHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '80px' }}>
-            <h2 style={{ fontSize: '2.5rem', textTransform: 'uppercase', lineHeight: 1.1 }}>Curated<br/><span className="text-accent">Signatures</span></h2>
-            <Link to="/shop" className="viewAll">
-              View All Categories
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>CURATED<br/>SIGNATURES</h2>
+            <div className={styles.sectionTitleDivider}></div>
+          </div>
+          
+          <div className={styles.viewAllWrapper}>
+            <Link to="/shop" className={styles.viewAll}>
+              View All Categories <span className={styles.viewAllIcon}>→</span>
             </Link>
           </div>
 
           <div className={styles.grid}>
-            {['Outerwear', 'Oversized Tees', 'Denim & Cargo'].map((cat, i) => (
+            {[
+              {
+                cat: 'Outerwear',
+                index: '01',
+                desc: 'Crafted for colder seasons.',
+                img: 'https://images.unsplash.com/photo-1559551409-dadc959f76b8?q=80&w=800&auto=format&fit=crop',
+                type: 'Side'
+              },
+              {
+                cat: 'Oversized Tees',
+                index: '02',
+                desc: 'Essential everyday silhouettes.',
+                img: 'https://images.unsplash.com/photo-1492288991661-058aa541ff43?q=80&w=800&auto=format&fit=crop',
+                type: 'Center'
+              },
+              {
+                cat: 'Denim & Cargo',
+                index: '03',
+                desc: 'Built for movement and durability.',
+                img: 'https://images.unsplash.com/photo-1509319117193-57bab727e09d?q=80&w=800&auto=format&fit=crop',
+                type: 'Side'
+              }
+            ].map((item, i) => (
               <ClickSpark key={i} sparkColor="#D4AF37" sparkCount={12} sparkRadius={25}>
-                <div className={styles.card}>
-                  <Link to="/shop" style={{ display: 'block', height: '100%' }}>
-                    <img 
-                      src={[
-                        "https://images.unsplash.com/photo-1559551409-dadc959f76b8?q=80&w=800&auto=format&fit=crop",
-                        "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=800&auto=format&fit=crop",
-                        "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=800&auto=format&fit=crop"
-                      ][i]} 
-                      alt={cat} 
-                      className={styles.cardImg}
-                    />
-                    <div className={styles.cardOverlay}></div>
-                    <div className={styles.cardContent}>
-                      <h3 className={styles.cardTitle}>{cat}</h3>
-                      <span className={styles.cardLink}>
-                        Explore <span className={styles.arrow}>→</span>
-                      </span>
-                    </div>
-                  </Link>
-                </div>
+                <motion.div 
+                  className={styles.cardWrapper}
+                  style={{ x: parallaxX, y: parallaxY }}
+                >
+                  <div className={`${styles.card} ${item.type === 'Center' ? styles.cardCenter : styles.cardSide}`}>
+                    <Link to="/shop" style={{ display: 'block', height: '100%' }}>
+                      <img 
+                        src={item.img} 
+                        alt={item.cat} 
+                        className={styles.cardImg}
+                      />
+                      <div className={styles.cardOverlay}></div>
+                      <div className={styles.cardContent}>
+                        <span className={styles.cardIndex}>{item.index} / {item.cat}</span>
+                        <h3 className={styles.cardTitle}>{item.cat}</h3>
+                        <p className={styles.cardSubtitle}>{item.desc}</p>
+                        <span className={styles.cardLink}>
+                          Explore <span className={styles.arrow}>→</span>
+                        </span>
+                      </div>
+                    </Link>
+                  </div>
+                </motion.div>
               </ClickSpark>
             ))}
           </div>
