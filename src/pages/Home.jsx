@@ -510,40 +510,75 @@ const Home = () => {
       </section>
 
       {/* 5. CAMPAIGN */}
-      <section style={{ padding: '150px 0', backgroundColor: 'var(--primary-color)' }}>
+      <section style={{ padding: '150px 0', backgroundColor: 'var(--primary-color)', position: 'relative', overflow: 'hidden' }} onMouseMove={handleMouseMove}>
+        
+        {/* Massive Background Text */}
+        <motion.div 
+          className={styles.campaignBgText}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 0.04 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 2, delay: 0.8, ease: "easeOut" }}
+        >
+          EXCLUSIVE
+        </motion.div>
+
         <div className="container">
-          <div className="campaign-container">
+          <div className={styles.campaignContainer}>
             <motion.div 
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1, ease: "easeOut" }}
-              className="campaign-image-wrapper"
+              className={styles.campaignImageWrapper}
+              style={{ rotateX: tiltX, rotateY: tiltY }}
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 1.2, ease: "easeOut" }}
             >
-              <img 
-                src="https://images.unsplash.com/photo-1613588718956-c2e80305bf61?q=80&w=1200&auto=format&fit=crop" 
-                alt="Campaign"
-                className="campaign-image"
-              />
+              <div className={styles.campaignGlow}></div>
+              <div className={styles.campaignImageContainer}>
+                <motion.img 
+                  initial={{ scale: 1.05 }}
+                  whileInView={{ scale: 1.00 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
+                  src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1200&auto=format&fit=crop" 
+                  alt="Luxury Campaign"
+                  className={styles.campaignImage}
+                />
+                <div className={styles.campaignGrain}></div>
+              </div>
             </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
-              style={{ paddingLeft: '40px' }}
+
+            <motion.div 
+              className={styles.campaignContent}
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 1.2, delay: 0.2, ease: "easeOut" }}
             >
-              <h2 style={{ fontSize: '3rem', lineHeight: 1.1, textTransform: 'uppercase', marginBottom: '32px' }}>
-                Built For The <br />Ones Who Lead.
-              </h2>
-              <p className="text-muted" style={{ fontSize: '1.2rem', marginBottom: '48px', lineHeight: 1.8 }}>
+              <div className={styles.campaignGlow} style={{ width: '150%', height: '150%', opacity: 0.5, left: '60%' }}></div>
+              <div className={styles.campaignLabel}>
+                LIMITED DROP
+              </div>
+
+              <div className={styles.campaignHeadingWrapper}>
+                <div className={styles.campaignAccentLine}></div>
+                <h2 className={styles.campaignHeading}>
+                  Built For The <br />Ones Who Lead.
+                </h2>
+              </div>
+
+              <p className={styles.campaignText}>
                 LEXCC isn't fashion. LEXCC is identity. Crafted in limited quantities for absolute exclusivity. We don't restock. Once a collection drops, it belongs to the few who secure it.
               </p>
-              <ClickSpark sparkColor="#D4AF37" sparkCount={10} sparkRadius={20} style={{ width: 'auto' }}>
-                <Link to="/shop" className="btn-outline">
-                  Discover Campaign
-                </Link>
-              </ClickSpark>
+              
+              <div>
+                <ClickSpark sparkColor="#D4AF37" sparkCount={10} sparkRadius={20} style={{ width: 'auto' }}>
+                  <Link to="/shop" className={styles.btnPremium}>
+                    <span>Discover Campaign</span>
+                    <div className={styles.btnHoverLine}></div>
+                  </Link>
+                </ClickSpark>
+              </div>
             </motion.div>
           </div>
         </div>
