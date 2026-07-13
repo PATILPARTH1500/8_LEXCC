@@ -12,6 +12,7 @@
   "dependencies": {
     "@appletosolutions/reactbits": "^1.0.3",
     "@hookform/resolvers": "^5.4.0",
+    "@marsidev/react-turnstile": "^1.5.3",
     "@studio-freight/lenis": "^1.0.42",
     "@studio-freight/react-lenis": "^0.0.47",
     "@supabase/supabase-js": "^2.110.3",

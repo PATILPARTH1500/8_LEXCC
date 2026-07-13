@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }) => {
   const signUp = async ({ email, password, firstName, lastName, phone }) => {
     // 1. Create auth user
     const { data, error } = await supabase.auth.signUp({
-      email,
+      email: email.toLowerCase().trim(),
       password,
       options: {
         data: {
@@ -74,13 +74,19 @@ export const AuthProvider = ({ children }) => {
     
     if (error) throw error;
     
+    // Check for duplicate account attempt when email confirmations are ON
+    // Supabase returns an empty identities array to prevent email enumeration
+    if (data.user && data.user.identities && data.user.identities.length === 0) {
+       throw new Error("An account already exists with this email. Please sign in using your existing authentication method.");
+    }
+    
     // Note: Database triggers automatically create the profile row
     return data;
   };
 
   const signIn = async ({ email, password }) => {
     const { data, error } = await supabase.auth.signInWithPassword({
-      email,
+      email: email.toLowerCase().trim(),
       password,
     });
     if (error) throw error;
@@ -123,7 +129,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const forgotPassword = async (email) => {
-    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email.toLowerCase().trim(), {
       redirectTo: window.location.origin + '/reset-password',
     });
     if (error) throw error;

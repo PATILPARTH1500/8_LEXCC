@@ -4,6 +4,7 @@ import { useForm as useHookForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { motion } from 'framer-motion';
+import { Turnstile } from '@marsidev/react-turnstile';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './Auth.module.css';
 
@@ -18,6 +19,7 @@ const Login = () => {
   const location = useLocation();
   const [globalError, setGlobalError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState('');
 
   const from = location.state?.from?.pathname || '/account';
 
@@ -26,6 +28,11 @@ const Login = () => {
   });
 
   const onSubmit = async (data) => {
+    if (!turnstileToken) {
+      setGlobalError('Please complete the security check.');
+      return;
+    }
+
     setIsLoading(true);
     setGlobalError('');
     try {
@@ -87,6 +94,16 @@ const Login = () => {
               {...register('password')}
             />
             {errors.password && <span className={styles.errorText}>{errors.password.message}</span>}
+          </div>
+
+          <div style={{ marginTop: '10px' }}>
+            <Turnstile 
+              siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
+              onSuccess={(token) => setTurnstileToken(token)}
+              onError={() => setGlobalError('Security check failed.')}
+              onExpire={() => setTurnstileToken('')}
+              options={{ theme: 'dark' }}
+            />
           </div>
 
           <button type="submit" className={styles.submitBtn} disabled={isLoading}>

@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import zxcvbn from 'zxcvbn';
 import { motion } from 'framer-motion';
+import { Turnstile } from '@marsidev/react-turnstile';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './Auth.module.css';
 
@@ -45,6 +46,7 @@ const Register = () => {
   const [globalError, setGlobalError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
+  const [turnstileToken, setTurnstileToken] = useState('');
 
   const { register, handleSubmit, formState: { errors }, watch } = useForm({
     resolver: zodResolver(registerSchema),
@@ -64,6 +66,11 @@ const Register = () => {
   }, [passwordValue]);
 
   const onSubmit = async (data) => {
+    if (!turnstileToken) {
+      setGlobalError('Please complete the security check.');
+      return;
+    }
+    
     setIsLoading(true);
     setGlobalError('');
     try {
@@ -74,9 +81,8 @@ const Register = () => {
         lastName: data.lastName,
         phone: data.phone
       });
-      // Registration successful, Supabase usually logs them in or requires email verification.
-      // We will redirect to account or verification page.
-      navigate('/account', { replace: true });
+      // Verification email is sent.
+      navigate('/verify-email', { replace: true });
     } catch (error) {
       setGlobalError(error.message || 'Failed to register account.');
     } finally {
@@ -203,6 +209,16 @@ const Register = () => {
               {...register('confirmPassword')}
             />
             {errors.confirmPassword && <span className={styles.errorText}>{errors.confirmPassword.message}</span>}
+          </div>
+
+          <div style={{ marginTop: '10px' }}>
+            <Turnstile 
+              siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'} // Test key
+              onSuccess={(token) => setTurnstileToken(token)}
+              onError={() => setGlobalError('Security check failed. Please try again.')}
+              onExpire={() => setTurnstileToken('')}
+              options={{ theme: 'dark' }}
+            />
           </div>
 
           <button type="submit" className={styles.submitBtn} disabled={isLoading}>

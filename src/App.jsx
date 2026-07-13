@@ -8,6 +8,9 @@ import GrainOverlay from './components/animations/GrainOverlay';
 // Auth & Protected Routes
 import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
+import VerifyEmail from './pages/Auth/VerifyEmail';
+import ForgotPassword from './pages/Auth/ForgotPassword';
+import ResetPassword from './pages/Auth/ResetPassword';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -23,6 +26,9 @@ function App() {
             {/* Auth Routes */}
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
+            <Route path="verify-email" element={<VerifyEmail />} />
+            <Route path="forgot-password" element={<ForgotPassword />} />
+            <Route path="reset-password" element={<ResetPassword />} />
             
             {/* Protected Routes */}
             <Route element={<ProtectedRoute />}>
