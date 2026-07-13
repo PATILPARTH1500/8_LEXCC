@@ -53,6 +53,7 @@ const Home = () => {
   const heroRef = useRef(null);
   const collectionsRef = useRef(null);
   const lookbookRef = useRef(null);
+  const editorialRef = useRef(null);
   const brandStatementRef = useRef(null);
   const [customers, setCustomers] = useState(0);
 
@@ -155,6 +156,81 @@ const Home = () => {
         { y: 0, opacity: 1, duration: 1, ease: "power2.out" }, 
         "-=1"
       );
+
+      // Editorial Lookbook Animations
+      gsap.from(".lookbook-title", {
+        opacity: 0,
+        y: 60,
+        duration: 1,
+        scrollTrigger: {
+          trigger: ".lookbook-section",
+          start: "top 80%",
+        }
+      });
+
+      gsap.from(".lookbook-left", {
+        x: -120,
+        opacity: 0,
+        scale: 1.1,
+        duration: 1.2,
+        scrollTrigger: {
+          trigger: ".lookbook-section",
+          start: "top 75%",
+        }
+      });
+
+      gsap.from(".lookbook-right", {
+        x: 120,
+        opacity: 0,
+        scale: 1.1,
+        duration: 1.2,
+        delay: 0.2,
+        scrollTrigger: {
+          trigger: ".lookbook-section",
+          start: "top 75%",
+        }
+      });
+
+      gsap.fromTo(".lookbook-bg-text", 
+        { opacity: 0 },
+        { 
+          opacity: 0.04, 
+          duration: 2, 
+          delay: 0.8,
+          scrollTrigger: {
+            trigger: ".lookbook-section",
+            start: "top 70%",
+          }
+        }
+      );
+
+      // Editorial Lookbook Parallax
+      const edLeft = editorialRef.current?.querySelector('.lookbook-left');
+      const edRight = editorialRef.current?.querySelector('.lookbook-right');
+      if (edLeft) {
+        gsap.to(edLeft, {
+          y: -40,
+          ease: "none",
+          scrollTrigger: {
+            trigger: editorialRef.current,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true,
+          }
+        });
+      }
+      if (edRight) {
+        gsap.to(edRight, {
+          y: -100,
+          ease: "none",
+          scrollTrigger: {
+            trigger: editorialRef.current,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true,
+          }
+        });
+      }
     });
 
     return () => ctx.revert();
@@ -584,101 +660,248 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 6. LOOKBOOK (Dome Gallery Experience) */}
-      <section style={{ padding: '150px 0', backgroundColor: 'var(--surface-color)', overflow: 'hidden' }}>
-        <div className="container" style={{ textAlign: 'center', marginBottom: '60px' }}>
-          <h2 style={{ fontSize: '2.5rem', textTransform: 'uppercase' }}>Editorial <span className="text-accent">Lookbook</span></h2>
+      {/* 6. EDITORIAL LOOKBOOK */}
+      <section ref={editorialRef} className={`${styles.lookbookSection} lookbook-section`}>
+        
+        <div className={`${styles.lookbookBgText} lookbook-bg-text`}>
+          LOOKBOOK
         </div>
-        <DomeGallery images={domeImages} />
+
+        <div className={styles.lookbookGlow}></div>
+
+        <div className="container">
+          <div className={`${styles.lookbookHeader} lookbook-title`}>
+            <div className={styles.lookbookHeadingWrapper}>
+              <div className={styles.lookbookAccentLine}></div>
+              <h2 className={styles.lookbookTitle}>Editorial Lookbook</h2>
+              <div className={styles.lookbookAccentLine}></div>
+            </div>
+            <p className={styles.lookbookSubtitle}>
+              A visual exploration of the FW26 collection. Crafted through silhouettes, texture, and movement.
+            </p>
+          </div>
+
+          <div className={styles.lookbookGrid}>
+            
+            {/* Left Hero Image */}
+            <div className={`${styles.lookbookCard} ${styles.lookbookCardLeft} lookbook-left`}>
+              <img 
+                src="https://images.unsplash.com/photo-1492288991661-058aa541ff43?q=80&w=1200&auto=format&fit=crop" 
+                alt="Outerwear Editorial" 
+                className={styles.lookbookImg} 
+              />
+              <div className={styles.lookbookOverlay}>
+                <div className={styles.lookbookLabel}>OUTERWEAR EDITORIAL</div>
+                <div className={styles.lookbookLink}>View Story <span>→</span></div>
+              </div>
+            </div>
+
+            {/* Right Smaller Image */}
+            <div className={`${styles.lookbookCard} ${styles.lookbookCardRight} lookbook-right`}>
+              <img 
+                src="https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?q=80&w=1000&auto=format&fit=crop" 
+                alt="FW26 Campaign" 
+                className={styles.lookbookImg} 
+              />
+              <div className={styles.lookbookOverlay}>
+                <div className={styles.lookbookLabel}>FW26 CAMPAIGN</div>
+                <div className={styles.lookbookLink}>View Story <span>→</span></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
       </section>
 
-      {/* 7. BEST SELLERS */}
-      <section style={{ padding: '150px 0', backgroundColor: 'var(--primary-color)' }}>
-        <div className="container">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '80px' }}>
-            <h2 style={{ fontSize: '2.5rem', textTransform: 'uppercase' }}>Most <span className="text-accent">Wanted</span></h2>
+      {/* 7. MOST WANTED */}
+      <section className={styles.mostWantedSection}>
+        <motion.div 
+          className={styles.mostWantedBgText}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 0.04 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 2, ease: "easeOut" }}
+        >
+          ESSENTIALS
+        </motion.div>
+        <div className={styles.mostWantedGlow}></div>
+
+        <div className={`container ${styles.mostWantedContent}`}>
+          <motion.div 
+            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '80px' }}
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1, ease: "easeOut" }}
+          >
+            <h2 style={{ fontSize: '3rem', textTransform: 'uppercase', margin: 0, lineHeight: 1.1 }}>Most <span className="text-accent">Wanted</span></h2>
             <Link to="/shop" className="viewAll">
-              Shop All
+              Explore Collection
             </Link>
-          </div>
+          </motion.div>
           
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '32px' }}>
             {dummyProducts.map((product, i) => (
-              <ClickSpark key={product.id} sparkColor="#D4AF37" sparkCount={10} sparkRadius={20}>
-                <motion.div 
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.8, delay: (i % 4) * 0.1, ease: "easeOut" }}
-                  className="product-card"
-                >
-                  <div className="product-card-image-wrapper">
-                    <img src={product.img} alt={product.name} className="product-card-image" />
-                    <div className="product-card-overlay">
-                      <span className="btn-outline" style={{ padding: '12px 24px', fontSize: '0.8rem', pointerEvents: 'auto' }}>QUICK VIEW</span>
-                    </div>
-                  </div>
-                  <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '8px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>{product.name}</h3>
-                  <p className="text-muted" style={{ fontSize: '0.9rem' }}>{product.price}</p>
-                </motion.div>
-              </ClickSpark>
+              <motion.div 
+                key={product.id}
+                initial={{ opacity: 0, y: 40, scale: 0.95 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                className={styles.wantedCard}
+              >
+                <div className={styles.wantedCardImgWrapper}>
+                  <img src={product.img} alt={product.name} className={styles.wantedCardImg} />
+                </div>
+                <h3 className={styles.wantedCardTitle}>{product.name}</h3>
+                <p className={styles.wantedCardPrice}>{product.price}</p>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* 8. COMMUNITY / INSTAGRAM */}
-      <section style={{ padding: '150px 0', backgroundColor: 'var(--surface-color)' }}>
-        <div className="container">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '60px' }}>
-            <h2 style={{ fontSize: '2.5rem', textTransform: 'uppercase', lineHeight: 1.1 }}>@LEXCC<br/><span className="text-accent">WORLDWIDE</span></h2>
-            <a href="#" className="viewAll" style={{ letterSpacing: '0.1em' }}>Follow The Movement</a>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '1px', backgroundColor: 'var(--border-color)', border: '1px solid var(--border-color)' }}>
-            {instaImages.map((img, i) => (
-              <div 
-                key={i}
-                className="insta-card"
-                style={{ aspectRatio: '1/1', position: 'relative', overflow: 'hidden', backgroundColor: 'var(--primary-color)' }}
-              >
-                <img src={img} alt="Editorial" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.6s ease', opacity: 0.8 }} className="insta-img" />
-                <div 
-                  className="insta-overlay"
-                  style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(212, 175, 55, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.4s ease' }}
-                >
-                  <span style={{ color: 'white', fontWeight: 700, fontSize: '0.8rem', letterSpacing: '0.1em' }}>INSTAGRAM</span>
+      {/* 8. @LEXCC WORLDWIDE */}
+      <section className={styles.worldwideSection}>
+        <motion.div 
+          className={styles.worldwideBgText}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 0.04 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 2, ease: "easeOut" }}
+        >
+          WORLDWIDE
+        </motion.div>
+
+        <div className={`container`} style={{ position: 'relative', zIndex: 10 }}>
+          <motion.div 
+            className={styles.worldwideHeader}
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1, ease: "easeOut" }}
+          >
+            <span className={styles.worldwideLabel}>Global Community</span>
+            <h2 className={styles.worldwideTitle}>@LEXCC<br/><span className="text-accent">WORLDWIDE</span></h2>
+          </motion.div>
+        </div>
+
+        <div className={styles.worldwideGrid}>
+          {instaImages.map((img, i) => (
+            <motion.div 
+              key={i}
+              className={styles.worldwideCard}
+              initial={{ opacity: 0, y: i % 2 === 0 ? 40 : 80 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 1.2, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <img src={img} alt="Editorial" className={styles.worldwideImg} />
+              <div className={styles.worldwideOverlay}>
+                <div className={styles.instagramIcon}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
                 </div>
               </div>
-            ))}
-          </div>
+            </motion.div>
+          ))}
         </div>
       </section>
 
       {/* 9. NEWSLETTER / MEMBERSHIP */}
-      <section style={{ padding: '150px 0', backgroundColor: '#000', borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)' }}>
-        <div className="container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', maxWidth: '700px' }}>
-          <CurvedLoop text="JOIN THE CLUB • EXCLUSIVE DROPS • EARLY ACCESS • " className="mb-12" />
+      <section className={styles.newsletterSection}>
+        <motion.div 
+          className={styles.newsletterBgText}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 0.03 }}
+          viewport={{ once: true }}
+          transition={{ duration: 2, ease: "easeOut" }}
+        >
+          MEMBERSHIP
+        </motion.div>
+        
+        <div className={`container ${styles.newsletterContent}`}>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1, ease: "easeOut" }}
+          >
+            <h2 className={styles.newsletterTitle}>
+              Stay Ahead Of <br/><span className="text-accent">The Drop.</span>
+            </h2>
+            <p className={styles.newsletterDesc}>
+              Sign up to receive exclusive access to new collections, limited releases, and member pricing. Join the movement.
+            </p>
+          </motion.div>
           
-          <TextReveal style={{ fontSize: '3rem', textTransform: 'uppercase', fontWeight: 700, fontFamily: 'var(--font-heading)', marginBottom: '24px', marginTop: '40px' }}>
-            Stay Ahead Of <br/><span className="text-accent">The Drop.</span>
-          </TextReveal>
-          
-          <p className="text-muted" style={{ marginBottom: '60px', fontSize: '1.1rem' }}>Sign up to receive exclusive access to new collections, limited releases, and member pricing.</p>
-          
-          <form style={{ display: 'flex', borderBottom: '1px solid var(--text-color)', paddingBottom: '12px', width: '100%', maxWidth: '500px' }} onSubmit={(e) => e.preventDefault()}>
+          <motion.form 
+            className={styles.newsletterForm}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
+            onSubmit={(e) => e.preventDefault()}
+          >
             <input 
               type="email" 
               placeholder="ENTER YOUR EMAIL" 
-              style={{ flex: 1, background: 'transparent', border: 'none', color: 'white', outline: 'none', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '0.05em' }} 
+              className={styles.newsletterInput}
             />
-            <ClickSpark sparkColor="#D4AF37" sparkCount={10} sparkRadius={20} style={{ width: 'auto' }}>
-              <button type="submit" style={{ color: 'var(--accent-color)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer' }}>
-                Subscribe
-              </button>
-            </ClickSpark>
-          </form>
+            <button type="submit" className={styles.newsletterSubmit}>
+              Subscribe
+            </button>
+          </motion.form>
         </div>
       </section>
+
+      {/* 10. FOOTER */}
+      <footer className={styles.footerSection}>
+        <motion.div 
+          className={styles.footerBgText}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 0.02 }}
+          viewport={{ once: true }}
+          transition={{ duration: 2, ease: "easeOut" }}
+        >
+          LEXCC
+        </motion.div>
+
+        <div className={`container ${styles.footerContent}`}>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1, ease: "easeOut" }}
+          >
+            <div className={styles.footerLogo}>LEXCC</div>
+            <div className={styles.footerTagline}>Define The Standard.</div>
+          </motion.div>
+
+          <motion.div 
+            className={styles.footerLinks}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
+          >
+            <Link to="/shop" className={styles.footerLink}>Shop</Link>
+            <Link to="/collections" className={styles.footerLink}>Collections</Link>
+            <Link to="/about" className={styles.footerLink}>About Us</Link>
+            <Link to="/contact" className={styles.footerLink}>Contact</Link>
+            <Link to="/terms" className={styles.footerLink}>Terms</Link>
+          </motion.div>
+
+          <motion.div 
+            className={styles.footerBottom}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
+          >
+            <div className={styles.footerCopyright}>© 2026 LEXCC. All Rights Reserved.</div>
+          </motion.div>
+        </div>
+      </footer>
 
     </div>
   );

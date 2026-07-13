@@ -23,7 +23,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 25vw;
+  font-size: 20vw;
   font-weight: 700;
   font-family: var(--font-heading);
   color: #ffffff;
@@ -313,7 +313,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 25vw;
+  font-size: 20vw;
   font-weight: 700;
   font-family: var(--font-heading);
   color: #ffffff;
@@ -599,7 +599,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 30vw;
+  font-size: 24vw;
   font-weight: 700;
   font-family: var(--font-heading);
   color: #ffffff;
@@ -953,7 +953,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 25vw;
+  font-size: 20vw;
   font-weight: 800;
   font-family: var(--font-heading);
   color: #ffffff;
@@ -1181,4 +1181,614 @@
 .btnPremium:hover .btnHoverLine {
   transform: scaleX(1);
   transform-origin: left;
+}
+
+/* ==================================================
+   6. EDITORIAL LOOKBOOK
+   ================================================== */
+.lookbookSection {
+  position: relative;
+  padding: 150px 0;
+  background-color: var(--primary-color);
+  overflow: hidden;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.lookbookBgText {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 22vw;
+  font-weight: 800;
+  font-family: var(--font-heading);
+  color: #ffffff;
+  opacity: 0.03;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 0;
+  letter-spacing: -0.05em;
+}
+
+.lookbookGlow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.08) 0%, transparent 60%);
+  filter: blur(80px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.lookbookHeader {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  margin-bottom: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lookbookHeadingWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.lookbookAccentLine {
+  width: 40px;
+  height: 1px;
+  background-color: var(--accent-color);
+  opacity: 0.6;
+}
+
+.lookbookTitle {
+  font-size: 2.5rem;
+  text-transform: uppercase;
+  margin: 0;
+  line-height: 1.1;
+  color: var(--text-color);
+}
+
+.lookbookSubtitle {
+  color: var(--text-muted);
+  font-size: 1rem;
+  max-width: 400px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.lookbookGrid {
+  position: relative;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+@media (min-width: 1024px) {
+  .lookbookGrid {
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 80px;
+    align-items: flex-start;
+  }
+}
+
+.lookbookCard {
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+.lookbookCardLeft {
+  height: 600px;
+}
+
+.lookbookCardRight {
+  height: 500px;
+  margin-top: 40px;
+}
+
+@media (min-width: 1024px) {
+  .lookbookCardLeft {
+    height: 800px;
+  }
+  
+  .lookbookCardRight {
+    height: 600px;
+    margin-top: 150px;
+  }
+}
+
+.lookbookImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.lookbookCard:hover .lookbookImg {
+  transform: scale(1.05);
+}
+
+.lookbookOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.2) 50%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 40px;
+  pointer-events: none;
+}
+
+.lookbookCard:hover .lookbookOverlay {
+  opacity: 1;
+}
+
+.lookbookLabel {
+  color: var(--text-color);
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-family: var(--font-heading);
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: 0.1s;
+}
+
+.lookbookCard:hover .lookbookLabel {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.lookbookLink {
+  color: var(--accent-color);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: 0.2s;
+}
+
+.lookbookCard:hover .lookbookLink {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* ==================================================
+   7. MOST WANTED SECTION
+   ================================================== */
+.mostWantedSection {
+  position: relative;
+  padding: 180px 0;
+  background-color: var(--primary-color);
+  overflow: hidden;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.mostWantedBgText {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 20vw;
+  font-weight: 800;
+  font-family: var(--font-heading);
+  color: #ffffff;
+  opacity: 0.04;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 0;
+  letter-spacing: -0.05em;
+}
+
+.mostWantedGlow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.05) 0%, transparent 60%);
+  filter: blur(80px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.mostWantedContent {
+  position: relative;
+  z-index: 10;
+}
+
+.wantedCard {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+  will-change: transform;
+  border-radius: 8px;
+  background-color: transparent;
+  padding: 16px;
+}
+
+.wantedCard:hover {
+  transform: translateY(-15px);
+  box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 40px rgba(212, 175, 55, 0.15);
+}
+
+.wantedCardImgWrapper {
+  overflow: hidden;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  aspect-ratio: 3/4;
+}
+
+.wantedCardImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.wantedCard:hover .wantedCardImg {
+  transform: scale(1.08);
+}
+
+.wantedCardTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-color);
+}
+
+.wantedCardPrice {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+/* ==================================================
+   8. WORLDWIDE SECTION
+   ================================================== */
+.worldwideSection {
+  position: relative;
+  padding: 180px 0;
+  background-color: var(--surface-color);
+  overflow: hidden;
+  border-top: 1px solid rgba(255,255,255,0.02);
+}
+
+.worldwideBgText {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 18vw;
+  font-weight: 800;
+  font-family: var(--font-heading);
+  color: #ffffff;
+  opacity: 0.04;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 0;
+  letter-spacing: -0.05em;
+}
+
+.worldwideHeader {
+  text-align: center;
+  margin-bottom: 80px;
+}
+
+.worldwideLabel {
+  display: inline-block;
+  color: var(--accent-color);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.worldwideTitle {
+  font-size: 4rem;
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.worldwideGrid {
+  position: relative;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .worldwideGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .worldwideGrid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+.worldwideCard {
+  position: relative;
+  aspect-ratio: 1/1.2;
+  overflow: hidden;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.worldwideImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.6s ease;
+  filter: brightness(0.8) grayscale(20%);
+}
+
+.worldwideCard:hover .worldwideImg {
+  transform: scale(1.05);
+  filter: brightness(1.1) grayscale(0%);
+}
+
+.worldwideOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.worldwideCard:hover .worldwideOverlay {
+  opacity: 1;
+}
+
+.instagramIcon {
+  color: white;
+  font-size: 1.5rem;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.worldwideCard:hover .instagramIcon {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* ==================================================
+   9. NEWSLETTER SECTION
+   ================================================== */
+.newsletterSection {
+  position: relative;
+  padding: 240px 0;
+  background-color: var(--primary-color);
+  overflow: hidden;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.newsletterBgText {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 16vw;
+  font-weight: 800;
+  font-family: var(--font-heading);
+  color: #ffffff;
+  opacity: 0.03;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 0;
+  letter-spacing: -0.05em;
+}
+
+.newsletterContent {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.newsletterTitle {
+  font-size: 4rem;
+  line-height: 1;
+  text-transform: uppercase;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+
+@media (min-width: 768px) {
+  .newsletterTitle {
+    font-size: 6rem;
+  }
+}
+
+.newsletterDesc {
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  max-width: 500px;
+  margin: 0 auto 60px auto;
+  line-height: 1.6;
+}
+
+.newsletterForm {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  padding-bottom: 12px;
+  transition: border-color 0.4s ease;
+}
+
+.newsletterForm:focus-within {
+  border-bottom-color: var(--accent-color);
+}
+
+.newsletterInput {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: white;
+  outline: none;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 8px 0;
+}
+
+.newsletterInput::placeholder {
+  color: rgba(255,255,255,0.3);
+}
+
+.newsletterSubmit {
+  color: var(--accent-color);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.newsletterSubmit:hover {
+  transform: translateX(5px);
+  color: #fff;
+}
+
+/* ==================================================
+   10. FOOTER SECTION
+   ================================================== */
+.footerSection {
+  position: relative;
+  padding: 150px 0 60px 0;
+  background-color: #050505;
+  overflow: hidden;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.footerBgText {
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  font-size: 32vw;
+  font-weight: 800;
+  font-family: var(--font-heading);
+  color: #ffffff;
+  opacity: 0.02;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 0;
+  letter-spacing: -0.05em;
+  line-height: 0.8;
+}
+
+.footerContent {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.footerLogo {
+  font-size: 2rem;
+  font-weight: 700;
+  font-family: var(--font-heading);
+  color: var(--text-color);
+  letter-spacing: 0.2em;
+  margin-bottom: 16px;
+}
+
+.footerTagline {
+  color: var(--accent-color);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  font-weight: 600;
+  margin-bottom: 80px;
+}
+
+.footerLinks {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 60px;
+}
+
+.footerLink {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.footerLink:hover {
+  color: var(--accent-color);
+}
+
+.footerBottom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: 40px;
+  width: 100%;
+  max-width: 800px;
+}
+
+.footerCopyright {
+  color: rgba(255,255,255,0.3);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
