@@ -7,13 +7,8 @@ import { supabase } from '../lib/supabase';
 import styles from './Home.module.css';
 
 // React Bits Components
-import SplitText from '../components/animations/SplitText';
-import Spotlight from '../components/animations/Spotlight';
 import CurvedLoop from '../components/animations/CurvedLoop';
-import TextReveal from '../components/animations/TextReveal';
 import ClickSpark from '../components/animations/ClickSpark';
-import BounceCards from '../components/animations/BounceCards';
-import DomeGallery from '../components/animations/DomeGallery';
 
 gsap.registerPlugin(ScrollTrigger);
 

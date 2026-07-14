@@ -107,7 +107,6 @@ export const AuthProvider = ({ children }) => {
   const verifyEmail = async (token) => {
     // Typically handled automatically via URL clicks to the site from Supabase emails
     // Or implemented via verifyOtp if using OTP codes for email verification
-    console.log('Verify email via token:', token);
   };
 
   const sendOTP = async (phone) => {
@@ -166,14 +165,10 @@ export const AuthProvider = ({ children }) => {
     const fileName = `${user.id}-${Math.random()}.${fileExt}`;
     const filePath = `${fileName}`;
 
-    console.log('[Avatar Upload] Starting upload to bucket: profile-images, Path:', filePath);
-
     // Upload image
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('profile-images')
       .upload(filePath, file);
-
-    console.log('[Avatar Upload] Upload response:', { data: uploadData, error: uploadError });
 
     if (uploadError) throw uploadError;
 
@@ -182,11 +177,8 @@ export const AuthProvider = ({ children }) => {
       .from('profile-images')
       .getPublicUrl(filePath);
 
-    console.log('[Avatar Upload] getPublicUrl response:', publicUrlData);
-
     // Update profile
     const profileData = await updateProfile({ avatar_url: publicUrlData.publicUrl });
-    console.log('[Avatar Upload] Profile update response:', profileData);
     
     return profileData;
   };
