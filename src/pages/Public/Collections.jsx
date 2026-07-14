@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import FilterSidebar from '../../components/shop/FilterSidebar';
 import ProductCard from '../../components/shop/ProductCard';
@@ -15,25 +15,62 @@ const Collections = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [filters, sortParam]); // Refetch when filters or sort changes
 
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      // For now, since categories/variants aren't heavily populated in Phase 2,
-      // we'll fetch all active products and filter in-memory for simplicity.
-      // In production with thousands of items, this should be done via RPC or complex queries.
-      const { data, error } = await supabase
+      // Use inner join on variants if filtering by size or color to ensure parent filtering works
+      const hasVariantFilter = (filters.size && filters.size.length > 0) || (filters.color && filters.color.length > 0);
+      const variantJoin = hasVariantFilter ? 'variants:product_variants!inner(size, color, stock)' : 'variants:product_variants(size, color, stock)';
+
+      let query = supabase
         .from('products')
         .select(`
           *,
-          category:categories(name),
           images:product_images(image_url),
-          variants:product_variants(size, color, stock_quantity)
-        `)
-        .eq('status', 'active');
-        
+          ${variantJoin}
+        `);
+        // Note: Removing .eq('status', 'active') since 'status' doesn't exist in the provided schema
+        // If we want only active stock we'd filter variants instead, but for now we just get products.
+
+      // Category Filter (Direct column on products table)
+      if (filters.category && filters.category.length > 0) {
+        query = query.in('category', filters.category);
+      }
+
+      // Size Filter (Inner join on variants table)
+      if (filters.size && filters.size.length > 0) {
+        query = query.in('variants.size', filters.size);
+      }
+
+      // Color Filter (Inner join on variants table)
+      if (filters.color && filters.color.length > 0) {
+        query = query.in('variants.color', filters.color);
+      }
+      
+      // Sort
+      switch(sortParam) {
+        case 'price-asc':
+          query = query.order('price', { ascending: true });
+          break;
+        case 'price-desc':
+          query = query.order('price', { ascending: false });
+          break;
+        case 'newest':
+          query = query.order('created_at', { ascending: false });
+          break;
+        case 'featured':
+          // Using 'featured' column based on the exact user schema
+          query = query.order('featured', { ascending: false });
+          break;
+        default:
+          break;
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
+      
       setProducts(data || []);
     } catch (err) {
       console.error('Error fetching products:', err);
@@ -41,45 +78,6 @@ const Collections = () => {
       setLoading(false);
     }
   };
-
-  const filteredAndSortedProducts = useMemo(() => {
-    let result = [...products];
-
-    // Category Filter
-    if (filters.category && filters.category.length > 0) {
-      result = result.filter(p => filters.category.includes(p.category?.name) || filters.category.includes(p.category_id)); 
-    }
-
-    // Size Filter
-    if (filters.size && filters.size.length > 0) {
-      result = result.filter(p => p.variants?.some(v => filters.size.includes(v.size)));
-    }
-
-    // Color Filter
-    if (filters.color && filters.color.length > 0) {
-      result = result.filter(p => p.variants?.some(v => filters.color.includes(v.color)));
-    }
-    
-    // Sort
-    switch(sortParam) {
-      case 'price-asc':
-        result.sort((a, b) => a.price - b.price);
-        break;
-      case 'price-desc':
-        result.sort((a, b) => b.price - a.price);
-        break;
-      case 'newest':
-        result.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-        break;
-      case 'featured':
-        result.sort((a, b) => (b.is_featured ? 1 : 0) - (a.is_featured ? 1 : 0));
-        break;
-      default:
-        break;
-    }
-
-    return result;
-  }, [products, filters, sortParam]);
 
   return (
     <div className={styles.collectionsPage}>
@@ -117,7 +115,7 @@ const Collections = () => {
         <div style={{ minHeight: '50vh' }}>
           {loading ? (
             <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.5)', marginTop: '40px' }}>LOADING COLLECTION...</div>
-          ) : filteredAndSortedProducts.length === 0 ? (
+          ) : products.length === 0 ? (
             <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.5)', marginTop: '40px' }}>
               No products found matching your criteria.
             </div>
@@ -134,7 +132,7 @@ const Collections = () => {
                 }
               }}
             >
-              {filteredAndSortedProducts.map(product => (
+              {products.map(product => (
                 <motion.div 
                   key={product.id}
                   variants={{

@@ -22,7 +22,7 @@ const ProductDetail = () => {
       try {
         const { data, error } = await supabase
           .from('products')
-          .select('*, images:product_images(image_url), variants:product_variants(size, color, stock_quantity)')
+          .select('*, images:product_images(image_url), variants:product_variants(size, color, stock)')
           .eq('slug', slug)
           .single();
           
@@ -84,7 +84,7 @@ const ProductDetail = () => {
   if (loading) return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>LOADING...</div>;
   if (!product) return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>PRODUCT NOT FOUND</div>;
 
-  const totalStock = product.variants?.reduce((sum, v) => sum + v.stock_quantity, 0) || 0;
+  const totalStock = product.variants?.reduce((sum, v) => sum + v.stock, 0) || 0;
   const uniqueSizes = [...new Set(product.variants?.map(v => v.size))].filter(Boolean);
   const displayImages = product.images?.length > 0 ? product.images.map(img => img.image_url) : ['https://via.placeholder.com/1200x1600/111/fff?text=No+Image'];
 

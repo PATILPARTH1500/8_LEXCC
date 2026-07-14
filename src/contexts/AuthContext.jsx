@@ -166,20 +166,29 @@ export const AuthProvider = ({ children }) => {
     const fileName = `${user.id}-${Math.random()}.${fileExt}`;
     const filePath = `${fileName}`;
 
+    console.log('[Avatar Upload] Starting upload to bucket: profile-images, Path:', filePath);
+
     // Upload image
-    const { error: uploadError } = await supabase.storage
-      .from('avatars')
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('profile-images')
       .upload(filePath, file);
+
+    console.log('[Avatar Upload] Upload response:', { data: uploadData, error: uploadError });
 
     if (uploadError) throw uploadError;
 
     // Get public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from('avatars')
+    const { data: publicUrlData } = supabase.storage
+      .from('profile-images')
       .getPublicUrl(filePath);
 
+    console.log('[Avatar Upload] getPublicUrl response:', publicUrlData);
+
     // Update profile
-    return updateProfile({ avatar_url: publicUrl });
+    const profileData = await updateProfile({ avatar_url: publicUrlData.publicUrl });
+    console.log('[Avatar Upload] Profile update response:', profileData);
+    
+    return profileData;
   };
 
   // Address Management

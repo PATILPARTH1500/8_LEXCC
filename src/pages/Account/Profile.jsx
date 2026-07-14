@@ -79,7 +79,8 @@ const Profile = () => {
       setSuccessMsg('Avatar updated successfully');
       setTimeout(() => setSuccessMsg(''), 3000);
     } catch (err) {
-      setError('Failed to upload photo. Ensure avatars bucket exists and is public.');
+      console.error('[Avatar Upload] Upload caught error:', err);
+      setError('Failed to upload photo. Ensure profile-images bucket exists and is public.');
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
