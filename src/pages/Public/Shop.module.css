@@ -22,15 +22,42 @@
 
 .shopGrid {
   display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 40px;
-  max-width: 1600px;
+  grid-template-columns: 240px 1fr;
+  gap: 60px;
+  max-width: 1800px;
   margin: 0 auto;
   padding: 40px;
 }
 
 @media (max-width: 1024px) {
   .shopGrid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+}
+
+/* Product Grid Layout */
+.productGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
+}
+
+@media (max-width: 1200px) {
+  .productGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .productGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+}
+
+@media (max-width: 500px) {
+  .productGrid {
     grid-template-columns: 1fr;
   }
 }
@@ -49,17 +76,25 @@
 }
 
 .filterTitle {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   margin-bottom: 15px;
   font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  color: #fff;
 }
 
 .filterList {
   list-style: none;
   padding: 0;
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .filterItem {
@@ -69,15 +104,32 @@
 .filterLabel {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.5);
   cursor: pointer;
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
+  letter-spacing: 0.05em;
 }
 
-.filterLabel:hover {
+.filterLabel:hover, .filterLabelActive {
   color: #fff;
+}
+
+.filterLabel input[type="checkbox"] {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.filterLabel input[type="checkbox"]:checked {
+  background: var(--accent-color, #D4AF37);
+  border-color: var(--accent-color, #D4AF37);
 }
 
 /* Product Card */

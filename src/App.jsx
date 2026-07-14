@@ -4,6 +4,7 @@ import Layout from './components/common/Layout';
 import Home from './pages/Home';
 import CustomCursor from './components/animations/CustomCursor';
 import GrainOverlay from './components/animations/GrainOverlay';
+import CartDrawer from './components/shop/CartDrawer';
 
 // Auth & Protected Routes
 import Login from './pages/Auth/Login';
@@ -16,6 +17,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 // Public Pages
 import Collections from './pages/Public/Collections';
 import ProductDetail from './pages/Public/ProductDetail';
+import Cart from './pages/Public/Cart';
+import Checkout from './pages/Public/Checkout';
 
 // Account Pages
 import AccountLayout from './pages/Account/AccountLayout';
@@ -31,13 +34,15 @@ function App() {
     <>
       <GrainOverlay />
       <BrowserRouter>
+        <CartDrawer />
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
             <Route path="collections" element={<Collections />} />
             <Route path="collections/:category" element={<Collections />} />
             <Route path="product/:slug" element={<ProductDetail />} />
-            <Route path="shop" element={<div style={{height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px'}}>Shop - Coming Soon</div>} />
+            <Route path="cart" element={<Cart />} />
+            <Route path="checkout" element={<Checkout />} />
             
             {/* Auth Routes */}
             <Route path="login" element={<Login />} />
@@ -56,8 +61,6 @@ function App() {
                 <Route path="addresses" element={<Addresses />} />
                 <Route path="security" element={<Security />} />
               </Route>
-              
-              <Route path="checkout" element={<div style={{height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px'}}>Checkout - Coming Soon</div>} />
             </Route>
           </Route>
         </Routes>

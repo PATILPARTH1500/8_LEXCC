@@ -1,31 +1,69 @@
-import React from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { supabase } from '../../lib/supabase';
 import styles from './Account.module.css';
 
 const Dashboard = () => {
-  const { profile } = useAuth();
-  
+  const { profile, user } = useAuth();
+  const [stats, setStats] = useState({ orders: 0, wishlist: 0, addresses: 0 });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (!user) return;
+      try {
+        const [ordersRes, wishlistRes, addressesRes] = await Promise.all([
+          supabase.from('orders').select('id', { count: 'exact' }).eq('user_id', user.id),
+          supabase.from('wishlist').select('id', { count: 'exact' }).eq('user_id', user.id),
+          supabase.from('addresses').select('id', { count: 'exact' }).eq('user_id', user.id)
+        ]);
+
+        setStats({
+          orders: ordersRes.count || 0,
+          wishlist: wishlistRes.count || 0,
+          addresses: addressesRes.count || 0
+        });
+      } catch (err) {
+        console.error('Failed to load dashboard stats', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, [user]);
+
   return (
     <div>
       <div className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>WELCOME BACK,<br/>{profile?.first_name ? profile.first_name.toUpperCase() : 'MEMBER'}</h1>
+        <motion.h1 
+          className={styles.pageTitle}
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          WELCOME BACK,<br/>{profile?.first_name ? profile.first_name.toUpperCase() : 'MEMBER'}
+        </motion.h1>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', marginBottom: '30px' }}>
-        <div className={styles.card} style={{ margin: 0 }}>
-          <h2 className={styles.cardTitle}>Recent Order</h2>
-          <div className={styles.emptyState} style={{ padding: '40px 20px', border: 'none' }}>
-            <p className={styles.emptyDesc} style={{ margin: 0 }}>No recent orders.</p>
-          </div>
-        </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '30px', marginBottom: '40px' }}>
+        <motion.div className={styles.card} style={{ margin: 0 }} whileHover={{ scale: 1.02 }}>
+          <h3 style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '15px' }}>Orders</h3>
+          <div style={{ fontSize: '3rem', fontWeight: '300', marginBottom: '20px' }}>{loading ? '-' : stats.orders}</div>
+          <Link to="/account/orders" style={{ color: 'var(--accent-color)', fontSize: '0.8rem', textDecoration: 'none', letterSpacing: '0.1em' }}>VIEW ORDER HISTORY &rarr;</Link>
+        </motion.div>
 
-        <div className={styles.card} style={{ margin: 0 }}>
-          <h2 className={styles.cardTitle}>Wishlist</h2>
-          <div className={styles.emptyState} style={{ padding: '40px 20px', border: 'none' }}>
-            <p className={styles.emptyDesc} style={{ margin: 0 }}>0 Items Saved.</p>
-          </div>
-        </div>
+        <motion.div className={styles.card} style={{ margin: 0 }} whileHover={{ scale: 1.02 }}>
+          <h3 style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '15px' }}>Wishlist</h3>
+          <div style={{ fontSize: '3rem', fontWeight: '300', marginBottom: '20px' }}>{loading ? '-' : stats.wishlist}</div>
+          <Link to="/account/wishlist" style={{ color: 'var(--accent-color)', fontSize: '0.8rem', textDecoration: 'none', letterSpacing: '0.1em' }}>VIEW SAVED ITEMS &rarr;</Link>
+        </motion.div>
+
+        <motion.div className={styles.card} style={{ margin: 0 }} whileHover={{ scale: 1.02 }}>
+          <h3 style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '15px' }}>Addresses</h3>
+          <div style={{ fontSize: '3rem', fontWeight: '300', marginBottom: '20px' }}>{loading ? '-' : stats.addresses}</div>
+          <Link to="/account/addresses" style={{ color: 'var(--accent-color)', fontSize: '0.8rem', textDecoration: 'none', letterSpacing: '0.1em' }}>MANAGE ADDRESSES &rarr;</Link>
+        </motion.div>
       </div>
 
       <div className={styles.card}>

@@ -159,6 +159,136 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
+  const uploadAvatar = async (file) => {
+    if (!user) throw new Error('No active user');
+    
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user.id}-${Math.random()}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    // Upload image
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(filePath);
+
+    // Update profile
+    return updateProfile({ avatar_url: publicUrl });
+  };
+
+  // Address Management
+  const fetchAddresses = async () => {
+    if (!user) return [];
+    const { data, error } = await supabase
+      .from('addresses')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('is_default', { ascending: false })
+      .order('created_at', { ascending: false });
+      
+    if (error) throw error;
+    return data;
+  };
+
+  const addAddress = async (address) => {
+    if (!user) throw new Error('No active user');
+    
+    if (address.is_default) {
+      // Unset previous default
+      await supabase.from('addresses').update({ is_default: false }).eq('user_id', user.id).eq('is_default', true);
+    }
+    
+    const { data, error } = await supabase
+      .from('addresses')
+      .insert([{ ...address, user_id: user.id }])
+      .select()
+      .single();
+      
+    if (error) throw error;
+    return data;
+  };
+
+  const updateAddress = async (id, updates) => {
+    if (!user) throw new Error('No active user');
+    
+    if (updates.is_default) {
+      await supabase.from('addresses').update({ is_default: false }).eq('user_id', user.id).eq('is_default', true);
+    }
+    
+    const { data, error } = await supabase
+      .from('addresses')
+      .update(updates)
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single();
+      
+    if (error) throw error;
+    return data;
+  };
+
+  const deleteAddress = async (id) => {
+    const { error } = await supabase
+      .from('addresses')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', user.id);
+      
+    if (error) throw error;
+  };
+
+  // Wishlist Management
+  const fetchWishlist = async () => {
+    if (!user) return [];
+
+    const { data, error } = await supabase
+      .from('wishlist')
+      .select(`
+        id,
+        product_id,
+        products (
+          id,
+          name,
+          slug,
+          price,
+          images:product_images(image_url)
+        )
+      `)
+      .eq('user_id', user.id);
+      
+    if (error) throw error;
+    return data;
+  };
+
+  const addToWishlist = async (productId) => {
+    if (!user) throw new Error('Please log in to save items to your wishlist');
+
+    const { data, error } = await supabase
+      .from('wishlist')
+      .insert([{ user_id: user.id, product_id: productId }])
+      .select()
+      .single();
+      
+    // Ignore duplicate insert errors
+    if (error && error.code !== '23505') throw error;
+    return data;
+  };
+
+  const removeFromWishlist = async (itemId) => {
+    const { error } = await supabase
+      .from('wishlist')
+      .delete()
+      .eq('id', itemId);
+      
+    if (error) throw error;
+  };
+
   const logout = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
@@ -192,6 +322,14 @@ export const AuthProvider = ({ children }) => {
     forgotPassword,
     resetPassword,
     updateProfile,
+    uploadAvatar,
+    fetchAddresses,
+    addAddress,
+    updateAddress,
+    deleteAddress,
+    fetchWishlist,
+    addToWishlist,
+    removeFromWishlist,
     logout,
     logoutAllDevices
   };

@@ -1,26 +1,92 @@
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../contexts/AuthContext';
 import styles from './Shop.module.css';
 
 const ProductDetail = () => {
   const { slug } = useParams();
-  const [selectedSize, setSelectedSize] = useState('');
+  const navigate = useNavigate();
+  const { user, addToWishlist, fetchWishlist, removeFromWishlist } = useAuth();
   
-  // Mock data based on slug
-  const product = {
-    name: slug ? slug.replace(/-/g, ' ').toUpperCase() : 'HEAVYWEIGHT OVERSIZED HOODIE',
-    price: 250,
-    description: "Crafted from 500gsm brushed French terry cotton. Features a relaxed, dropped shoulder silhouette with subtle distressing at the cuffs and hem. The perfect everyday piece to elevate your casual uniform.",
-    images: [
-      'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=1200&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=1200&auto=format&fit=crop', // normally different angles
-      'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=1200&auto=format&fit=crop'
-    ],
-    sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
-    stock: 3 // 'Only 3 Left' state
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedSize, setSelectedSize] = useState('');
+  const [activeImage, setActiveImage] = useState('');
+  
+  const [wishlistItems, setWishlistItems] = useState([]);
+  const [isWishlistLoading, setIsWishlistLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*, images:product_images(image_url), variants:product_variants(size, color, stock_quantity)')
+          .eq('slug', slug)
+          .single();
+          
+        if (error) throw error;
+        setProduct(data);
+        if (data?.images?.length > 0) {
+          setActiveImage(data.images[0].image_url);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchProduct();
+  }, [slug]);
+
+  useEffect(() => {
+    if (user) {
+      fetchWishlist().then(data => setWishlistItems(data || []));
+    }
+  }, [user]);
+
+  const isInWishlist = product ? wishlistItems.some(item => item.product_id === product.id) : false;
+  
+  const toggleWishlist = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    
+    setIsWishlistLoading(true);
+    try {
+      if (isInWishlist) {
+        const item = wishlistItems.find(i => i.product_id === product.id);
+        if (item) await removeFromWishlist(item.id);
+      } else {
+        await addToWishlist(product.id);
+      }
+      const data = await fetchWishlist();
+      setWishlistItems(data || []);
+    } catch (err) {
+      alert(err.message || 'Failed to update wishlist');
+    } finally {
+      setIsWishlistLoading(false);
+    }
   };
 
-  const [activeImage, setActiveImage] = useState(product.images[0]);
+  const handleAddToCart = () => {
+    if (!selectedSize && uniqueSizes.length > 0) {
+      alert('Please select a size');
+      return;
+    }
+    const variant = product.variants?.find(v => v.size === selectedSize);
+    addToCart(product, variant || { size: selectedSize });
+  };
+
+  if (loading) return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>LOADING...</div>;
+  if (!product) return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>PRODUCT NOT FOUND</div>;
+
+  const totalStock = product.variants?.reduce((sum, v) => sum + v.stock_quantity, 0) || 0;
+  const uniqueSizes = [...new Set(product.variants?.map(v => v.size))].filter(Boolean);
+  const displayImages = product.images?.length > 0 ? product.images.map(img => img.image_url) : ['https://via.placeholder.com/1200x1600/111/fff?text=No+Image'];
 
   return (
     <div className={styles.pdpContainer}>
@@ -28,7 +94,7 @@ const ProductDetail = () => {
       {/* Left Side: Gallery */}
       <div className={styles.gallerySection}>
         <div className={styles.thumbnailList}>
-          {product.images.map((img, idx) => (
+          {displayImages.map((img, idx) => (
             <img 
               key={idx} 
               src={img} 
@@ -39,7 +105,7 @@ const ProductDetail = () => {
           ))}
         </div>
         <div className={styles.mainImageContainer}>
-          <img src={activeImage} alt={product.name} className={styles.mainImage} />
+          <img src={activeImage || displayImages[0]} alt={product.name} className={styles.mainImage} />
         </div>
       </div>
 
@@ -56,7 +122,7 @@ const ProductDetail = () => {
             <span style={{ color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}>Size Guide</span>
           </div>
           <div className={styles.sizeGrid}>
-            {product.sizes.map(size => (
+            {uniqueSizes.map(size => (
               <button 
                 key={size} 
                 className={`${styles.sizeBtn} ${selectedSize === size ? styles.sizeBtnActive : ''}`}
@@ -69,9 +135,9 @@ const ProductDetail = () => {
         </div>
 
         {/* Inventory Status */}
-        {product.stock > 0 && product.stock <= 5 ? (
-          <span className={`${styles.inventoryBadge} ${styles.inventoryWarning}`}>Only {product.stock} Left</span>
-        ) : product.stock === 0 ? (
+        {totalStock > 0 && totalStock <= 5 ? (
+          <span className={`${styles.inventoryBadge} ${styles.inventoryWarning}`}>Only {totalStock} Left</span>
+        ) : totalStock === 0 ? (
           <span className={`${styles.inventoryBadge} ${styles.inventoryOut}`}>Out Of Stock</span>
         ) : (
           <span className={styles.inventoryBadge}>In Stock</span>
@@ -79,11 +145,20 @@ const ProductDetail = () => {
 
         {/* Actions */}
         <div className={styles.actionRow}>
-          <button className={styles.primaryBtn} disabled={product.stock === 0}>
-            {product.stock === 0 ? 'SOLD OUT' : 'ADD TO CART'}
+          <button 
+            className={styles.primaryBtn} 
+            disabled={totalStock === 0}
+            onClick={handleAddToCart}
+          >
+            {totalStock === 0 ? 'SOLD OUT' : 'ADD TO CART'}
           </button>
-          <button className={styles.wishlistBtn}>
-            <span style={{ fontSize: '1.2rem' }}>♡</span>
+          <button 
+            className={styles.wishlistBtn} 
+            onClick={toggleWishlist}
+            disabled={isWishlistLoading}
+            style={isInWishlist ? { background: '#fff', color: '#000', borderColor: '#fff' } : {}}
+          >
+            <span style={{ fontSize: '1.2rem' }}>{isInWishlist ? '♥' : '♡'}</span>
           </button>
         </div>
 

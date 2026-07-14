@@ -1,20 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './Account.module.css';
 
 const Profile = () => {
-  const { profile, updateProfile } = useAuth();
+  const { profile, updateProfile, uploadAvatar } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+  const fileInputRef = useRef(null);
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
     defaultValues: {
       first_name: profile?.first_name || '',
       last_name: profile?.last_name || '',
       phone: profile?.phone || '',
-      avatar_url: profile?.avatar_url || '',
+      dob: profile?.dob || '',
+      gender: profile?.gender || '',
       language: profile?.language || 'en',
       currency: profile?.currency || 'USD'
     }
@@ -26,7 +30,8 @@ const Profile = () => {
         first_name: profile.first_name || '',
         last_name: profile.last_name || '',
         phone: profile.phone || '',
-        avatar_url: profile.avatar_url || '',
+        dob: profile.dob || '',
+        gender: profile.gender || '',
         language: profile.language || 'en',
         currency: profile.currency || 'USD'
       });
@@ -36,17 +41,21 @@ const Profile = () => {
   const onSubmit = async (data) => {
     setIsLoading(true);
     setError('');
+    setSuccessMsg('');
     
     try {
       await updateProfile({
         first_name: data.first_name,
         last_name: data.last_name,
         phone: data.phone,
-        avatar_url: data.avatar_url,
+        dob: data.dob,
+        gender: data.gender,
         language: data.language,
         currency: data.currency
       });
+      setSuccessMsg('Changes Saved');
       setIsEditing(false);
+      setTimeout(() => setSuccessMsg(''), 3000);
     } catch (err) {
       setError(err.message || 'Failed to update profile.');
     } finally {
@@ -54,10 +63,34 @@ const Profile = () => {
     }
   };
 
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError('File must be less than 5MB');
+      return;
+    }
+
+    setIsUploading(true);
+    setError('');
+    try {
+      await uploadAvatar(file);
+      setSuccessMsg('Avatar updated successfully');
+      setTimeout(() => setSuccessMsg(''), 3000);
+    } catch (err) {
+      setError('Failed to upload photo. Ensure avatars bucket exists and is public.');
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   const handleAvatarRemove = async () => {
     try {
       await updateProfile({ avatar_url: '' });
-      reset({ ...profile, avatar_url: '' });
+      setSuccessMsg('Avatar removed');
+      setTimeout(() => setSuccessMsg(''), 3000);
     } catch (err) {
       setError('Failed to remove photo.');
     }
@@ -78,6 +111,7 @@ const Profile = () => {
       </div>
 
       {error && <div style={{ color: '#ef4444', marginBottom: '20px', fontSize: '0.9rem', padding: '15px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>{error}</div>}
+      {successMsg && <div style={{ color: '#22c55e', marginBottom: '20px', fontSize: '0.9rem', padding: '15px', border: '1px solid rgba(34, 197, 94, 0.2)', background: 'rgba(34, 197, 94, 0.05)' }}>{successMsg}</div>}
 
       <div className={styles.card}>
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -85,7 +119,12 @@ const Profile = () => {
           <h2 className={styles.cardTitle}>Personal Information</h2>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '30px', marginBottom: '40px' }}>
-            <div style={{ width: '100px', height: '100px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.05)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '100px', height: '100px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.05)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+              {isUploading && (
+                <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ fontSize: '0.7rem' }}>UPLOADING...</span>
+                </div>
+              )}
               {profile?.avatar_url ? (
                 <img src={profile.avatar_url} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
@@ -93,28 +132,35 @@ const Profile = () => {
               )}
             </div>
             
-            {isEditing ? (
-              <div style={{ flex: 1, maxWidth: '400px' }}>
-                <label className={styles.formLabel}>Avatar URL</label>
-                <input 
-                  type="url" 
-                  {...register('avatar_url')} 
-                  className={styles.formInput} 
-                  placeholder="https://example.com/avatar.jpg"
-                />
-              </div>
-            ) : (
-              <div style={{ display: 'flex', gap: '15px' }}>
-                <button type="button" onClick={() => setIsEditing(true)} className={styles.secondaryBtn} style={{ padding: '10px 20px', fontSize: '0.7rem' }}>
-                  Change Photo
+            <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+              <input 
+                type="file" 
+                accept="image/*" 
+                ref={fileInputRef} 
+                style={{ display: 'none' }} 
+                onChange={handleAvatarUpload}
+              />
+              <button 
+                type="button" 
+                onClick={() => fileInputRef.current?.click()} 
+                className={styles.secondaryBtn} 
+                style={{ padding: '10px 20px', fontSize: '0.7rem' }}
+                disabled={isUploading}
+              >
+                Change Photo
+              </button>
+              {profile?.avatar_url && (
+                <button 
+                  type="button" 
+                  onClick={handleAvatarRemove} 
+                  className={styles.secondaryBtn} 
+                  style={{ padding: '10px 20px', fontSize: '0.7rem', color: '#ef4444', borderColor: 'transparent' }}
+                  disabled={isUploading}
+                >
+                  Remove Photo
                 </button>
-                {profile?.avatar_url && (
-                  <button type="button" onClick={handleAvatarRemove} className={styles.secondaryBtn} style={{ padding: '10px 20px', fontSize: '0.7rem', color: '#ef4444', borderColor: 'transparent' }}>
-                    Remove Photo
-                  </button>
-                )}
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           <div className={styles.formGrid}>
@@ -161,6 +207,27 @@ const Profile = () => {
             </div>
           </div>
 
+          <div className={styles.formGrid}>
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>Date of Birth</label>
+              <input 
+                type="date" 
+                {...register('dob')} 
+                className={styles.formInput} 
+                disabled={!isEditing} 
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>Gender</label>
+              <select {...register('gender')} className={styles.formInput} disabled={!isEditing}>
+                <option value="">Prefer not to say</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
           <h2 className={styles.cardTitle} style={{ marginTop: '20px' }}>Preferences</h2>
           
           <div className={styles.formGrid}>
@@ -189,7 +256,7 @@ const Profile = () => {
               </button>
               <button 
                 type="button" 
-                onClick={() => { reset(); setIsEditing(false); setError(''); }} 
+                onClick={() => { reset(); setIsEditing(false); setError(''); setSuccessMsg(''); }} 
                 className={styles.secondaryBtn}
               >
                 CANCEL
