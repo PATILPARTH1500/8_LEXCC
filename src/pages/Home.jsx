@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { supabase } from '../lib/supabase';
 import styles from './Home.module.css';
 
 // React Bits Components
@@ -17,12 +18,6 @@ import DomeGallery from '../components/animations/DomeGallery';
 gsap.registerPlugin(ScrollTrigger);
 
 // Muted, cohesive luxury editorial imagery
-const dummyProducts = [
-  { id: 1, name: "Signature Oversized Hoodie", price: "$240", img: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=800&auto=format&fit=crop" },
-  { id: 2, name: "Heavyweight Box Tee", price: "$120", img: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=800&auto=format&fit=crop" },
-  { id: 3, name: "Washed Cargo Denim", price: "$350", img: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=800&auto=format&fit=crop" },
-  { id: 4, name: "Mohair Cardigan", price: "$480", img: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?q=80&w=800&auto=format&fit=crop" },
-];
 
 const bounceImages = [
   { src: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=400&auto=format&fit=crop", label: "Cotton" },
@@ -56,6 +51,32 @@ const Home = () => {
   const editorialRef = useRef(null);
   const brandStatementRef = useRef(null);
   const [customers, setCustomers] = useState(0);
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select(`
+            id,
+            name,
+            price,
+            images:product_images(image_url)
+          `)
+          .eq('status', 'active')
+          .eq('is_featured', true)
+          .limit(4);
+        
+        if (!error && data) {
+          setFeaturedProducts(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch featured products:', err);
+      }
+    };
+    fetchFeatured();
+  }, []);
 
   // Mouse Parallax Logic
   const mouseX = useMotionValue(0);
@@ -741,7 +762,7 @@ const Home = () => {
           </motion.div>
           
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '32px' }}>
-            {dummyProducts.map((product, i) => (
+            {featuredProducts.map((product, i) => (
               <motion.div 
                 key={product.id}
                 initial={{ opacity: 0, y: 40, scale: 0.95 }}
@@ -750,11 +771,17 @@ const Home = () => {
                 transition={{ duration: 1, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
                 className={styles.wantedCard}
               >
-                <div className={styles.wantedCardImgWrapper}>
-                  <img src={product.img} alt={product.name} className={styles.wantedCardImg} />
-                </div>
-                <h3 className={styles.wantedCardTitle}>{product.name}</h3>
-                <p className={styles.wantedCardPrice}>{product.price}</p>
+                <Link to={`/product/${product.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                  <div className={styles.wantedCardImgWrapper}>
+                    <img 
+                      src={product.images?.[0]?.image_url || 'https://via.placeholder.com/800x1200/111/fff?text=No+Image'} 
+                      alt={product.name} 
+                      className={styles.wantedCardImg} 
+                    />
+                  </div>
+                  <h3 className={styles.wantedCardTitle}>{product.name}</h3>
+                  <p className={styles.wantedCardPrice}>${parseFloat(product.price).toFixed(2)}</p>
+                </Link>
               </motion.div>
             ))}
           </div>

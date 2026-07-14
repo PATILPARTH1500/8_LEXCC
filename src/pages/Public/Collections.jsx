@@ -29,14 +29,14 @@ const Collections = () => {
         .select(`
           *,
           images:product_images(image_url),
+          categories!inner(name, slug),
           ${variantJoin}
-        `);
-        // Note: Removing .eq('status', 'active') since 'status' doesn't exist in the provided schema
-        // If we want only active stock we'd filter variants instead, but for now we just get products.
+        `)
+        .eq('status', 'active');
 
-      // Category Filter (Direct column on products table)
+      // Category Filter (Inner join on categories table)
       if (filters.category && filters.category.length > 0) {
-        query = query.in('category', filters.category);
+        query = query.in('categories.slug', filters.category.map(c => c.toLowerCase()));
       }
 
       // Size Filter (Inner join on variants table)
@@ -61,8 +61,7 @@ const Collections = () => {
           query = query.order('created_at', { ascending: false });
           break;
         case 'featured':
-          // Using 'featured' column based on the exact user schema
-          query = query.order('featured', { ascending: false });
+          query = query.order('is_featured', { ascending: false });
           break;
         default:
           break;
