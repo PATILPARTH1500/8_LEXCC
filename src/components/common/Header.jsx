@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FiShoppingBag, FiUser, FiMenu, FiX, FiSearch } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
+import SearchOverlay from '../layout/SearchOverlay';
 import styles from './Header.module.css';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -34,9 +36,9 @@ const Header = () => {
 
         {/* Navigation - Desktop */}
         <nav className={styles.nav}>
-          <Link to="/shop" className={styles.navLink}>New Arrivals</Link>
-          <Link to="/shop?category=men" className={styles.navLink}>Men</Link>
-          <Link to="/shop?category=footwear" className={styles.navLink}>Footwear</Link>
+          <Link to="/collections?filter=new" className={styles.navLink}>New Arrivals</Link>
+          <Link to="/collections?category=men" className={styles.navLink}>Men</Link>
+          <Link to="/collections?category=footwear" className={styles.navLink}>Footwear</Link>
           <Link to="/collections" className={styles.navLink}>Collections</Link>
           <Link to="/about" className={styles.navLink}>Brand</Link>
         </nav>
@@ -48,10 +50,10 @@ const Header = () => {
 
         {/* Actions */}
         <div className={styles.actions}>
-          <button className={`${styles.iconButton} ${styles.searchBtn}`}>
+          <button className={`${styles.iconButton} ${styles.searchBtn}`} onClick={() => setIsSearchOpen(true)}>
             <FiSearch size={20} />
           </button>
-          <Link to="/login" className={styles.iconButton}>
+          <Link to="/account" className={styles.iconButton}>
             <FiUser size={20} />
           </Link>
           <button className={styles.iconButton}>
@@ -78,6 +80,8 @@ const Header = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </header>
   );
 };
