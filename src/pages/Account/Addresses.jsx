@@ -108,43 +108,56 @@ const Addresses = () => {
     }
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1, 
+      transition: { staggerChildren: 0.1, delayChildren: 0.2 } 
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
+  };
+
   return (
-    <div>
-      <div className={styles.pageHeader}>
+    <motion.div variants={containerVariants} initial="hidden" animate="visible">
+      <motion.div variants={itemVariants} className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>Saved Addresses</h1>
         <p className={styles.pageSubtitle}>Manage your shipping and billing locations.</p>
-      </div>
+      </motion.div>
 
       {isLoading ? (
-        <div style={{ padding: '40px', color: 'rgba(255,255,255,0.5)' }}>LOADING...</div>
+        <motion.div variants={itemVariants} style={{ padding: '40px', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em' }}>LOADING...</motion.div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '30px' }}>
+        <motion.div variants={itemVariants} className={styles.addressGrid}>
           
-          {addresses.map(addr => (
+          {addresses.map((addr, index) => (
             <motion.div 
               key={addr.id} 
-              className={styles.card} 
-              style={{ margin: 0, display: 'flex', flexDirection: 'column' }}
-              initial={{ opacity: 0, y: 10 }}
+              className={styles.addressCard}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h3 style={{ fontSize: '0.9rem', letterSpacing: '0.1em', fontWeight: 600 }}>{addr.title}</h3>
-                {addr.is_default && <span className={`${styles.badge} ${styles.badgeSuccess}`}>Default</span>}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
+                <h3 style={{ fontSize: '0.95rem', letterSpacing: '0.15em', fontWeight: 500, color: '#fff' }}>{addr.title}</h3>
+                {addr.is_default && <span className={`${styles.badge} ${styles.badgeSuccess}`}>Default Address</span>}
               </div>
               
-              <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem', lineHeight: '1.6', marginBottom: '30px' }}>
-                <p style={{ color: '#fff', fontWeight: 500, marginBottom: '5px' }}>{addr.first_name} {addr.last_name}</p>
+              <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.95rem', lineHeight: '1.8', marginBottom: '35px' }}>
+                <p style={{ color: '#fff', fontWeight: 400, marginBottom: '10px', letterSpacing: '0.05em' }}>{addr.first_name} {addr.last_name}</p>
                 <p>{addr.street}</p>
                 <p>{addr.city}, {addr.state} {addr.postal_code}</p>
-                <p>{addr.country}</p>
+                <p style={{ marginTop: '5px' }}>{addr.country}</p>
               </div>
 
               <div style={{ display: 'flex', gap: '15px', marginTop: 'auto', flexWrap: 'wrap' }}>
-                <button onClick={() => handleOpenModal(addr)} className={styles.secondaryBtn} style={{ padding: '8px 16px', fontSize: '0.7rem', flex: 1 }}>Edit</button>
-                <button onClick={() => handleDelete(addr.id)} className={styles.secondaryBtn} style={{ padding: '8px 16px', fontSize: '0.7rem', flex: 1, borderColor: 'transparent', color: '#ef4444' }}>Remove</button>
+                <button onClick={() => handleOpenModal(addr)} className={styles.secondaryBtn} style={{ padding: '12px 20px', fontSize: '0.75rem', flex: 1 }}>Edit</button>
+                <button onClick={() => handleDelete(addr.id)} className={styles.secondaryBtn} style={{ padding: '12px 20px', fontSize: '0.75rem', flex: 1, borderColor: 'transparent', color: '#ef4444' }}>Remove</button>
                 {!addr.is_default && (
-                  <button onClick={() => handleSetDefault(addr.id)} className={styles.secondaryBtn} style={{ padding: '8px 16px', fontSize: '0.7rem', width: '100%', marginTop: '5px' }}>
+                  <button onClick={() => handleSetDefault(addr.id)} className={styles.secondaryBtn} style={{ padding: '12px 20px', fontSize: '0.75rem', width: '100%', marginTop: '5px' }}>
                     Set As Default
                   </button>
                 )}
@@ -152,17 +165,18 @@ const Addresses = () => {
             </motion.div>
           ))}
 
-          <motion.button 
+          <motion.div 
             onClick={() => handleOpenModal()}
-            className={styles.card} 
-            style={{ margin: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'transparent', borderStyle: 'dashed', minHeight: '250px', cursor: 'pointer' }}
-            whileHover={{ scale: 1.02, backgroundColor: 'rgba(255,255,255,0.02)' }}
+            className={styles.addAddressCard}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: addresses.length * 0.1, ease: [0.16, 1, 0.3, 1] }}
           >
-            <span style={{ fontSize: '2rem', marginBottom: '10px', color: 'rgba(255,255,255,0.5)' }}>+</span>
-            <span style={{ fontSize: '0.8rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)' }}>Add New Address</span>
-          </motion.button>
+            <div className={styles.addAddressIcon}>+</div>
+            <span style={{ fontSize: '0.85rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>Add New Address</span>
+          </motion.div>
 
-        </div>
+        </motion.div>
       )}
 
       {/* Address Modal Overlay */}
@@ -170,17 +184,18 @@ const Addresses = () => {
         {isModalOpen && (
           <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <motion.div 
-              style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(5px)' }}
+              style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)' }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={handleCloseModal}
             />
             <motion.div 
-              style={{ background: '#111', padding: '40px', width: '100%', maxWidth: '600px', position: 'relative', zIndex: 10, border: '1px solid rgba(255,255,255,0.1)', maxHeight: '90vh', overflowY: 'auto' }}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 30 }}
+              style={{ background: '#0a0a0a', padding: '50px', width: '100%', maxWidth: '650px', position: 'relative', zIndex: 10, border: '1px solid rgba(212,175,55,0.3)', maxHeight: '90vh', overflowY: 'auto' }}
+              initial={{ opacity: 0, y: 40, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 40, scale: 0.95 }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             >
               <h2 className={styles.cardTitle}>{editingAddress ? 'Edit Address' : 'Add New Address'}</h2>
               
@@ -239,19 +254,19 @@ const Addresses = () => {
                   </div>
                 </div>
 
-                <div className={styles.formGroup} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div className={styles.formGroup} style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                   <input 
                     type="checkbox" 
                     name="is_default" 
                     checked={formData.is_default} 
                     onChange={handleChange} 
                     id="isDefault" 
-                    style={{ accentColor: '#D4AF37' }}
+                    style={{ accentColor: '#D4AF37', width: '18px', height: '18px' }}
                   />
-                  <label htmlFor="isDefault" style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)' }}>Set as default address</label>
+                  <label htmlFor="isDefault" style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', letterSpacing: '0.05em' }}>Set as default address</label>
                 </div>
 
-                <div style={{ display: 'flex', gap: '15px', marginTop: '30px' }}>
+                <div style={{ display: 'flex', gap: '20px', marginTop: '40px' }}>
                   <button type="submit" className={styles.actionBtn}>
                     {editingAddress ? 'Update Address' : 'Save Address'}
                   </button>
@@ -265,7 +280,7 @@ const Addresses = () => {
         )}
       </AnimatePresence>
 
-    </div>
+    </motion.div>
   );
 };
 

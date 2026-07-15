@@ -67,8 +67,7 @@ export const CartProvider = ({ children }) => {
                 color,
                 product_id,
                 products (
-                  id, name, price, slug,
-                  images:product_images(image_url)
+                  id, name, price, slug, image_url
                 )
               `)
               .eq('cart_id', cart.id);
@@ -77,8 +76,7 @@ export const CartProvider = ({ children }) => {
               const formattedItems = items.map(dbItem => ({
                 id: dbItem.id, // DB item ID
                 product: {
-                  ...dbItem.products,
-                  images: dbItem.products.images
+                  ...dbItem.products
                 },
                 variant: { size: dbItem.size !== 'default' ? dbItem.size : null, color: dbItem.color !== 'default' ? dbItem.color : null },
                 quantity: dbItem.quantity

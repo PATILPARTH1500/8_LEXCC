@@ -19,7 +19,7 @@ const AccountLayout = () => {
   };
 
   const navItems = [
-    { path: '/account', label: 'My Account', exact: true },
+    { path: '/account', label: 'Dashboard', exact: true },
     { path: '/account/profile', label: 'Profile' },
     { path: '/account/addresses', label: 'Addresses' },
     { path: '/account/security', label: 'Security' },
@@ -28,46 +28,65 @@ const AccountLayout = () => {
   ];
 
   return (
-    <div className={styles.accountContainer}>
-      <motion.aside 
-        className={styles.sidebar}
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-      >
-        {navItems.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            end={item.exact}
-            className={({ isActive }) => `${styles.navLink} ${isActive ? styles.activeLink : ''}`}
-          >
-            {item.label}
-          </NavLink>
-        ))}
-        <button onClick={handleLogout} className={styles.logoutBtn}>
-          Log Out
-        </button>
-      </motion.aside>
-
-      <motion.main 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-      >
-        <AnimatePresence mode="wait">
+    <>
+      <div className={styles.accountBackground}>
+        <div className={styles.noiseOverlay}></div>
+        <div className={styles.radialGlow}></div>
+      </div>
+      
+      <div className={styles.accountContainer}>
+        <motion.aside 
+          className={styles.sidebar}
+          initial={{ opacity: 0, x: -40 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+        >
+          {navItems.map((item, index) => (
+            <motion.div
+              key={item.path}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <NavLink
+                to={item.path}
+                end={item.exact}
+                className={({ isActive }) => `${styles.navLink} ${isActive ? styles.activeLink : ''}`}
+              >
+                {item.label}
+              </NavLink>
+            </motion.div>
+          ))}
           <motion.div
-            key={location.pathname}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.4 }}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: navItems.length * 0.1, ease: [0.16, 1, 0.3, 1] }}
           >
-            <Outlet />
+            <button onClick={handleLogout} className={styles.logoutBtn}>
+              Log Out
+            </button>
           </motion.div>
-        </AnimatePresence>
-      </motion.main>
-    </div>
+        </motion.aside>
+
+        <motion.main 
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+        >
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <Outlet />
+            </motion.div>
+          </AnimatePresence>
+        </motion.main>
+      </div>
+    </>
   );
 };
 

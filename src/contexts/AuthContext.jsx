@@ -258,7 +258,7 @@ export const AuthProvider = ({ children }) => {
           name,
           slug,
           price,
-          images:product_images(image_url)
+          image_url
         )
       `)
       .eq('user_id', user.id);

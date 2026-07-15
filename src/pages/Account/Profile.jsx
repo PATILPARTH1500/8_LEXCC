@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './Account.module.css';
 
@@ -97,41 +98,73 @@ const Profile = () => {
     }
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1, 
+      transition: { staggerChildren: 0.1, delayChildren: 0.2 } 
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
+  };
+
   return (
-    <div>
+    <motion.div variants={containerVariants} initial="hidden" animate="visible">
       <div className={styles.pageHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
+        <motion.div variants={itemVariants}>
           <h1 className={styles.pageTitle}>Profile</h1>
           <p className={styles.pageSubtitle}>Manage your personal information and preferences.</p>
-        </div>
+        </motion.div>
         {!isEditing && (
-          <button onClick={() => setIsEditing(true)} className={styles.secondaryBtn}>
-            Edit Profile
-          </button>
+          <motion.div variants={itemVariants}>
+            <button onClick={() => setIsEditing(true)} className={styles.secondaryBtn}>
+              Edit Profile
+            </button>
+          </motion.div>
         )}
       </div>
 
-      {error && <div style={{ color: '#ef4444', marginBottom: '20px', fontSize: '0.9rem', padding: '15px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>{error}</div>}
-      {successMsg && <div style={{ color: '#22c55e', marginBottom: '20px', fontSize: '0.9rem', padding: '15px', border: '1px solid rgba(34, 197, 94, 0.2)', background: 'rgba(34, 197, 94, 0.05)' }}>{successMsg}</div>}
+      <AnimatePresence>
+        {error && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} style={{ color: '#ef4444', marginBottom: '20px', fontSize: '0.9rem', padding: '15px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+            {error}
+          </motion.div>
+        )}
+        {successMsg && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} style={{ color: '#22c55e', marginBottom: '20px', fontSize: '0.9rem', padding: '15px', border: '1px solid rgba(34, 197, 94, 0.2)', background: 'rgba(34, 197, 94, 0.05)' }}>
+            {successMsg}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      <div className={styles.card}>
+      <motion.div variants={itemVariants} className={styles.card}>
         <form onSubmit={handleSubmit(onSubmit)}>
           
           <h2 className={styles.cardTitle}>Personal Information</h2>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '30px', marginBottom: '40px' }}>
-            <div style={{ width: '100px', height: '100px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.05)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '40px', marginBottom: '50px' }}>
+            <motion.div 
+              style={{ width: '120px', height: '120px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.05)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.1)' }}
+              whileHover={{ scale: 1.05 }}
+              onClick={() => fileInputRef.current?.click()}
+            >
               {isUploading && (
-                <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ fontSize: '0.7rem' }}>UPLOADING...</span>
+                <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>
+                  <span style={{ fontSize: '0.7rem', letterSpacing: '0.1em' }}>UPLOADING...</span>
                 </div>
               )}
               {profile?.avatar_url ? (
                 <img src={profile.avatar_url} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
-                <span style={{ fontSize: '2rem', color: 'rgba(255,255,255,0.2)' }}>{profile?.first_name?.charAt(0) || 'U'}</span>
+                <span style={{ fontSize: '2.5rem', color: 'rgba(212,175,55,0.8)', fontWeight: 300 }}>{profile?.first_name?.charAt(0) || 'U'}</span>
               )}
-            </div>
+              <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', opacity: 0, transition: 'opacity 0.3s ease', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onMouseEnter={(e) => e.currentTarget.style.opacity = 1} onMouseLeave={(e) => e.currentTarget.style.opacity = 0}>
+                <span style={{ fontSize: '0.7rem', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Update</span>
+              </div>
+            </motion.div>
             
             <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
               <input 
@@ -145,7 +178,7 @@ const Profile = () => {
                 type="button" 
                 onClick={() => fileInputRef.current?.click()} 
                 className={styles.secondaryBtn} 
-                style={{ padding: '10px 20px', fontSize: '0.7rem' }}
+                style={{ padding: '12px 24px', fontSize: '0.75rem' }}
                 disabled={isUploading}
               >
                 Change Photo
@@ -155,10 +188,10 @@ const Profile = () => {
                   type="button" 
                   onClick={handleAvatarRemove} 
                   className={styles.secondaryBtn} 
-                  style={{ padding: '10px 20px', fontSize: '0.7rem', color: '#ef4444', borderColor: 'transparent' }}
+                  style={{ padding: '12px 24px', fontSize: '0.75rem', color: '#ef4444', borderColor: 'transparent' }}
                   disabled={isUploading}
                 >
-                  Remove Photo
+                  Remove
                 </button>
               )}
             </div>
@@ -173,7 +206,7 @@ const Profile = () => {
                 className={styles.formInput} 
                 disabled={!isEditing} 
               />
-              {errors.first_name && <span style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '4px', display: 'block' }}>{errors.first_name.message}</span>}
+              {errors.first_name && <span style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '6px', display: 'block' }}>{errors.first_name.message}</span>}
             </div>
             <div className={styles.formGroup}>
               <label className={styles.formLabel}>Last Name</label>
@@ -183,7 +216,7 @@ const Profile = () => {
                 className={styles.formInput} 
                 disabled={!isEditing} 
               />
-              {errors.last_name && <span style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '4px', display: 'block' }}>{errors.last_name.message}</span>}
+              {errors.last_name && <span style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '6px', display: 'block' }}>{errors.last_name.message}</span>}
             </div>
           </div>
 
@@ -228,8 +261,12 @@ const Profile = () => {
               </select>
             </div>
           </div>
+        </form>
+      </motion.div>
 
-          <h2 className={styles.cardTitle} style={{ marginTop: '20px' }}>Preferences</h2>
+      <motion.div variants={itemVariants} className={styles.card}>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <h2 className={styles.cardTitle}>Preferences</h2>
           
           <div className={styles.formGrid}>
             <div className={styles.formGroup}>
@@ -251,7 +288,11 @@ const Profile = () => {
           </div>
 
           {isEditing && (
-            <div style={{ display: 'flex', gap: '15px', marginTop: '20px' }}>
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              style={{ display: 'flex', gap: '20px', marginTop: '30px' }}
+            >
               <button type="submit" className={styles.actionBtn} disabled={isLoading}>
                 {isLoading ? 'SAVING...' : 'SAVE CHANGES'}
               </button>
@@ -262,11 +303,11 @@ const Profile = () => {
               >
                 CANCEL
               </button>
-            </div>
+            </motion.div>
           )}
         </form>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
