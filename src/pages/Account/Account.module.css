@@ -90,6 +90,23 @@
   overflow: hidden;
 }
 
+.bgTextAccount {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: clamp(8rem, 15vw, 25rem);
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.02);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 0;
+  user-select: none;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
 .navLink::before {
   content: '';
   position: absolute;

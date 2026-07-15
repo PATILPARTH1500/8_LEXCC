@@ -53,8 +53,9 @@ const Orders = () => {
   };
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible">
-      <motion.div variants={itemVariants} className={styles.pageHeader}>
+    <motion.div variants={containerVariants} initial="hidden" animate="visible" style={{ position: 'relative' }}>
+      <div className={styles.bgTextAccount}>ORDERS</div>
+      <motion.div variants={itemVariants} className={styles.pageHeader} style={{ position: 'relative', zIndex: 1 }}>
         <h1 className={styles.pageTitle}>Order History</h1>
         <p className={styles.pageSubtitle}>View and track your previous purchases.</p>
       </motion.div>

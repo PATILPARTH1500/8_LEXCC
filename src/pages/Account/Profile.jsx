@@ -112,8 +112,9 @@ const Profile = () => {
   };
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible">
-      <div className={styles.pageHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+    <motion.div variants={containerVariants} initial="hidden" animate="visible" style={{ position: 'relative' }}>
+      <div className={styles.bgTextAccount}>IDENTITY</div>
+      <div className={styles.pageHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
         <motion.div variants={itemVariants}>
           <h1 className={styles.pageTitle}>Profile</h1>
           <p className={styles.pageSubtitle}>Manage your personal information and preferences.</p>

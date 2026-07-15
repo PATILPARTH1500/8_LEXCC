@@ -122,8 +122,9 @@ const Addresses = () => {
   };
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible">
-      <motion.div variants={itemVariants} className={styles.pageHeader}>
+    <motion.div variants={containerVariants} initial="hidden" animate="visible" style={{ position: 'relative' }}>
+      <div className={styles.bgTextAccount}>ADDRESS BOOK</div>
+      <motion.div variants={itemVariants} className={styles.pageHeader} style={{ position: 'relative', zIndex: 1 }}>
         <h1 className={styles.pageTitle}>Saved Addresses</h1>
         <p className={styles.pageSubtitle}>Manage your shipping and billing locations.</p>
       </motion.div>

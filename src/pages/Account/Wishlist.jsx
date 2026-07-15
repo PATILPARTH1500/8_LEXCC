@@ -56,8 +56,9 @@ const Wishlist = () => {
   };
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible">
-      <motion.div variants={itemVariants} className={styles.pageHeader}>
+    <motion.div variants={containerVariants} initial="hidden" animate="visible" style={{ position: 'relative' }}>
+      <div className={styles.bgTextAccount}>WISHLIST</div>
+      <motion.div variants={itemVariants} className={styles.pageHeader} style={{ position: 'relative', zIndex: 1 }}>
         <h1 className={styles.pageTitle}>Wishlist</h1>
         <p className={styles.pageSubtitle}>Curate your favorite pieces for the season.</p>
       </motion.div>

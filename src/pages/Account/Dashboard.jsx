@@ -68,8 +68,9 @@ const Dashboard = () => {
   };
 
   return (
-    <div>
-      <div className={styles.pageHeader}>
+    <div style={{ position: 'relative' }}>
+      <div className={styles.bgTextAccount}>MEMBER</div>
+      <div className={styles.pageHeader} style={{ position: 'relative', zIndex: 1 }}>
         <motion.h1 
           className={styles.pageTitle}
           initial={{ opacity: 0, y: 20 }}

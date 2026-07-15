@@ -32,8 +32,9 @@ const Security = () => {
   };
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible">
-      <motion.div variants={itemVariants} className={styles.pageHeader}>
+    <motion.div variants={containerVariants} initial="hidden" animate="visible" style={{ position: 'relative' }}>
+      <div className={styles.bgTextAccount}>SECURITY</div>
+      <motion.div variants={itemVariants} className={styles.pageHeader} style={{ position: 'relative', zIndex: 1 }}>
         <h1 className={styles.pageTitle}>Security Center</h1>
         <p className={styles.pageSubtitle}>Manage your account security and authentication.</p>
       </motion.div>
