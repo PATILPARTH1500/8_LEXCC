@@ -22,14 +22,14 @@ const ProductDetail = () => {
       try {
         const { data, error } = await supabase
           .from('products')
-          .select('*, images:product_images(image_url), variants:product_variants(size, color, stock)')
+          .select('*, variants:product_variants(size, color, stock)')
           .eq('slug', slug)
           .single();
           
         if (error) throw error;
         setProduct(data);
-        if (data?.images?.length > 0) {
-          setActiveImage(data.images[0].image_url);
+        if (data?.image_url) {
+          setActiveImage(data.image_url);
         }
       } catch (err) {
         console.error(err);
@@ -86,7 +86,7 @@ const ProductDetail = () => {
 
   const totalStock = product.variants?.reduce((sum, v) => sum + v.stock, 0) || 0;
   const uniqueSizes = [...new Set(product.variants?.map(v => v.size))].filter(Boolean);
-  const displayImages = product.images?.length > 0 ? product.images.map(img => img.image_url) : ['https://via.placeholder.com/1200x1600/111/fff?text=No+Image'];
+  const displayImages = product.image_url ? [product.image_url] : ['https://via.placeholder.com/1200x1600/111/fff?text=No+Image'];
 
   return (
     <div className={styles.pdpContainer}>

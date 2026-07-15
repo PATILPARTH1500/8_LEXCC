@@ -6,7 +6,6 @@ import { useCart } from '../../contexts/CartContext';
 import styles from '../../pages/Public/Shop.module.css';
 
 const ProductCard = ({ product }) => {
-  const [isHovered, setIsHovered] = useState(false);
   const { user, fetchWishlist, addToWishlist, removeFromWishlist } = useAuth();
   const { addToCart } = useCart();
   const navigate = useNavigate();
@@ -52,18 +51,13 @@ const ProductCard = ({ product }) => {
   };
 
   return (
-    <div 
-      className={styles.productCard}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <div className={`${styles.productCard} will-change-transform`}>
       <Link to={`/product/${product.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
         <div className={styles.imageContainer}>
           <img src={product.image_url} alt={product.name} className={styles.productImage} />
           
           <button 
             className={styles.quickAddBtn}
-            style={{ opacity: isHovered ? 1 : 0, pointerEvents: isHovered ? 'auto' : 'none' }}
             onClick={(e) => {
               e.preventDefault();
               addToCart(product);
@@ -75,13 +69,11 @@ const ProductCard = ({ product }) => {
           <button 
             onClick={toggleWishlist}
             disabled={loadingWishlist}
+            className={`${styles.wishlistFloatingBtn} ${isInWishlist ? styles.wishlistFloatingBtnActive : ''}`}
             style={{
               position: 'absolute',
               top: '15px',
               right: '15px',
-              background: isInWishlist ? '#fff' : 'transparent',
-              color: isInWishlist ? '#000' : '#fff',
-              border: '1px solid #fff',
               width: '32px',
               height: '32px',
               borderRadius: '50%',
@@ -90,8 +82,7 @@ const ProductCard = ({ product }) => {
               justifyContent: 'center',
               cursor: 'pointer',
               zIndex: 10,
-              transition: 'all 0.3s ease',
-              opacity: isInWishlist ? 1 : (isHovered ? 1 : 0)
+              transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
             }}
           >
             <span style={{ fontSize: '1rem', marginTop: '2px' }}>{isInWishlist ? '♥' : '♡'}</span>

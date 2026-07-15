@@ -27,6 +27,18 @@ const AccountLayout = () => {
     { path: '/account/orders', label: 'Orders' },
   ];
 
+  const getBackgroundText = () => {
+    switch(location.pathname) {
+      case '/account': return 'MEMBER';
+      case '/account/profile': return 'IDENTITY';
+      case '/account/addresses': return 'ADDRESS BOOK';
+      case '/account/security': return 'SECURITY';
+      case '/account/wishlist': return 'WISHLIST';
+      case '/account/orders': return 'ORDERS';
+      default: return '';
+    }
+  };
+
   return (
     <>
       <div className={styles.accountBackground}>
@@ -35,6 +47,20 @@ const AccountLayout = () => {
       </div>
       
       <div className={styles.accountContainer}>
+        {/* Centralized Background Typography */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={location.pathname + '-bg'}
+            className={styles.bgTextAccount}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {getBackgroundText()}
+          </motion.div>
+        </AnimatePresence>
+
         <motion.aside 
           className={styles.sidebar}
           initial={{ opacity: 0, x: -40 }}
@@ -90,17 +116,20 @@ const AccountLayout = () => {
         </motion.aside>
 
         <motion.main 
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
+          className={styles.mainContentArea}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
         >
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="popLayout">
             <motion.div
               key={location.pathname}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              exit={{ opacity: 0, y: -15, scale: 0.98 }}
+              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              style={{ width: '100%' }}
+              className="will-change-both"
             >
               <Outlet />
             </motion.div>

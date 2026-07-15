@@ -102,19 +102,18 @@ const Profile = () => {
     hidden: { opacity: 0 },
     visible: { 
       opacity: 1, 
-      transition: { staggerChildren: 0.1, delayChildren: 0.2 } 
+      transition: { staggerChildren: 0.1, delayChildren: 0.1 } 
     }
   };
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } }
   };
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible" style={{ position: 'relative' }}>
-      <div className={styles.bgTextAccount}>IDENTITY</div>
-      <div className={styles.pageHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
+    <motion.div variants={containerVariants} initial="hidden" animate="visible">
+      <div className={styles.pageHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <motion.div variants={itemVariants}>
           <h1 className={styles.pageTitle}>Profile</h1>
           <p className={styles.pageSubtitle}>Manage your personal information and preferences.</p>

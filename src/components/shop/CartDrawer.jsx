@@ -36,7 +36,7 @@ const CartDrawer = () => {
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            transition={{ type: 'spring', stiffness: 280, damping: 30, mass: 0.8 }}
             style={{ 
               position: 'relative', 
               width: '100%', 
@@ -47,6 +47,7 @@ const CartDrawer = () => {
               flexDirection: 'column',
               boxShadow: '-20px 0 50px rgba(0,0,0,0.8)'
             }}
+            className="will-change-transform"
           >
             {/* Subtle glow effect */}
             <div style={{ position: 'absolute', top: 0, right: 0, width: '100%', height: '30%', background: 'radial-gradient(ellipse at top right, rgba(212,175,55,0.1), transparent 70%)', pointerEvents: 'none' }} />
@@ -80,10 +81,13 @@ const CartDrawer = () => {
                     {cartItems.map((item) => (
                       <motion.div 
                         key={item.id} 
+                        layout
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                         style={{ display: 'flex', gap: '25px', position: 'relative' }}
+                        className="will-change-both"
                       >
                         <div style={{ width: '100px', height: '130px', background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.05)' }}>
                           <img 

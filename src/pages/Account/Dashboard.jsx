@@ -68,14 +68,13 @@ const Dashboard = () => {
   };
 
   return (
-    <div style={{ position: 'relative' }}>
-      <div className={styles.bgTextAccount}>MEMBER</div>
-      <div className={styles.pageHeader} style={{ position: 'relative', zIndex: 1 }}>
+    <div>
+      <div className={styles.pageHeader}>
         <motion.h1 
           className={styles.pageTitle}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         >
           WELCOME BACK,<br/>
           <span>{firstName} {lastName}</span>
@@ -84,7 +83,7 @@ const Dashboard = () => {
           className={styles.pageSubtitle}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
         >
           Manage your account, orders, wishlist and preferences.
         </motion.p>
@@ -94,7 +93,7 @@ const Dashboard = () => {
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
         >
           <Link to="/account/orders" style={{ textDecoration: 'none' }}>
             <div className={styles.statCard}>
@@ -110,7 +109,7 @@ const Dashboard = () => {
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
         >
           <Link to="/account/wishlist" style={{ textDecoration: 'none' }}>
             <div className={styles.statCard}>
@@ -126,7 +125,7 @@ const Dashboard = () => {
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.5, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
         >
           <Link to="/account/addresses" style={{ textDecoration: 'none' }}>
             <div className={styles.statCard}>
@@ -144,7 +143,7 @@ const Dashboard = () => {
         className={styles.card}
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.5, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
       >
         <h2 className={styles.cardTitle}>Account Status</h2>
         <div style={{ display: 'flex', gap: '40px', alignItems: 'center' }}>

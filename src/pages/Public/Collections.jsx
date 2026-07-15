@@ -28,7 +28,6 @@ const Collections = () => {
         .from('products')
         .select(`
           *,
-          images:product_images(image_url),
           categories!inner(name, slug),
           ${variantJoin}
         `)
@@ -135,14 +134,15 @@ const Collections = () => {
                 <motion.div 
                   key={product.id}
                   variants={{
-                    hidden: { opacity: 0, y: 20 },
-                    show: { opacity: 1, y: 0 }
+                    hidden: { opacity: 0, y: 30 },
+                    show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
                   }}
+                  className="will-change-both"
                 >
                   <ProductCard 
                     product={{
                       ...product,
-                      image_url: product.images?.[0]?.image_url || 'https://via.placeholder.com/800x1200/111/fff?text=No+Image'
+                      image_url: product.image_url || 'https://via.placeholder.com/800x1200/111/fff?text=No+Image'
                     }} 
                   />
                 </motion.div>

@@ -93,6 +93,7 @@ const Header = () => {
                     justifyContent: 'center',
                     lineHeight: 1
                   }}
+                  className="will-change-transform"
                 >
                   {cartCount > 99 ? '99+' : cartCount}
                 </motion.span>
@@ -109,7 +110,7 @@ const Header = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className={styles.mobileMenu}
+            className={`${styles.mobileMenu} will-change-both`}
           >
             <Link to="/shop" className={styles.mobileMenuLink}>Shop All</Link>
             <Link to="/collections" className={styles.mobileMenuLink}>Collections</Link>

@@ -43,19 +43,18 @@ const Orders = () => {
     hidden: { opacity: 0 },
     visible: { 
       opacity: 1, 
-      transition: { staggerChildren: 0.1, delayChildren: 0.2 } 
+      transition: { staggerChildren: 0.1, delayChildren: 0.1 } 
     }
   };
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } }
   };
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible" style={{ position: 'relative' }}>
-      <div className={styles.bgTextAccount}>ORDERS</div>
-      <motion.div variants={itemVariants} className={styles.pageHeader} style={{ position: 'relative', zIndex: 1 }}>
+    <motion.div variants={containerVariants} initial="hidden" animate="visible">
+      <motion.div variants={itemVariants} className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>Order History</h1>
         <p className={styles.pageSubtitle}>View and track your previous purchases.</p>
       </motion.div>

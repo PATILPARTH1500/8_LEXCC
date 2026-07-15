@@ -12,9 +12,9 @@
   --font-heading: 'Outfit', sans-serif;
   --font-body: 'Inter', sans-serif;
   
-  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-normal: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-normal: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-slow: 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 * {
@@ -258,11 +258,21 @@ input::placeholder, textarea::placeholder {
 
 /* Instant-render utility classes */
 .will-change-transform {
+  transform: translate3d(0, 0, 0);
   will-change: transform;
+  backface-visibility: hidden;
 }
 
 .will-change-opacity {
+  transform: translate3d(0, 0, 0);
   will-change: opacity;
+  backface-visibility: hidden;
+}
+
+.will-change-both {
+  transform: translate3d(0, 0, 0);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
 }
 
 /* Instagram Community Grid */

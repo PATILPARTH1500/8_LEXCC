@@ -57,7 +57,7 @@ const Home = () => {
             id,
             name,
             price,
-            images:product_images(image_url)
+            image_url
           `)
           .eq('status', 'active')
           .eq('is_featured', true)
@@ -769,7 +769,7 @@ const Home = () => {
                 <Link to={`/product/${product.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                   <div className={styles.wantedCardImgWrapper}>
                     <img 
-                      src={product.images?.[0]?.image_url || 'https://via.placeholder.com/800x1200/111/fff?text=No+Image'} 
+                      src={product.image_url || 'https://via.placeholder.com/800x1200/111/fff?text=No+Image'} 
                       alt={product.name} 
                       className={styles.wantedCardImg} 
                     />
