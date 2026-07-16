@@ -2,12 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
 import styles from '../Account/Account.module.css';
+import AdminProductForm from './AdminProductForm';
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -56,6 +60,21 @@ const AdminProducts = () => {
     }
   };
 
+  const handleCreateNew = () => {
+    setEditingProduct(null);
+    setIsFormOpen(true);
+  };
+
+  const handleEdit = (product) => {
+    setEditingProduct(product);
+    setIsFormOpen(true);
+  };
+
+  const handleFormSuccess = () => {
+    setIsFormOpen(false);
+    fetchData(); // Refresh the list from the database
+  };
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.05 } }
@@ -84,7 +103,7 @@ const AdminProducts = () => {
           <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', letterSpacing: '0.05em' }}>Manage your entire inventory and variants.</p>
         </motion.div>
         <motion.div variants={itemVariants}>
-          <button className={styles.primaryBtn} style={{ padding: '12px 24px', fontSize: '0.75rem' }}>+ NEW PRODUCT</button>
+          <button onClick={handleCreateNew} className={styles.primaryBtn} style={{ padding: '12px 24px', fontSize: '0.75rem' }}>+ NEW PRODUCT</button>
         </motion.div>
       </div>
 
@@ -169,7 +188,10 @@ const AdminProducts = () => {
                           </button>
                         </td>
                         <td style={{ padding: '20px 30px', textAlign: 'right' }}>
-                          <button style={{ background: 'transparent', border: 'none', color: 'var(--accent-color, #D4AF37)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer' }}>
+                          <button 
+                            onClick={() => handleEdit(product)}
+                            style={{ background: 'transparent', border: 'none', color: 'var(--accent-color, #D4AF37)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer' }}
+                          >
                             Edit
                           </button>
                         </td>
@@ -182,6 +204,17 @@ const AdminProducts = () => {
           </table>
         </div>
       </motion.div>
+
+      <AnimatePresence>
+        {isFormOpen && (
+          <AdminProductForm 
+            onClose={() => setIsFormOpen(false)} 
+            onSuccess={handleFormSuccess}
+            product={editingProduct}
+            categories={categories}
+          />
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };

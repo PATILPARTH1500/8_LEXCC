@@ -18,6 +18,7 @@ import AdminRoute from './components/AdminRoute';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import AdminProducts from './pages/Admin/AdminProducts';
 import AdminOrders from './pages/Admin/AdminOrders';
+import AdminCustomers from './pages/Admin/AdminCustomers';
 
 // Public Pages
 import Collections from './pages/Public/Collections';
@@ -71,7 +72,7 @@ function App() {
                   <Route index element={<AdminDashboard />} />
                   <Route path="products" element={<AdminProducts />} />
                   <Route path="orders" element={<AdminOrders />} />
-                  <Route path="customers" element={<div style={{color: '#fff', padding: '50px'}}>Customers Management (WIP)</div>} />
+                  <Route path="customers" element={<AdminCustomers />} />
                 </Route>
               </Route>
             </Route>
