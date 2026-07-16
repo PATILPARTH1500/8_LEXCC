@@ -72,7 +72,7 @@ const Header = () => {
             <AnimatePresence>
               {cartCount > 0 && (
                 <motion.span 
-                  className={styles.cartBadge}
+                  className={`${styles.cartBadge} will-change-transform`}
                   initial={{ scale: 0, opacity: 0 }}
                   animate={{ scale: bumpBadge ? 1.2 : 1, opacity: 1 }}
                   exit={{ scale: 0, opacity: 0 }}
@@ -93,7 +93,6 @@ const Header = () => {
                     justifyContent: 'center',
                     lineHeight: 1
                   }}
-                  className="will-change-transform"
                 >
                   {cartCount > 99 ? '99+' : cartCount}
                 </motion.span>

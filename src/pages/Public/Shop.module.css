@@ -138,7 +138,6 @@
   flex-direction: column;
   cursor: pointer;
   position: relative;
-  group: true;
 }
 
 .imageContainer {

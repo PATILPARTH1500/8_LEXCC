@@ -876,55 +876,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 10. FOOTER */}
-      <footer className={styles.footerSection}>
-        <motion.div 
-          className={styles.footerBgText}
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 0.02 }}
-          viewport={{ once: true }}
-          transition={{ duration: 2, ease: "easeOut" }}
-        >
-          LEXCC
-        </motion.div>
-
-        <div className={`container ${styles.footerContent}`}>
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1, ease: "easeOut" }}
-          >
-            <div className={styles.footerLogo}>LEXCC</div>
-            <div className={styles.footerTagline}>Define The Standard.</div>
-          </motion.div>
-
-          <motion.div 
-            className={styles.footerLinks}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
-          >
-            <Link to="/shop" className={styles.footerLink}>Shop</Link>
-            <Link to="/collections" className={styles.footerLink}>Collections</Link>
-            <Link to="/about" className={styles.footerLink}>About Us</Link>
-            <Link to="/contact" className={styles.footerLink}>Contact</Link>
-            <Link to="/terms" className={styles.footerLink}>Terms</Link>
-          </motion.div>
-
-          <motion.div 
-            className={styles.footerBottom}
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
-          >
-            <div className={styles.footerCopyright}>© 2026 LEXCC. All Rights Reserved.</div>
-          </motion.div>
-        </div>
-      </footer>
-
     </div>
   );
 };
