@@ -51,7 +51,6 @@ const Header = () => {
           <Link to="/collections?category=men" className={styles.navLink}>Men</Link>
           <Link to="/collections?category=footwear" className={styles.navLink}>Footwear</Link>
           <Link to="/collections" className={styles.navLink}>Collections</Link>
-          <Link to="/about" className={styles.navLink}>Brand</Link>
         </nav>
 
         {/* Logo */}
@@ -113,7 +112,6 @@ const Header = () => {
           >
             <Link to="/shop" className={styles.mobileMenuLink}>Shop All</Link>
             <Link to="/collections" className={styles.mobileMenuLink}>Collections</Link>
-            <Link to="/about" className={styles.mobileMenuLink}>The Brand</Link>
           </motion.div>
         )}
       </AnimatePresence>
