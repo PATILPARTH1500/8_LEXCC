@@ -14,6 +14,11 @@ import ForgotPassword from './pages/Auth/ForgotPassword';
 import ResetPassword from './pages/Auth/ResetPassword';
 import ProtectedRoute from './components/ProtectedRoute';
 
+// Admin Routes
+import AdminRoute from './components/AdminRoute';
+import AdminLayout from './pages/Admin/AdminLayout';
+import AdminDashboard from './pages/Admin/AdminDashboard';
+
 // Public Pages
 import Collections from './pages/Public/Collections';
 import ProductDetail from './pages/Public/ProductDetail';
@@ -63,6 +68,17 @@ function App() {
               </Route>
             </Route>
           </Route>
+
+          {/* Admin Routes (Outside of main Layout for distinct luxury style) */}
+          <Route path="/admin" element={<AdminRoute />}>
+            <Route element={<AdminLayout />}>
+              <Route index element={<AdminDashboard />} />
+              <Route path="products" element={<div style={{color: '#fff', padding: '50px'}}>Products Management (WIP)</div>} />
+              <Route path="orders" element={<div style={{color: '#fff', padding: '50px'}}>Orders Management (WIP)</div>} />
+              <Route path="customers" element={<div style={{color: '#fff', padding: '50px'}}>Customers Management (WIP)</div>} />
+            </Route>
+          </Route>
+
         </Routes>
       </BrowserRouter>
     </>
