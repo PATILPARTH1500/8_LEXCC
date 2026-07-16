@@ -27,7 +27,12 @@ const AccountLayout = () => {
     { path: '/account/orders', label: 'Orders' },
   ];
 
+  if (profile?.is_admin) {
+    navItems.push({ path: '/account/admin', label: 'Admin Panel' });
+  }
+
   const getBackgroundText = () => {
+    if (location.pathname.startsWith('/account/admin')) return 'SYSTEM';
     switch(location.pathname) {
       case '/account': return 'MEMBER';
       case '/account/profile': return 'IDENTITY';
