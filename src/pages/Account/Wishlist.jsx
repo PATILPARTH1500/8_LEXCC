@@ -6,34 +6,18 @@ import { useCart } from '../../contexts/CartContext';
 import styles from './Account.module.css';
 
 const Wishlist = () => {
-  const { fetchWishlist, removeFromWishlist } = useAuth();
+  const { wishlistItems, removeFromWishlist } = useAuth();
   const { addToCart } = useCart();
-  const [items, setItems] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const loadWishlist = async () => {
-    setIsLoading(true);
-    try {
-      const data = await fetchWishlist();
-      setItems(data || []);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadWishlist();
-  }, []);
+  const [isRemoving, setIsRemoving] = useState(null);
 
   const handleRemove = async (itemId) => {
+    setIsRemoving(itemId);
     try {
-      setItems(prev => prev.filter(item => item.id !== itemId));
       await removeFromWishlist(itemId);
     } catch (err) {
       alert('Failed to remove item');
-      loadWishlist();
+    } finally {
+      setIsRemoving(null);
     }
   };
 
@@ -62,9 +46,7 @@ const Wishlist = () => {
         <p className={styles.pageSubtitle}>Curate your favorite pieces for the season.</p>
       </motion.div>
 
-      {isLoading ? (
-        <motion.div variants={itemVariants} style={{ padding: '40px', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em' }}>LOADING WISHLIST...</motion.div>
-      ) : items.length === 0 ? (
+      {wishlistItems.length === 0 ? (
         <motion.div variants={itemVariants} className={styles.emptyState}>
           <div className={styles.emptyIcon}>♥</div>
           <h3 className={styles.emptyTitle}>Your Wishlist is Empty</h3>
@@ -76,7 +58,7 @@ const Wishlist = () => {
       ) : (
         <motion.div variants={itemVariants} className={styles.productGrid}>
           <AnimatePresence>
-            {items.map(item => {
+            {wishlistItems.map(item => {
               const product = item.products;
               if (!product) return null;
               
@@ -104,8 +86,8 @@ const Wishlist = () => {
                       <p className={styles.productPrice}>${product.price.toFixed(2)}</p>
                     </div>
                     <div className={styles.productActions}>
-                      <button onClick={() => handleMoveToCart(item, product)} className={styles.actionBtn} style={{ padding: '12px', fontSize: '0.75rem', flex: 1 }}>Move To Cart</button>
-                      <button onClick={() => handleRemove(item.id)} className={styles.secondaryBtn} style={{ padding: '12px', fontSize: '0.75rem', borderColor: 'transparent', color: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.05)' }}>Remove</button>
+                      <button onClick={() => handleMoveToCart(item, product)} disabled={isRemoving === item.id} className={styles.actionBtn} style={{ padding: '12px', fontSize: '0.75rem', flex: 1 }}>Move To Cart</button>
+                      <button onClick={() => handleRemove(item.id)} disabled={isRemoving === item.id} className={styles.secondaryBtn} style={{ padding: '12px', fontSize: '0.75rem', borderColor: 'transparent', color: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.05)' }}>Remove</button>
                     </div>
                   </div>
                 </motion.div>

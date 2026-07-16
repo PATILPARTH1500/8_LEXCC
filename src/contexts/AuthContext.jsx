@@ -8,6 +8,7 @@ export const AuthProvider = ({ children }) => {
   const [profile, setProfile] = useState(null);
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [wishlistItems, setWishlistItems] = useState([]);
 
   useEffect(() => {
     // Check active sessions and sets the user
@@ -19,6 +20,7 @@ export const AuthProvider = ({ children }) => {
       
       if (session?.user) {
         await fetchProfile(session.user.id);
+        await fetchWishlist(session.user.id);
       }
       
       setLoading(false);
@@ -33,8 +35,10 @@ export const AuthProvider = ({ children }) => {
       
       if (session?.user) {
         await fetchProfile(session.user.id);
+        await fetchWishlist(session.user.id);
       } else {
         setProfile(null);
+        setWishlistItems([]);
       }
       
       setLoading(false);
@@ -245,8 +249,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Wishlist Management
-  const fetchWishlist = async () => {
-    if (!user) return [];
+  const fetchWishlist = async (uid = user?.id) => {
+    if (!uid) return [];
 
     const { data, error } = await supabase
       .from('wishlist')
@@ -261,9 +265,10 @@ export const AuthProvider = ({ children }) => {
           image_url
         )
       `)
-      .eq('user_id', user.id);
+      .eq('user_id', uid);
       
     if (error) throw error;
+    setWishlistItems(data || []);
     return data;
   };
 
@@ -273,11 +278,28 @@ export const AuthProvider = ({ children }) => {
     const { data, error } = await supabase
       .from('wishlist')
       .insert([{ user_id: user.id, product_id: productId }])
-      .select()
+      .select(`
+        id,
+        product_id,
+        products (
+          id,
+          name,
+          slug,
+          price,
+          image_url
+        )
+      `)
       .single();
       
     // Ignore duplicate insert errors
     if (error && error.code !== '23505') throw error;
+    
+    if (data) {
+      setWishlistItems(prev => {
+        if (prev.some(item => item.product_id === productId)) return prev;
+        return [...prev, data];
+      });
+    }
     return data;
   };
 
@@ -288,6 +310,7 @@ export const AuthProvider = ({ children }) => {
       .eq('id', itemId);
       
     if (error) throw error;
+    setWishlistItems(prev => prev.filter(item => item.id !== itemId));
   };
 
   const logout = async () => {
@@ -299,6 +322,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setSession(null);
     setProfile(null);
+    setWishlistItems([]);
   };
 
   const logoutAllDevices = async () => {
@@ -328,6 +352,7 @@ export const AuthProvider = ({ children }) => {
     addAddress,
     updateAddress,
     deleteAddress,
+    wishlistItems,
     fetchWishlist,
     addToWishlist,
     removeFromWishlist,

@@ -6,22 +6,13 @@ import { useCart } from '../../contexts/CartContext';
 import styles from '../../pages/Public/Shop.module.css';
 
 const ProductCard = ({ product }) => {
-  const { user, fetchWishlist, addToWishlist, removeFromWishlist } = useAuth();
+  const { user, wishlistItems, addToWishlist, removeFromWishlist } = useAuth();
   const { addToCart } = useCart();
   const navigate = useNavigate();
   
-  const [isInWishlist, setIsInWishlist] = useState(false);
-  const [wishlistItems, setWishlistItems] = useState([]);
   const [loadingWishlist, setLoadingWishlist] = useState(false);
-
-  useEffect(() => {
-    if (user) {
-      fetchWishlist().then(items => {
-        setWishlistItems(items || []);
-        setIsInWishlist(items?.some(i => i.product_id === product.id) || false);
-      });
-    }
-  }, [user, product.id]);
+  
+  const isInWishlist = wishlistItems?.some(i => i.product_id === product.id) || false;
 
   const toggleWishlist = async (e) => {
     e.preventDefault(); // Prevent link navigation
@@ -35,14 +26,9 @@ const ProductCard = ({ product }) => {
       if (isInWishlist) {
         const item = wishlistItems.find(i => i.product_id === product.id);
         if (item) await removeFromWishlist(item.id);
-        setIsInWishlist(false);
       } else {
         await addToWishlist(product.id);
-        setIsInWishlist(true);
       }
-      // Refresh state
-      const newItems = await fetchWishlist();
-      setWishlistItems(newItems || []);
     } catch (err) {
       console.error(err);
     } finally {

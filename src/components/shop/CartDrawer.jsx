@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../contexts/CartContext';
 
+const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop';
+
 const CartDrawer = () => {
   const { isCartOpen, setIsCartOpen, cartItems, removeFromCart, updateQuantity, cartTotal } = useCart();
   const navigate = useNavigate();
@@ -91,7 +93,7 @@ const CartDrawer = () => {
                       >
                         <div style={{ width: '100px', height: '130px', background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.05)' }}>
                           <img 
-                            src={item.product.image_url || 'https://via.placeholder.com/100x130/111/fff?text=No+Image'} 
+                            src={item.product.image_url || DEFAULT_IMAGE} 
                             alt={item.product.name} 
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                           />
