@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useCart } from '../../contexts/CartContext';
 import styles from './Shop.module.css';
 import accountStyles from '../Account/Account.module.css';
+import ProductCard from '../../components/shop/ProductCard';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop';
 
@@ -18,7 +19,9 @@ const ProductDetail = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState('');
+  const [selectedColor, setSelectedColor] = useState('');
   const [activeImage, setActiveImage] = useState('');
+  const [relatedProducts, setRelatedProducts] = useState([]);
   
   const [isWishlistLoading, setIsWishlistLoading] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
@@ -41,6 +44,20 @@ const ProductDetail = () => {
           setActiveImage(data.image_url);
         } else {
           setActiveImage(DEFAULT_IMAGE);
+        }
+        
+        if (data?.variants?.length > 0) {
+          setSelectedColor(data.variants[0].color);
+        }
+        
+        if (data?.category_id) {
+          const { data: related } = await supabase
+            .from('products')
+            .select('*')
+            .eq('category_id', data.category_id)
+            .neq('id', data.id)
+            .limit(4);
+          if (related) setRelatedProducts(related);
         }
       } catch (err) {
         console.error(err);
@@ -86,8 +103,8 @@ const ProductDetail = () => {
     // Simulate slight delay for premium feel
     await new Promise(r => setTimeout(r, 600));
     
-    const variant = product.variants?.find(v => v.size === selectedSize);
-    addToCart(product, variant || { size: selectedSize });
+    const variant = product.variants?.find(v => v.size === selectedSize && v.color === selectedColor);
+    addToCart(product, variant || { size: selectedSize, color: selectedColor });
     
     setIsAddingToCart(false);
     setCartSuccess(true);
@@ -117,8 +134,10 @@ const ProductDetail = () => {
     </div>
   );
 
-  const totalStock = product.variants?.reduce((sum, v) => sum + v.stock, 0) || 0;
-  const uniqueSizes = [...new Set(product.variants?.map(v => v.size))].filter(Boolean);
+  const uniqueColors = [...new Set(product.variants?.map(v => v.color))].filter(Boolean);
+  const variantsForColor = product.variants?.filter(v => v.color === selectedColor) || [];
+  const totalStock = variantsForColor.reduce((sum, v) => sum + v.stock, 0) || 0;
+  const uniqueSizes = [...new Set(variantsForColor.map(v => v.size))].filter(Boolean);
   
   const displayImages = product.image_url ? [product.image_url, DEFAULT_IMAGE] : [DEFAULT_IMAGE, DEFAULT_IMAGE];
 
@@ -186,9 +205,18 @@ const ProductDetail = () => {
                   alt={product.name} 
                   className={styles.mainImage}
                   onLoad={() => setImageLoading(false)}
-                  style={{ opacity: imageLoading ? 0 : 1 }}
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ duration: 1.2, ease: "easeOut" }}
+                  style={{ opacity: imageLoading ? 0 : 1, cursor: 'zoom-in' }}
+                  whileHover={{ scale: 1.5 }}
+                  onMouseMove={(e) => {
+                    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+                    const x = ((e.clientX - left) / width) * 100;
+                    const y = ((e.clientY - top) / height) * 100;
+                    e.currentTarget.style.transformOrigin = `${x}% ${y}%`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transformOrigin = 'center center';
+                  }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
                 />
               </motion.div>
             </AnimatePresence>
@@ -206,6 +234,38 @@ const ProductDetail = () => {
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }} style={{ marginBottom: '40px' }}>
+              {/* Color Selection */}
+              {uniqueColors.length > 0 && (
+                <div style={{ marginBottom: '30px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px', fontSize: '0.8rem', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                    <span style={{ color: '#fff' }}>Color</span>
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px' }}>
+                    {uniqueColors.map(color => (
+                      <motion.button 
+                        key={color} 
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        style={{ 
+                          padding: '12px 24px',
+                          background: 'transparent',
+                          color: selectedColor === color ? 'var(--accent-color, #D4AF37)' : '#fff',
+                          border: `1px solid ${selectedColor === color ? 'var(--accent-color, #D4AF37)' : 'rgba(255,255,255,0.2)'}`,
+                          cursor: 'pointer',
+                          fontSize: '0.9rem',
+                          letterSpacing: '0.1em',
+                          transition: 'all 0.3s',
+                        }}
+                        onClick={() => { setSelectedColor(color); setSelectedSize(''); }}
+                      >
+                        {color}
+                      </motion.button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Size Selection */}
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px', fontSize: '0.8rem', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                 <span style={{ color: '#fff' }}>Size</span>
                 <span style={{ color: 'rgba(255,255,255,0.4)', cursor: 'pointer', transition: 'color 0.3s' }} onMouseOver={e=>e.currentTarget.style.color='#fff'} onMouseOut={e=>e.currentTarget.style.color='rgba(255,255,255,0.4)'}>Size Guide</span>
@@ -295,6 +355,20 @@ const ProductDetail = () => {
           </div>
         </div>
       </div>
+      
+      {/* Related Products Section */}
+      {relatedProducts.length > 0 && (
+        <div style={{ padding: '80px 20px', maxWidth: '1600px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px' }}>
+            <h2 style={{ fontSize: '2rem', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 300, color: '#fff' }}>Related Pieces</h2>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '30px' }}>
+            {relatedProducts.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 };

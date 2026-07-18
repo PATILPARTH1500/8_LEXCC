@@ -15,7 +15,7 @@ const AdminCustomers = () => {
   const fetchCustomers = async () => {
     setLoading(true);
     try {
-      // Fetch profiles and join orders to calculate lifetime spend
+      // Fetch profiles separately
       const { data: profiles, error: err } = await supabase
         .from('profiles')
         .select(`
@@ -23,18 +23,35 @@ const AdminCustomers = () => {
           first_name,
           last_name,
           email,
-          created_at,
-          orders ( total_amount )
+          created_at
         `)
         .order('created_at', { ascending: false });
         
       if (err) throw err;
       
-      const enrichedCustomers = (profiles || []).map(p => ({
-        ...p,
-        total_orders: p.orders?.length || 0,
-        lifetime_spend: p.orders?.reduce((sum, o) => sum + (o.total_amount || 0), 0) || 0
-      }));
+      // Fetch all orders
+      const { data: orders, error: ordersErr } = await supabase
+        .from('orders')
+        .select('user_id, total_amount');
+        
+      if (ordersErr) throw ordersErr;
+      
+      const ordersByUser = {};
+      if (orders) {
+        orders.forEach(o => {
+          if (!ordersByUser[o.user_id]) ordersByUser[o.user_id] = [];
+          ordersByUser[o.user_id].push(o);
+        });
+      }
+      
+      const enrichedCustomers = (profiles || []).map(p => {
+        const userOrders = ordersByUser[p.id] || [];
+        return {
+          ...p,
+          total_orders: userOrders.length,
+          lifetime_spend: userOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0)
+        };
+      });
 
       setCustomers(enrichedCustomers);
     } catch (err) {

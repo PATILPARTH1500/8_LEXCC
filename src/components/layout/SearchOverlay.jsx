@@ -3,12 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import styles from '../../pages/Public/Shop.module.css';
 
-// Mock data for search
-const MOCK_PRODUCTS = [
-  { id: 1, name: 'HEAVYWEIGHT OVERSIZED HOODIE', slug: 'heavyweight-oversized-hoodie', price: 250, image_url: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=800&auto=format&fit=crop' },
-  { id: 2, name: 'DISTRESSED DENIM JACKET', slug: 'distressed-denim-jacket', price: 450, image_url: 'https://images.unsplash.com/photo-1495105787522-5334e3ffa0ef?q=80&w=800&auto=format&fit=crop' },
-  { id: 3, name: 'VINTAGE WASH TEE', slug: 'vintage-wash-tee', price: 120, image_url: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=800&auto=format&fit=crop' },
-];
+import { supabase } from '../../lib/supabase';
 
 const SearchOverlay = ({ isOpen, onClose }) => {
   const [query, setQuery] = useState('');
@@ -21,11 +16,21 @@ const SearchOverlay = ({ isOpen, onClose }) => {
     }
     
     // Live search simulation
-    const timer = setTimeout(() => {
-      const filtered = MOCK_PRODUCTS.filter(p => 
-        p.name.toLowerCase().includes(query.toLowerCase())
-      );
-      setResults(filtered);
+    const timer = setTimeout(async () => {
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('id, name, price, image_url')
+          .ilike('name', `%${query}%`)
+          .eq('status', 'active')
+          .limit(10);
+        
+        if (!error && data) {
+          setResults(data);
+        }
+      } catch (err) {
+        console.error('Search error:', err);
+      }
     }, 300); // 300ms debounce
     
     return () => clearTimeout(timer);

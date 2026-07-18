@@ -15,8 +15,8 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // Fetch Orders for Revenue & Count
-        const { data: orders } = await supabase.from('orders').select('total_amount, status');
+        // Fetch Orders for Revenue & Count & Recent Feed
+        const { data: orders } = await supabase.from('orders').select('id, order_number, created_at, total_amount, status').order('created_at', { ascending: false });
         
         // Fetch Products for Count & Stock
         const { data: products } = await supabase.from('products').select('id, status, product_variants(stock)');
@@ -46,7 +46,8 @@ const AdminDashboard = () => {
           totalOrders: totalOrd,
           totalRevenue: totalRev,
           activeProducts: activeProd,
-          lowStock: lowStockCount
+          lowStock: lowStockCount,
+          recentOrders: orders ? orders.slice(0, 5) : []
         });
       } catch (err) {
         console.error("Error fetching admin stats:", err);
@@ -113,9 +114,26 @@ const AdminDashboard = () => {
 
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '25px' }}>
         <motion.div variants={itemVariants} className={styles.card} style={{ padding: '40px', margin: 0, minHeight: '300px' }}>
-          <h3 style={{ fontSize: '0.9rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#fff', marginBottom: '20px' }}>Recent Activity</h3>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px', color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-            Analytics Engine Syncing...
+          <h3 style={{ fontSize: '0.9rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#fff', marginBottom: '20px' }}>Recent Orders</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            {stats.recentOrders && stats.recentOrders.length > 0 ? (
+              stats.recentOrders.map(order => (
+                <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '15px' }}>
+                  <div>
+                    <p style={{ fontSize: '0.85rem', color: '#fff', marginBottom: '4px' }}>{order.order_number}</p>
+                    <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}>{new Date(order.created_at).toLocaleDateString()}</p>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--accent-color, #D4AF37)' }}>${order.total_amount?.toFixed(2)}</p>
+                    <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>{order.status}</p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.1em', textAlign: 'center', marginTop: '40px' }}>
+                No recent orders found.
+              </div>
+            )}
           </div>
         </motion.div>
 

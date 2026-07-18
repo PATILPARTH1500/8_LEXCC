@@ -19,13 +19,35 @@ const AdminOrders = () => {
         .from('orders')
         .select(`
           *,
-          profiles ( first_name, last_name, email ),
           order_items ( id, quantity, price_at_time, products(name) )
         `)
         .order('created_at', { ascending: false });
         
       if (err) throw err;
-      setOrders(ords || []);
+
+      // Fetch profiles separately due to foreign key relationship caching issues
+      const userIds = [...new Set((ords || []).map(o => o.user_id).filter(Boolean))];
+      let profilesMap = {};
+      
+      if (userIds.length > 0) {
+        const { data: profiles, error: profErr } = await supabase
+          .from('profiles')
+          .select('id, first_name, last_name, email')
+          .in('id', userIds);
+          
+        if (!profErr && profiles) {
+          profiles.forEach(p => {
+            profilesMap[p.id] = p;
+          });
+        }
+      }
+
+      const enrichedOrders = (ords || []).map(o => ({
+        ...o,
+        profiles: profilesMap[o.user_id] || null
+      }));
+
+      setOrders(enrichedOrders);
     } catch (err) {
       console.error(err);
       setError(`Failed to load orders: ${err.message || JSON.stringify(err)}`);
