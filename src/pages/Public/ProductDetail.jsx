@@ -147,19 +147,25 @@ const ProductDetail = () => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-      style={{ position: 'relative', minHeight: '100vh', background: 'var(--secondary-color, #0a0a0a)', overflow: 'hidden' }}
+      style={{ position: 'relative', minHeight: '100vh', background: 'var(--primary-color, #0a0a0a)', overflow: 'hidden' }}
     >
+      <div className={accountStyles.accountBackground}>
+        <div className={accountStyles.noiseOverlay} />
+        <div className={accountStyles.radialGlow} />
+      </div>
+
       {/* Dashboard Style Oversized Typography */}
       <AnimatePresence mode="wait">
         <motion.div
-          key="PRODUCT"
+          key={product?.category?.name || "PRODUCT"}
           className={accountStyles.bgTextAccount}
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+          style={{ top: '120px' }}
         >
-          PRODUCT
+          {product?.category?.name || "PRODUCT"}
         </motion.div>
       </AnimatePresence>
 
@@ -185,7 +191,7 @@ const ProductDetail = () => {
               </motion.div>
             ))}
           </div>
-          <div className={styles.mainImageContainer} style={{ borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <div className={styles.mainImageContainer} style={{ borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeImage}
@@ -225,36 +231,42 @@ const ProductDetail = () => {
 
         {/* Right Side: Product Info */}
         <div className={styles.infoSection}>
-          <div className={accountStyles.card} style={{ padding: '50px', margin: 0 }}>
+          <div className={accountStyles.card} style={{ padding: '60px', margin: 0, background: 'rgba(10, 10, 10, 0.6)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 30px 60px rgba(0,0,0,0.6)', transform: 'none' }}>
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}>
-              <h1 style={{ fontSize: '2.5rem', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '15px', fontFamily: 'var(--font-heading)', fontWeight: 300, color: '#fff' }}>{product.name}</h1>
-              <p style={{ fontSize: '1.4rem', color: 'var(--accent-color, #D4AF37)', letterSpacing: '0.05em', marginBottom: '30px', fontWeight: 300 }}>${product.price.toFixed(2)}</p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
+                <h1 style={{ fontSize: '2.8rem', letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'var(--font-heading)', fontWeight: 300, color: '#fff', lineHeight: 1.1 }}>{product.name}</h1>
+              </div>
+              <p style={{ fontSize: '1.6rem', color: 'var(--accent-color, #D4AF37)', letterSpacing: '0.05em', marginBottom: '35px', fontWeight: 300, fontFamily: 'var(--font-heading)' }}>${product.price.toFixed(2)}</p>
               
-              <p style={{ fontSize: '0.95rem', color: 'rgba(255,255,255,0.6)', lineHeight: '1.8', letterSpacing: '0.05em', marginBottom: '40px' }}>{product.description}</p>
+              <div style={{ height: '1px', width: '100%', background: 'linear-gradient(90deg, rgba(255,255,255,0.1), transparent)', marginBottom: '35px' }} />
+              
+              <p style={{ fontSize: '0.95rem', color: 'rgba(255,255,255,0.6)', lineHeight: '1.8', letterSpacing: '0.05em', marginBottom: '45px', fontWeight: 300 }}>{product.description}</p>
             </motion.div>
 
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }} style={{ marginBottom: '40px' }}>
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }} style={{ marginBottom: '45px' }}>
               {/* Color Selection */}
               {uniqueColors.length > 0 && (
-                <div style={{ marginBottom: '30px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px', fontSize: '0.8rem', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-                    <span style={{ color: '#fff' }}>Color</span>
+                <div style={{ marginBottom: '35px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px', fontSize: '0.75rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)' }}>
+                    <span>Color</span>
                   </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
                     {uniqueColors.map(color => (
                       <motion.button 
                         key={color} 
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                         style={{ 
                           padding: '12px 24px',
-                          background: 'transparent',
+                          background: selectedColor === color ? 'rgba(212,175,55,0.05)' : 'transparent',
                           color: selectedColor === color ? 'var(--accent-color, #D4AF37)' : '#fff',
-                          border: `1px solid ${selectedColor === color ? 'var(--accent-color, #D4AF37)' : 'rgba(255,255,255,0.2)'}`,
+                          border: `1px solid ${selectedColor === color ? 'var(--accent-color, #D4AF37)' : 'rgba(255,255,255,0.1)'}`,
+                          boxShadow: selectedColor === color ? '0 0 15px rgba(212,175,55,0.15)' : 'none',
                           cursor: 'pointer',
-                          fontSize: '0.9rem',
+                          fontSize: '0.85rem',
                           letterSpacing: '0.1em',
-                          transition: 'all 0.3s',
+                          textTransform: 'uppercase',
+                          transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
                         }}
                         onClick={() => { setSelectedColor(color); setSelectedSize(''); }}
                       >
@@ -266,26 +278,28 @@ const ProductDetail = () => {
               )}
 
               {/* Size Selection */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px', fontSize: '0.8rem', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-                <span style={{ color: '#fff' }}>Size</span>
-                <span style={{ color: 'rgba(255,255,255,0.4)', cursor: 'pointer', transition: 'color 0.3s' }} onMouseOver={e=>e.currentTarget.style.color='#fff'} onMouseOut={e=>e.currentTarget.style.color='rgba(255,255,255,0.4)'}>Size Guide</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px', fontSize: '0.75rem', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                <span style={{ color: 'rgba(255,255,255,0.5)' }}>Size</span>
+                <span style={{ color: 'rgba(255,255,255,0.3)', cursor: 'pointer', transition: 'color 0.4s ease' }} onMouseOver={e=>e.currentTarget.style.color='#fff'} onMouseOut={e=>e.currentTarget.style.color='rgba(255,255,255,0.3)'}>Size Guide</span>
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
                 {uniqueSizes.map(size => (
                   <motion.button 
                     key={size} 
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     style={{ 
-                      flex: '1 0 calc(33.333% - 10px)',
-                      padding: '16px',
-                      background: 'transparent',
+                      flex: '1 0 calc(33.333% - 8px)',
+                      padding: '14px',
+                      background: selectedSize === size ? 'rgba(212,175,55,0.05)' : 'transparent',
                       color: selectedSize === size ? 'var(--accent-color, #D4AF37)' : '#fff',
-                      border: `1px solid ${selectedSize === size ? 'var(--accent-color, #D4AF37)' : 'rgba(255,255,255,0.2)'}`,
+                      border: `1px solid ${selectedSize === size ? 'var(--accent-color, #D4AF37)' : 'rgba(255,255,255,0.1)'}`,
+                      boxShadow: selectedSize === size ? '0 0 15px rgba(212,175,55,0.15)' : 'none',
                       cursor: 'pointer',
-                      fontSize: '0.9rem',
+                      fontSize: '0.85rem',
                       letterSpacing: '0.1em',
-                      transition: 'all 0.3s',
+                      textTransform: 'uppercase',
+                      transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
                     }}
                     onClick={() => setSelectedSize(size)}
                   >
@@ -297,29 +311,45 @@ const ProductDetail = () => {
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.4 }}>
               {/* Inventory Status */}
-              {totalStock > 0 && totalStock <= 5 ? (
-                <div style={{ marginBottom: '20px', display: 'inline-block', padding: '6px 12px', background: 'rgba(212,175,55,0.1)', color: 'var(--accent-color, #D4AF37)', fontSize: '0.75rem', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Only {totalStock} Left</div>
-              ) : totalStock === 0 ? (
-                <div style={{ marginBottom: '20px', display: 'inline-block', padding: '6px 12px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', fontSize: '0.75rem', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Out Of Stock</div>
-              ) : null}
+              <div style={{ minHeight: '30px', marginBottom: '15px' }}>
+                <AnimatePresence mode="wait">
+                  {totalStock > 0 && totalStock <= 5 ? (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ display: 'inline-block', padding: '6px 12px', background: 'rgba(212,175,55,0.1)', color: 'var(--accent-color, #D4AF37)', fontSize: '0.7rem', letterSpacing: '0.15em', textTransform: 'uppercase', border: '1px solid rgba(212,175,55,0.2)', borderRadius: '2px' }}>Only {totalStock} Left</motion.div>
+                  ) : totalStock === 0 ? (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ display: 'inline-block', padding: '6px 12px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', fontSize: '0.7rem', letterSpacing: '0.15em', textTransform: 'uppercase', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '2px' }}>Out Of Stock</motion.div>
+                  ) : null}
+                </AnimatePresence>
+              </div>
 
               {/* Actions */}
               <div style={{ display: 'flex', gap: '15px' }}>
                 <motion.button 
-                  whileHover={totalStock > 0 ? { scale: 1.02 } : {}}
-                  whileTap={totalStock > 0 ? { scale: 0.98 } : {}}
+                  whileHover={totalStock > 0 ? { scale: 1.01 } : {}}
+                  whileTap={totalStock > 0 ? { scale: 0.99 } : {}}
                   className={styles.primaryBtn} 
                   disabled={totalStock === 0 || isAddingToCart}
                   onClick={handleAddToCart}
-                  style={{ flex: 1, position: 'relative', overflow: 'hidden', padding: '20px', background: cartSuccess ? '#22c55e' : '#fff', color: cartSuccess ? '#fff' : '#000', borderColor: cartSuccess ? '#22c55e' : '#fff', fontSize: '0.85rem' }}
+                  style={{ 
+                    flex: 1, 
+                    position: 'relative', 
+                    overflow: 'hidden', 
+                    padding: '20px', 
+                    background: cartSuccess ? '#22c55e' : '#fff', 
+                    color: cartSuccess ? '#fff' : '#000', 
+                    borderColor: cartSuccess ? '#22c55e' : '#fff', 
+                    fontSize: '0.85rem',
+                    letterSpacing: '0.15em',
+                    boxShadow: cartSuccess ? '0 0 20px rgba(34, 197, 94, 0.4)' : '0 10px 20px rgba(255,255,255,0.1)',
+                    transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
+                  }}
                 >
                   <AnimatePresence mode="wait">
                     {isAddingToCart ? (
-                      <motion.span key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>ADDING...</motion.span>
+                      <motion.span key="loading" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} style={{ display: 'block' }}>ADDING...</motion.span>
                     ) : cartSuccess ? (
-                      <motion.span key="success" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>ADDED TO CART ✓</motion.span>
+                      <motion.span key="success" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} style={{ display: 'block' }}>ADDED TO CART ✓</motion.span>
                     ) : (
-                      <motion.span key="text" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>{totalStock === 0 ? 'SOLD OUT' : 'ADD TO CART'}</motion.span>
+                      <motion.span key="text" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ display: 'block' }}>{totalStock === 0 ? 'SOLD OUT' : 'ADD TO CART'}</motion.span>
                     )}
                   </AnimatePresence>
                 </motion.button>
@@ -330,9 +360,9 @@ const ProductDetail = () => {
                   className={styles.wishlistBtn} 
                   onClick={toggleWishlist}
                   disabled={isWishlistLoading}
-                  style={isInWishlist ? { background: '#fff', color: '#000', borderColor: '#fff', width: '60px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center' } : { width: '60px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
+                  style={isInWishlist ? { background: '#fff', color: '#000', borderColor: '#fff', width: '64px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 20px rgba(255,255,255,0.1)' } : { width: '64px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, background: 'rgba(255,255,255,0.02)' }}
                 >
-                  <span style={{ fontSize: '1.4rem' }}>{isInWishlist ? '♥' : '♡'}</span>
+                  <span style={{ fontSize: '1.4rem', marginTop: '2px' }}>{isInWishlist ? '♥' : '♡'}</span>
                 </motion.button>
               </div>
             </motion.div>

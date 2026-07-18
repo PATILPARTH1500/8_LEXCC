@@ -223,7 +223,7 @@
 
 /* Product Detail Page */
 .pdpContainer {
-  background-color: var(--primary-color, #000);
+  background-color: transparent;
   color: #fff;
   min-height: 100vh;
   padding-top: 80px;
@@ -292,7 +292,7 @@
 
 .infoSection {
   padding: 60px 80px;
-  background: #0a0a0a;
+  background: transparent;
 }
 
 @media (max-width: 1024px) {
