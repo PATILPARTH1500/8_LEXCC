@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import styles from './Shop.module.css';
 import accountStyles from '../Account/Account.module.css';
+import StripePaymentForm from '../../components/shop/StripePaymentForm';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop';
+
+// Initialize Stripe (use import.meta.env for the real key in production)
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || 'pk_test_placeholder');
 
 const Checkout = () => {
   const { cartItems, cartTotal, clearCart } = useCart();
@@ -23,7 +29,11 @@ const Checkout = () => {
   
   // Final Order Info
   const [orderId, setOrderId] = useState(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Stripe State
+  const [clientSecret, setClientSecret] = useState('');
+  const [paymentIntentId, setPaymentIntentId] = useState(null);
+  const [isInitializingStripe, setIsInitializingStripe] = useState(false);
 
   useEffect(() => {
     if (cartItems.length === 0 && step !== 4) {
@@ -43,33 +53,69 @@ const Checkout = () => {
     }
   }, [user, cartItems.length, navigate, step]);
 
-  const handleNextStep = () => {
+  const handleNextStep = async () => {
     if (step === 1 && !selectedAddressId && user) {
       alert("Please select a shipping address");
       return;
     }
-    setStep(prev => prev + 1);
+    
+    // If moving to payment step, initialize PaymentIntent
+    if (step === 2) {
+      await initializePaymentIntent();
+    } else {
+      setStep(prev => prev + 1);
+    }
   };
 
-  const handlePlaceOrder = async () => {
-    setIsProcessing(true);
+  const initializePaymentIntent = async () => {
+    setIsInitializingStripe(true);
     try {
-      // Mock payment delay
-      await new Promise(res => setTimeout(res, 2500));
-      
       const orderNumber = `LEX-${Math.floor(Math.random() * 1000000)}`;
+      setOrderId(orderNumber);
+
+      // In a real environment, you'd call your Supabase Edge Function here:
+      /*
+      const { data, error } = await supabase.functions.invoke('create-payment-intent', {
+        body: { amount: cartTotal, metadata: { order_number: orderNumber, user_id: user?.id } }
+      });
+      if (error) throw error;
+      setClientSecret(data.clientSecret);
+      */
+      
+      // FOR DEV: Since Edge Functions aren't deployed, we mock the delay and setup step 3.
+      // In production, the clientSecret comes from the Edge Function above.
+      await new Promise(res => setTimeout(res, 1000));
+      
+      // Dummy secret for UI preview (Stripe requires a real one to render the form)
+      // Since we don't have a real one without the edge function, we will conditionally render the form 
+      // or a placeholder if the key is missing.
+      const mockSecret = "pi_123_secret_456"; 
+      setClientSecret(mockSecret);
+      setStep(3);
+
+    } catch (error) {
+      console.error("Failed to initialize payment:", error);
+      alert("Failed to initialize secure checkout. Please try again.");
+    } finally {
+      setIsInitializingStripe(false);
+    }
+  };
+
+  const handlePaymentSuccess = async () => {
+    try {
       const selectedAddress = addresses.find(a => a.id === selectedAddressId) || {};
       
       if (user) {
-        // Insert order
+        // Create Order (In production, the Webhook does this, but we do it here as a fallback/sync process)
         const { data: order, error: orderErr } = await supabase
           .from('orders')
           .insert([{
             user_id: user.id,
-            order_number: orderNumber,
+            order_number: orderId,
             total_amount: cartTotal,
             shipping_address: selectedAddress,
-            status: 'processing'
+            status: 'processing',
+            payment_status: 'paid'
           }])
           .select('id')
           .single();
@@ -80,6 +126,7 @@ const Checkout = () => {
         const orderItemsData = cartItems.map(item => ({
           order_id: order.id,
           product_id: item.product.id,
+          variant_id: item.variant?.id || null,
           quantity: item.quantity,
           price_at_time: item.product.price
         }));
@@ -88,14 +135,11 @@ const Checkout = () => {
         if (itemsErr) throw itemsErr;
       }
       
-      setOrderId(orderNumber);
       clearCart();
       setStep(4);
     } catch (err) {
       console.error(err);
-      alert("Payment failed. Please try again.");
-    } finally {
-      setIsProcessing(false);
+      alert("Payment was successful, but order creation failed. Please contact support.");
     }
   };
 
@@ -105,6 +149,28 @@ const Checkout = () => {
     if (step === 3) return 'PAYMENT';
     if (step === 4) return 'CONFIRMED';
     return '';
+  };
+
+  const appearance = {
+    theme: 'night',
+    variables: {
+      fontFamily: 'var(--font-body)',
+      colorPrimary: '#D4AF37',
+      colorBackground: 'transparent',
+      colorText: '#ffffff',
+      colorDanger: '#ef4444',
+    },
+    rules: {
+      '.Input': {
+        backgroundColor: 'rgba(255,255,255,0.02)',
+        border: '1px solid rgba(255,255,255,0.1)',
+        padding: '12px',
+        color: '#ffffff',
+      },
+      '.Input:focus': {
+        borderColor: '#D4AF37',
+      }
+    }
   };
 
   return (
@@ -282,60 +348,66 @@ const Checkout = () => {
                       </div>
 
                       <div style={{ display: 'flex', gap: '20px' }}>
-                        <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handleNextStep} className={styles.primaryBtn} style={{ flex: 1, maxWidth: '300px' }}>CONTINUE TO PAYMENT</motion.button>
-                        <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => setStep(1)} className={styles.secondaryBtn}>BACK</motion.button>
+                        <motion.button 
+                          whileHover={!isInitializingStripe ? { scale: 1.02 } : {}} 
+                          whileTap={!isInitializingStripe ? { scale: 0.98 } : {}} 
+                          onClick={handleNextStep} 
+                          className={styles.primaryBtn} 
+                          disabled={isInitializingStripe}
+                          style={{ flex: 1, maxWidth: '300px', position: 'relative', overflow: 'hidden' }}
+                        >
+                          <AnimatePresence mode="wait">
+                            {isInitializingStripe ? (
+                              <motion.div key="processing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                                <div style={{ width: '16px', height: '16px', border: '2px solid #000', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                                <span>INITIALIZING...</span>
+                              </motion.div>
+                            ) : (
+                              <motion.span key="text" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>CONTINUE TO PAYMENT</motion.span>
+                            )}
+                          </AnimatePresence>
+                        </motion.button>
+                        <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => setStep(1)} className={styles.secondaryBtn} disabled={isInitializingStripe}>BACK</motion.button>
                       </div>
                     </div>
                   )}
 
                   {/* STEP 3: PAYMENT */}
                   {step === 3 && (
-                    <div>
-                      <h2 style={{ fontSize: '1.8rem', fontWeight: 300, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '40px' }}>Payment Method</h2>
-                      
-                      <div className={accountStyles.card} style={{ padding: '40px', margin: '0 0 50px 0' }}>
-                        <div className={accountStyles.formGroup}>
-                          <label className={accountStyles.formLabel}>Name on Card</label>
-                          <input type="text" className={accountStyles.formInput} placeholder="JOHN DOE" disabled={isProcessing} />
-                        </div>
-                        <div className={accountStyles.formGroup}>
-                          <label className={accountStyles.formLabel}>Card Number</label>
-                          <input type="text" className={accountStyles.formInput} placeholder="**** **** **** ****" disabled={isProcessing} />
-                        </div>
-                        <div className={accountStyles.formGrid}>
-                          <div className={accountStyles.formGroup}>
-                            <label className={accountStyles.formLabel}>Expiration Date</label>
-                            <input type="text" className={accountStyles.formInput} placeholder="MM/YY" disabled={isProcessing} />
+                    <div style={{ minHeight: '400px' }}>
+                      {clientSecret && clientSecret !== "pi_123_secret_456" ? (
+                        <Elements stripe={stripePromise} options={{ clientSecret, appearance }}>
+                          <StripePaymentForm 
+                            amount={cartTotal}
+                            onPaymentSuccess={handlePaymentSuccess} 
+                            onBack={() => setStep(2)} 
+                          />
+                        </Elements>
+                      ) : (
+                        <form onSubmit={(e) => { e.preventDefault(); handlePaymentSuccess(); }} style={{ width: '100%' }}>
+                          <h2 style={{ fontSize: '1.8rem', fontWeight: 300, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '40px' }}>Payment Method</h2>
+                          
+                          <div className={accountStyles.card} style={{ padding: '40px', margin: '0 0 50px 0', border: '1px dashed rgba(212,175,55,0.5)', background: 'rgba(212,175,55,0.02)' }}>
+                            <p style={{ color: 'var(--accent-color, #D4AF37)', marginBottom: '15px', letterSpacing: '0.1em', textTransform: 'uppercase', fontSize: '0.85rem' }}>Developer Mode</p>
+                            <p style={{ color: 'rgba(255,255,255,0.6)', lineHeight: '1.6', fontSize: '0.9rem' }}>
+                              Stripe Elements requires a real Client Secret from the Edge Function. Since the Edge Function is not currently deployed, we are mocking the payment success to allow testing the end-to-end checkout flow. Click below to simulate a successful payment.
+                            </p>
                           </div>
-                          <div className={accountStyles.formGroup}>
-                            <label className={accountStyles.formLabel}>Security Code</label>
-                            <input type="text" className={accountStyles.formInput} placeholder="CVC" disabled={isProcessing} />
-                          </div>
-                        </div>
-                      </div>
 
-                      <div style={{ display: 'flex', gap: '20px' }}>
-                        <motion.button 
-                          whileHover={!isProcessing ? { scale: 1.02 } : {}} 
-                          whileTap={!isProcessing ? { scale: 0.98 } : {}} 
-                          onClick={handlePlaceOrder} 
-                          className={styles.primaryBtn} 
-                          disabled={isProcessing}
-                          style={{ flex: 1, maxWidth: '300px', position: 'relative', overflow: 'hidden' }}
-                        >
-                          <AnimatePresence mode="wait">
-                            {isProcessing ? (
-                              <motion.div key="processing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-                                <div style={{ width: '16px', height: '16px', border: '2px solid #000', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-                                <span>PROCESSING</span>
-                              </motion.div>
-                            ) : (
-                              <motion.span key="text" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>AUTHORIZE & PAY</motion.span>
-                            )}
-                          </AnimatePresence>
-                        </motion.button>
-                        <motion.button whileHover={!isProcessing ? { scale: 1.02 } : {}} whileTap={!isProcessing ? { scale: 0.98 } : {}} onClick={() => setStep(2)} className={styles.secondaryBtn} disabled={isProcessing}>BACK</motion.button>
-                      </div>
+                          <div style={{ display: 'flex', gap: '20px' }}>
+                            <motion.button 
+                              type="submit"
+                              whileHover={{ scale: 1.02 }} 
+                              whileTap={{ scale: 0.98 }} 
+                              className={styles.primaryBtn} 
+                              style={{ flex: 1, maxWidth: '300px' }}
+                            >
+                              SIMULATE PAYMENT
+                            </motion.button>
+                            <motion.button type="button" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => setStep(2)} className={styles.secondaryBtn}>BACK</motion.button>
+                          </div>
+                        </form>
+                      )}
                     </div>
                   )}
                 </motion.div>
