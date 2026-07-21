@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import CustomSelect from '../../components/ui/CustomSelect';
 import styles from './Account.module.css';
 
 const Addresses = () => {
@@ -202,11 +203,11 @@ const Addresses = () => {
               <form onSubmit={handleSubmit}>
                 <div className={styles.formGroup}>
                   <label className={styles.formLabel}>Address Type</label>
-                  <select name="title" value={formData.title} onChange={handleChange} className={styles.formInput} required>
+                  <CustomSelect name="title" value={formData.title} onChange={handleChange} className={styles.formInput} required>
                     <option value="HOME">HOME</option>
                     <option value="WORK">WORK</option>
                     <option value="OTHER">OTHER</option>
-                  </select>
+                  </CustomSelect>
                 </div>
                 
                 <div className={styles.formGrid}>
@@ -243,14 +244,14 @@ const Addresses = () => {
                   </div>
                   <div className={styles.formGroup}>
                     <label className={styles.formLabel}>Country</label>
-                    <select name="country" value={formData.country} onChange={handleChange} className={styles.formInput} required>
+                    <CustomSelect name="country" value={formData.country} onChange={handleChange} className={styles.formInput} required>
                       <option value="United States">United States</option>
                       <option value="United Kingdom">United Kingdom</option>
                       <option value="Canada">Canada</option>
                       <option value="Australia">Australia</option>
                       <option value="France">France</option>
                       <option value="Italy">Italy</option>
-                    </select>
+                    </CustomSelect>
                   </div>
                 </div>
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
+import CustomSelect from '../../components/ui/CustomSelect';
 import styles from './Account.module.css';
 
 const Profile = () => {
@@ -81,7 +82,7 @@ const Profile = () => {
       setTimeout(() => setSuccessMsg(''), 3000);
     } catch (err) {
       console.error('[Avatar Upload] Upload caught error:', err);
-      setError('Failed to upload photo. Ensure profile-images bucket exists and is public.');
+      setError(`Avatar upload failed: ${err.message || JSON.stringify(err)}`);
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -253,12 +254,12 @@ const Profile = () => {
             </div>
             <div className={styles.formGroup}>
               <label className={styles.formLabel}>Gender</label>
-              <select {...register('gender')} className={styles.formInput} disabled={!isEditing}>
+              <CustomSelect {...register('gender')} className={styles.formInput} disabled={!isEditing}>
                 <option value="">Prefer not to say</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
                 <option value="Other">Other</option>
-              </select>
+              </CustomSelect>
             </div>
           </div>
         </form>
@@ -271,19 +272,19 @@ const Profile = () => {
           <div className={styles.formGrid}>
             <div className={styles.formGroup}>
               <label className={styles.formLabel}>Language</label>
-              <select {...register('language')} className={styles.formInput} disabled={!isEditing}>
+              <CustomSelect {...register('language')} className={styles.formInput} disabled={!isEditing}>
                 <option value="en">English (US)</option>
                 <option value="fr">Français (FR)</option>
                 <option value="it">Italiano (IT)</option>
-              </select>
+              </CustomSelect>
             </div>
             <div className={styles.formGroup}>
               <label className={styles.formLabel}>Currency</label>
-              <select {...register('currency')} className={styles.formInput} disabled={!isEditing}>
+              <CustomSelect {...register('currency')} className={styles.formInput} disabled={!isEditing}>
                 <option value="USD">USD ($)</option>
                 <option value="EUR">EUR (€)</option>
                 <option value="GBP">GBP (£)</option>
-              </select>
+              </CustomSelect>
             </div>
           </div>
 

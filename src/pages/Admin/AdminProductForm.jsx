@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
+import CustomSelect from '../../components/ui/CustomSelect';
 import styles from '../Account/Account.module.css';
 
 const AdminProductForm = ({ onClose, onSuccess, product = null, categories = [] }) => {
@@ -64,12 +65,12 @@ const AdminProductForm = ({ onClose, onSuccess, product = null, categories = [] 
     const filePath = `${fileName}`;
 
     const { error: uploadError } = await supabase.storage
-      .from('products')
+      .from('product-images')
       .upload(filePath, imageFile);
 
     if (uploadError) throw uploadError;
 
-    const { data } = supabase.storage.from('products').getPublicUrl(filePath);
+    const { data } = supabase.storage.from('product-images').getPublicUrl(filePath);
     return data.publicUrl;
   };
 
@@ -151,11 +152,11 @@ const AdminProductForm = ({ onClose, onSuccess, product = null, categories = [] 
       }}
     >
       <motion.div 
-        initial={{ y: 50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: 20, opacity: 0 }}
+        initial={{ y: 50, opacity: 0, scale: 0.95 }}
+        animate={{ y: 0, opacity: 1, scale: 1 }}
+        exit={{ y: 20, opacity: 0, scale: 0.95 }}
         className={styles.card}
-        style={{ width: '100%', maxWidth: '800px', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}
+        style={{ width: '100%', maxWidth: '900px', maxHeight: '90vh', overflowY: 'auto', position: 'relative', padding: '40px' }}
       >
         <button 
           onClick={onClose}
@@ -164,7 +165,7 @@ const AdminProductForm = ({ onClose, onSuccess, product = null, categories = [] 
           &times;
         </button>
         
-        <h2 style={{ fontSize: '1.2rem', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 300, marginBottom: '30px' }}>
+        <h2 style={{ fontSize: '1.5rem', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 300, marginBottom: '40px', color: '#D4AF37' }}>
           {product ? 'Edit Product' : 'Create New Product'}
         </h2>
 
@@ -174,15 +175,19 @@ const AdminProductForm = ({ onClose, onSuccess, product = null, categories = [] 
           
           <div style={{ display: 'flex', gap: '20px' }}>
             {/* Image Upload Area */}
-            <div style={{ flex: '0 0 200px' }}>
-              <label style={{ display: 'block', fontSize: '0.75rem', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.5)', marginBottom: '10px' }}>PRODUCT IMAGE</label>
+            <div style={{ flex: '0 0 250px' }}>
+              <label style={{ display: 'block', fontSize: '0.75rem', letterSpacing: '0.15em', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', marginBottom: '15px' }}>Product Image</label>
               <div 
                 style={{ 
-                  width: '200px', height: '250px', 
-                  border: '1px dashed rgba(255,255,255,0.2)', 
+                  width: '250px', height: '320px', 
+                  border: '1px solid rgba(212, 175, 55, 0.3)', 
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  cursor: 'pointer', position: 'relative', overflow: 'hidden'
+                  cursor: 'pointer', position: 'relative', overflow: 'hidden',
+                  backgroundColor: 'rgba(0,0,0,0.4)',
+                  transition: 'all 0.3s ease'
                 }}
+                onMouseEnter={(e) => e.currentTarget.style.border = '1px solid #D4AF37'}
+                onMouseLeave={(e) => e.currentTarget.style.border = '1px solid rgba(212, 175, 55, 0.3)'}
                 onClick={() => document.getElementById('imageUpload').click()}
               >
                 {imagePreview ? (
@@ -213,10 +218,10 @@ const AdminProductForm = ({ onClose, onSuccess, product = null, categories = [] 
                 </div>
                 <div style={{ flex: 1 }}>
                   <label className={styles.inputLabel}>Category</label>
-                  <select name="category_id" className={styles.inputField} value={formData.category_id} onChange={handleInputChange} required>
+                  <CustomSelect name="category_id" className={styles.inputField} value={formData.category_id} onChange={handleInputChange} required>
                     <option value="">Select Category</option>
                     {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </select>
+                  </CustomSelect>
                 </div>
               </div>
               <div>
@@ -246,13 +251,24 @@ const AdminProductForm = ({ onClose, onSuccess, product = null, categories = [] 
               <button type="button" onClick={addVariant} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '5px 10px', fontSize: '0.75rem', cursor: 'pointer' }}>+ ADD VARIANT</button>
             </div>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               {variants.map((v, index) => (
-                <div key={index} style={{ display: 'flex', gap: '10px', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                  <input type="text" placeholder="Size (e.g. M)" value={v.size} onChange={(e) => handleVariantChange(index, 'size', e.target.value)} className={styles.inputField} style={{ padding: '8px' }} required />
-                  <input type="text" placeholder="Color (e.g. Black)" value={v.color} onChange={(e) => handleVariantChange(index, 'color', e.target.value)} className={styles.inputField} style={{ padding: '8px' }} required />
-                  <input type="number" placeholder="Stock" value={v.stock} onChange={(e) => handleVariantChange(index, 'stock', e.target.value)} className={styles.inputField} style={{ padding: '8px', width: '100px' }} required />
-                  <button type="button" onClick={() => removeVariant(index)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '5px' }}>&times;</button>
+                <div key={index} style={{ display: 'flex', gap: '15px', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '15px', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px' }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em', display: 'block', marginBottom: '5px' }}>Size</label>
+                    <input type="text" placeholder="e.g. M, L, OS" value={v.size} onChange={(e) => handleVariantChange(index, 'size', e.target.value)} className={styles.inputField} style={{ padding: '10px' }} required />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em', display: 'block', marginBottom: '5px' }}>Color</label>
+                    <input type="text" placeholder="e.g. Black" value={v.color} onChange={(e) => handleVariantChange(index, 'color', e.target.value)} className={styles.inputField} style={{ padding: '10px' }} required />
+                  </div>
+                  <div style={{ flex: '0 0 100px' }}>
+                    <label style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em', display: 'block', marginBottom: '5px' }}>Stock</label>
+                    <input type="number" placeholder="0" value={v.stock} onChange={(e) => handleVariantChange(index, 'stock', e.target.value)} className={styles.inputField} style={{ padding: '10px', width: '100%' }} required />
+                  </div>
+                  <button type="button" onClick={() => removeVariant(index)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '10px', marginTop: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontSize: '1.2rem' }}>&times;</span>
+                  </button>
                 </div>
               ))}
             </div>

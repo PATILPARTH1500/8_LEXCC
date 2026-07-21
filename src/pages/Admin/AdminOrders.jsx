@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
+import CustomSelect from '../../components/ui/CustomSelect';
 import styles from '../Account/Account.module.css';
 
 const AdminOrders = () => {
@@ -143,27 +144,17 @@ const AdminOrders = () => {
                         ${order.total_amount?.toFixed(2)}
                       </td>
                       <td style={{ padding: '20px 30px' }}>
-                        <select 
+                        <CustomSelect 
                           value={order.status}
                           onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                          style={{
-                            background: 'rgba(255,255,255,0.05)',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            color: order.status === 'delivered' ? '#22c55e' : (order.status === 'cancelled' ? '#ef4444' : '#fff'),
-                            padding: '6px 12px',
-                            borderRadius: '4px',
-                            fontSize: '0.75rem',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.05em',
-                            cursor: 'pointer'
-                          }}
+                          className={styles.inputField}
                         >
-                          <option value="pending" style={{ color: '#000' }}>Pending</option>
-                          <option value="processing" style={{ color: '#000' }}>Processing</option>
-                          <option value="shipped" style={{ color: '#000' }}>Shipped</option>
-                          <option value="delivered" style={{ color: '#000' }}>Delivered</option>
-                          <option value="cancelled" style={{ color: '#000' }}>Cancelled</option>
-                        </select>
+                          <option value="pending">Pending</option>
+                          <option value="processing">Processing</option>
+                          <option value="shipped">Shipped</option>
+                          <option value="delivered">Delivered</option>
+                          <option value="cancelled">Cancelled</option>
+                        </CustomSelect>
                       </td>
                       <td style={{ padding: '20px 30px', textAlign: 'right' }}>
                         <button style={{ background: 'transparent', border: 'none', color: 'var(--accent-color, #D4AF37)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer' }}>

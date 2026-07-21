@@ -29,3 +29,8 @@ dist-ssr
 .env.development.local
 .env.test.local
 .env.production.local
+# Keep the example template committed
+!.env.example
+
+# Debug/audit scripts (may contain credentials when run locally)
+test_supabase.js

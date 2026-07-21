@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import FilterSidebar from '../../components/shop/FilterSidebar';
 import ProductCard from '../../components/shop/ProductCard';
 import { supabase } from '../../lib/supabase';
+import CustomSelect from '../../components/ui/CustomSelect';
 import styles from './Shop.module.css';
 import accountStyles from '../Account/Account.module.css';
 
@@ -188,16 +189,17 @@ const Collections = () => {
             <span style={{ fontSize: '0.8rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)' }}>
               {products.length} {products.length === 1 ? 'Product' : 'Products'}
             </span>
-            <select 
+            <CustomSelect 
               value={sortParam}
               onChange={(e) => setSortParam(e.target.value)}
-              style={{ background: 'transparent', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', padding: '12px 20px', outline: 'none', fontSize: '0.8rem', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer' }}
+              className={styles.sortSelect}
+              style={{ width: '220px' }}
             >
-              <option value="featured" style={{ background: '#000' }}>Featured</option>
-              <option value="newest" style={{ background: '#000' }}>Newest</option>
-              <option value="price-asc" style={{ background: '#000' }}>Price: Low to High</option>
-              <option value="price-desc" style={{ background: '#000' }}>Price: High to Low</option>
-            </select>
+              <option value="featured">Featured</option>
+              <option value="newest">Newest</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+            </CustomSelect>
           </motion.div>
         </div>
 

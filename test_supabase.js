@@ -1,12 +1,19 @@
 import WebSocket from 'ws';
 global.WebSocket = WebSocket;
 import { createClient } from '@supabase/supabase-js';
-const url = 'https://wptcntssrgsjrliwlprw.supabase.co';
-const key = 'sb_publishable_NP7PENEHcnJZKJZgrTxcsw_aDUhGhbO';
+
+// Load credentials from environment variables — never hardcode secrets.
+// Run with: SUPABASE_URL=<url> SUPABASE_ANON_KEY=<key> node test_supabase.js
+const url = process.env.SUPABASE_URL;
+const key = process.env.SUPABASE_ANON_KEY;
+
+if (!url || !key) {
+  console.error('ERROR: SUPABASE_URL and SUPABASE_ANON_KEY must be set as environment variables.');
+  process.exit(1);
+}
 
 console.log('STEP 1 — VERIFY ACTIVE SUPABASE PROJECT');
 console.log('URL:', url);
-console.log('Matches Expected:', url === 'https://wptcntssrgsjrliwlprw.supabase.co');
 
 const supabase = createClient(url, key);
 

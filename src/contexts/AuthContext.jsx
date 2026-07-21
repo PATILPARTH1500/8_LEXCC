@@ -166,19 +166,32 @@ export const AuthProvider = ({ children }) => {
     if (!user) throw new Error('No active user');
     
     const fileExt = file.name.split('.').pop();
-    const fileName = `${user.id}-${Math.random()}.${fileExt}`;
-    const filePath = `${fileName}`;
+    const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+    // Path must be {userId}/{fileName} so storage.foldername(name)[1] = auth.uid()
+    // which is required by the avatars bucket INSERT RLS policy.
+    const filePath = `${user.id}/${fileName}`;
+
+    console.log(`[Avatar Upload] Using bucket: avatars, path: ${filePath}`);
 
     // Upload image
     const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('profile-images')
+      .from('avatars')
       .upload(filePath, file);
 
-    if (uploadError) throw uploadError;
+    if (uploadError) {
+      console.log('UPLOAD ERROR', uploadError);
+      throw {
+        message: uploadError.message,
+        statusCode: uploadError.statusCode || 'N/A',
+        error: uploadError.error || 'N/A',
+        name: uploadError.name,
+        original: uploadError
+      };
+    }
 
     // Get public URL
     const { data: publicUrlData } = supabase.storage
-      .from('profile-images')
+      .from('avatars')
       .getPublicUrl(filePath);
 
     // Update profile

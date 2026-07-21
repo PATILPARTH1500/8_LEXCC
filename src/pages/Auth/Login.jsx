@@ -98,7 +98,7 @@ const Login = () => {
 
           <div style={{ marginTop: '10px' }}>
             <Turnstile 
-              siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
+              siteKey={import.meta.env.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY}
               onSuccess={(token) => setTurnstileToken(token)}
               onError={() => setGlobalError('Security check failed.')}
               onExpire={() => setTurnstileToken('')}

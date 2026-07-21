@@ -12,8 +12,8 @@ import StripePaymentForm from '../../components/shop/StripePaymentForm';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop';
 
-// Initialize Stripe (use import.meta.env for the real key in production)
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || 'pk_test_placeholder');
+// Initialize Stripe — VITE_STRIPE_PUBLIC_KEY must be set in your .env file.
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 const Checkout = () => {
   const { cartItems, cartTotal, clearCart } = useCart();
