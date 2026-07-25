@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import CustomSelect from '../../components/ui/CustomSelect';
 import ShipmentTrackingModal from '../../components/admin/ShipmentTrackingModal';
 import styles from '../Account/Account.module.css';
+import { formatINR } from '../../utils/currency';
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -188,7 +189,7 @@ const AdminOrders = () => {
                         <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem' }}>{order.profiles?.email}</p>
                       </td>
                       <td style={{ padding: '20px 30px', color: '#fff', fontSize: '0.85rem' }}>
-                        ${order.total_amount?.toFixed(2)}
+                        {formatINR(order.total_amount)}
                       </td>
                       <td style={{ padding: '20px 30px' }}>
                         <CustomSelect 

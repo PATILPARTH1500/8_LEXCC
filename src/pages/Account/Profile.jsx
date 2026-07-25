@@ -22,7 +22,7 @@ const Profile = () => {
       dob: profile?.dob || '',
       gender: profile?.gender || '',
       language: profile?.language || 'en',
-      currency: profile?.currency || 'USD'
+      currency: profile?.currency || 'INR'
     }
   });
 
@@ -35,7 +35,7 @@ const Profile = () => {
         dob: profile.dob || '',
         gender: profile.gender || '',
         language: profile.language || 'en',
-        currency: profile.currency || 'USD'
+        currency: profile.currency || 'INR'
       });
     }
   }, [profile, reset]);
@@ -281,6 +281,7 @@ const Profile = () => {
             <div className={styles.formGroup}>
               <label className={styles.formLabel}>Currency</label>
               <CustomSelect {...register('currency')} className={styles.formInput} disabled={!isEditing}>
+                <option value="INR">INR (₹)</option>
                 <option value="USD">USD ($)</option>
                 <option value="EUR">EUR (€)</option>
                 <option value="GBP">GBP (£)</option>

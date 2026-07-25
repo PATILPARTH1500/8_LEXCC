@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCart } from '../../contexts/CartContext';
 import styles from '../../pages/Public/Shop.module.css';
+import { formatINR } from '../../utils/currency';
 
 const ProductCard = ({ product }) => {
   const { user, wishlistItems, addToWishlist, removeFromWishlist } = useAuth();
@@ -78,7 +79,7 @@ const ProductCard = ({ product }) => {
         <div className={styles.productInfo}>
           <div>
             <h3 className={styles.productName}>{product.name}</h3>
-            <p className={styles.productPrice}>${product.price.toFixed(2)}</p>
+            <p className={styles.productPrice}>{formatINR(product.price)}</p>
           </div>
         </div>
       </Link>

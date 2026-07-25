@@ -5,6 +5,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { supabase } from '../lib/supabase';
 import styles from './Home.module.css';
+import { formatINR } from '../utils/currency';
 
 // React Bits Components
 import CurvedLoop from '../components/animations/CurvedLoop';
@@ -775,7 +776,7 @@ const Home = () => {
                     />
                   </div>
                   <h3 className={styles.wantedCardTitle}>{product.name}</h3>
-                  <p className={styles.wantedCardPrice}>${parseFloat(product.price).toFixed(2)}</p>
+                  <p className={styles.wantedCardPrice}>{formatINR(product.price)}</p>
                 </Link>
               </motion.div>
             ))}

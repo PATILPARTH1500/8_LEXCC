@@ -7,6 +7,7 @@ import { useCart } from '../../contexts/CartContext';
 import styles from './Shop.module.css';
 import accountStyles from '../Account/Account.module.css';
 import ProductCard from '../../components/shop/ProductCard';
+import { formatINR } from '../../utils/currency';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop';
 
@@ -236,7 +237,7 @@ const ProductDetail = () => {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
                 <h1 style={{ fontSize: '2.8rem', letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'var(--font-heading)', fontWeight: 300, color: '#fff', lineHeight: 1.1 }}>{product.name}</h1>
               </div>
-              <p style={{ fontSize: '1.6rem', color: 'var(--accent-color, #D4AF37)', letterSpacing: '0.05em', marginBottom: '35px', fontWeight: 300, fontFamily: 'var(--font-heading)' }}>${product.price.toFixed(2)}</p>
+              <p style={{ fontSize: '1.6rem', color: 'var(--accent-color, #D4AF37)', letterSpacing: '0.05em', marginBottom: '35px', fontWeight: 300, fontFamily: 'var(--font-heading)' }}>{formatINR(product.price)}</p>
               
               <div style={{ height: '1px', width: '100%', background: 'linear-gradient(90deg, rgba(255,255,255,0.1), transparent)', marginBottom: '35px' }} />
               

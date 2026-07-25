@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../contexts/CartContext';
+import { formatINR } from '../../utils/currency';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop';
 
@@ -101,7 +102,7 @@ const CartDrawer = () => {
                         <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                             <h4 style={{ fontSize: '0.9rem', letterSpacing: '0.1em', lineHeight: '1.4', paddingRight: '15px', fontWeight: 400 }}>{item.product.name}</h4>
-                            <span style={{ fontSize: '1rem', fontWeight: 300 }}>${item.product.price.toFixed(2)}</span>
+                            <span style={{ fontSize: '1rem', fontWeight: 300 }}>{formatINR(item.product.price)}</span>
                           </div>
                           {item.variant?.size && <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', marginTop: '8px', letterSpacing: '0.05em' }}>Size: {item.variant.size}</p>}
                           
@@ -129,7 +130,7 @@ const CartDrawer = () => {
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '25px', fontSize: '1.2rem', letterSpacing: '0.1em' }}>
                   <span style={{ fontWeight: 400 }}>Subtotal</span>
-                  <span style={{ fontWeight: 300 }}>${cartTotal.toFixed(2)}</span>
+                  <span style={{ fontWeight: 300 }}>{formatINR(cartTotal)}</span>
                 </div>
                 <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', marginBottom: '25px', textAlign: 'center', letterSpacing: '0.05em' }}>Shipping & taxes calculated at checkout</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>

@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import styles from '../../pages/Public/Shop.module.css';
 
 import { supabase } from '../../lib/supabase';
+import { formatINR } from '../../utils/currency';
 
 const SearchOverlay = ({ isOpen, onClose }) => {
   const [query, setQuery] = useState('');
@@ -87,7 +88,7 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                       <img src={product.image_url} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     </div>
                     <h3 style={{ fontSize: '0.75rem', letterSpacing: '0.05em', marginBottom: '5px' }}>{product.name}</h3>
-                    <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}>${product.price.toFixed(2)}</p>
+                    <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}>{formatINR(product.price)}</p>
                   </Link>
                 ))}
               </div>

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './Account.module.css';
+import { formatINR } from '../../utils/currency';
 
 const Orders = () => {
   const { user } = useAuth();
@@ -87,7 +88,7 @@ const Orders = () => {
                   <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.05em' }}>Placed on {new Date(order.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <p style={{ fontSize: '1.4rem', fontWeight: 300, marginBottom: '10px' }}>${order.total_amount.toFixed(2)}</p>
+                  <p style={{ fontSize: '1.4rem', fontWeight: 300, marginBottom: '10px' }}>{formatINR(order.total_amount)}</p>
                   <span className={`${styles.badge} ${order.status === 'delivered' ? styles.badgeSuccess : styles.badgeWarning}`} style={{ display: 'inline-block' }}>
                     {order.status}
                   </span>
@@ -130,7 +131,7 @@ const Orders = () => {
                     </div>
                     <div>
                       <h4 style={{ fontSize: '0.95rem', letterSpacing: '0.1em', marginBottom: '8px', fontWeight: 400 }}>{item.product?.name}</h4>
-                      <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.05em' }}>Qty: {item.quantity} × ${item.price_at_time.toFixed(2)}</p>
+                      <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.05em' }}>Qty: {item.quantity} × {formatINR(item.price_at_time)}</p>
                     </div>
                   </div>
                 ))}

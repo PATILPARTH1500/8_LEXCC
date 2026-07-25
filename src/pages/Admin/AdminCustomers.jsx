@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
 import styles from '../Account/Account.module.css';
+import { formatINR } from '../../utils/currency';
 
 const AdminCustomers = () => {
   const [customers, setCustomers] = useState([]);
@@ -131,7 +132,7 @@ const AdminCustomers = () => {
                         {customer.total_orders}
                       </td>
                       <td style={{ padding: '20px 30px', color: 'var(--accent-color, #D4AF37)', fontSize: '0.85rem' }}>
-                        ${customer.lifetime_spend.toFixed(2)}
+                        {formatINR(customer.lifetime_spend)}
                       </td>
                       <td style={{ padding: '20px 30px', textAlign: 'right' }}>
                         <button style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer', opacity: 0.7, transition: 'opacity 0.2s', ':hover': { opacity: 1 } }}>

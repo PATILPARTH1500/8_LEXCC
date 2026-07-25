@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
 import styles from '../Account/Account.module.css';
+import { formatINR } from '../../utils/currency';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -90,7 +91,7 @@ const AdminDashboard = () => {
         {/* Revenue */}
         <motion.div variants={itemVariants} className={styles.card} style={{ padding: '30px', margin: 0 }}>
           <h3 style={{ fontSize: '0.75rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', marginBottom: '15px' }}>Total Revenue</h3>
-          <p style={{ fontSize: '2.5rem', color: '#fff', fontWeight: 300, letterSpacing: '0.05em' }}>${stats.totalRevenue.toFixed(2)}</p>
+          <p style={{ fontSize: '2.5rem', color: '#fff', fontWeight: 300, letterSpacing: '0.05em' }}>{formatINR(stats.totalRevenue)}</p>
         </motion.div>
 
         {/* Orders */}
@@ -124,7 +125,7 @@ const AdminDashboard = () => {
                     <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}>{new Date(order.created_at).toLocaleDateString()}</p>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <p style={{ fontSize: '0.85rem', color: 'var(--accent-color, #D4AF37)' }}>${order.total_amount?.toFixed(2)}</p>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--accent-color, #D4AF37)' }}>{formatINR(order.total_amount)}</p>
                     <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>{order.status}</p>
                   </div>
                 </div>
@@ -154,7 +155,7 @@ const AdminDashboard = () => {
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', letterSpacing: '0.05em' }}>Payment Gateway</span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.75rem', color: '#ef4444', textTransform: 'uppercase', letterSpacing: '0.1em' }}><div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ef4444' }}/> Simulated</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.75rem', color: '#22c55e', textTransform: 'uppercase', letterSpacing: '0.1em' }}><div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e' }}/> Connected</span>
             </div>
           </div>
         </motion.div>

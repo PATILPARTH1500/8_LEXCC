@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
 import styles from '../Account/Account.module.css';
 import AdminProductForm from './AdminProductForm';
+import { formatINR } from '../../utils/currency';
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
@@ -155,7 +156,7 @@ const AdminProducts = () => {
                           {product.categories?.name || 'Uncategorized'}
                         </td>
                         <td style={{ padding: '20px 30px', color: '#fff', fontSize: '0.85rem' }}>
-                          ${product.price.toFixed(2)}
+                          {formatINR(product.price)}
                         </td>
                         <td style={{ padding: '20px 30px' }}>
                           <span style={{ 

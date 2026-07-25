@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCart } from '../../contexts/CartContext';
 import styles from './Account.module.css';
+import { formatINR } from '../../utils/currency';
 
 const Wishlist = () => {
   const { wishlistItems, removeFromWishlist } = useAuth();
@@ -83,7 +84,7 @@ const Wishlist = () => {
                   <div className={styles.productInfo}>
                     <div>
                       <h3 className={styles.productName}>{product.name}</h3>
-                      <p className={styles.productPrice}>${product.price.toFixed(2)}</p>
+                      <p className={styles.productPrice}>{formatINR(product.price)}</p>
                     </div>
                     <div className={styles.productActions}>
                       <button onClick={() => handleMoveToCart(item, product)} disabled={isRemoving === item.id} className={styles.actionBtn} style={{ padding: '12px', fontSize: '0.75rem', flex: 1 }}>Move To Cart</button>

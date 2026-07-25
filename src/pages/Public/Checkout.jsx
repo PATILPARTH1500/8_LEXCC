@@ -7,6 +7,7 @@ import { supabase } from '../../lib/supabase';
 import styles from './Shop.module.css';
 import accountStyles from '../Account/Account.module.css';
 import { initiatePayment } from '../../services/PaymentProvider';
+import { formatINR } from '../../utils/currency';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop';
 
@@ -357,7 +358,7 @@ const Checkout = () => {
                         <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}>Qty: {item.quantity}</p>
                       </div>
                       <div style={{ fontSize: '0.9rem', fontWeight: 300, color: '#fff' }}>
-                        ${(item.product.price * item.quantity).toFixed(2)}
+                        {formatINR(item.product.price * item.quantity)}
                       </div>
                     </div>
                   ))}
@@ -366,7 +367,7 @@ const Checkout = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', letterSpacing: '0.05em' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>Subtotal</span>
-                    <span style={{ color: '#fff' }}>${cartTotal.toFixed(2)}</span>
+                    <span style={{ color: '#fff' }}>{formatINR(cartTotal)}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>Shipping</span>
@@ -374,11 +375,11 @@ const Checkout = () => {
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>Estimated Tax</span>
-                    <span style={{ color: '#fff' }}>$0.00</span>
+                    <span style={{ color: '#fff' }}>{formatINR(0)}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '25px', marginTop: '10px', color: '#fff', fontSize: '1.2rem', fontWeight: 300, letterSpacing: '0.1em' }}>
                     <span>Total</span>
-                    <span>${cartTotal.toFixed(2)}</span>
+                    <span>{formatINR(cartTotal)}</span>
                   </div>
                 </div>
               </div>

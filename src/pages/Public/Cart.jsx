@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../contexts/CartContext';
 import styles from './Shop.module.css';
 import accountStyles from '../Account/Account.module.css';
+import { formatINR } from '../../utils/currency';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop';
 
@@ -94,7 +95,7 @@ const Cart = () => {
                     </Link>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       <Link to={`/product/${item.product.slug}`} style={{ color: '#fff', textDecoration: 'none', fontSize: '1.1rem', letterSpacing: '0.1em', fontWeight: 400, textTransform: 'uppercase' }}>{item.product.name}</Link>
-                      <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem', letterSpacing: '0.05em' }}>${item.product.price.toFixed(2)}</p>
+                      <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem', letterSpacing: '0.05em' }}>{formatINR(item.product.price)}</p>
                       {item.variant?.size && <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', letterSpacing: '0.05em' }}>Size: {item.variant.size}</p>}
                       <button 
                         onClick={() => removeFromCart(item.id)} 
@@ -116,7 +117,7 @@ const Cart = () => {
                   </div>
                   
                   <div style={{ flex: 1, textAlign: 'right', fontSize: '1.1rem', fontWeight: 300, letterSpacing: '0.05em' }}>
-                    ${(item.product.price * item.quantity).toFixed(2)}
+                    {formatINR(item.product.price * item.quantity)}
                   </div>
                 </motion.div>
               ))}
@@ -130,7 +131,7 @@ const Cart = () => {
               
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', letterSpacing: '0.05em' }}>
                 <span>Subtotal</span>
-                <span style={{ color: '#fff' }}>${cartTotal.toFixed(2)}</span>
+                <span style={{ color: '#fff' }}>{formatINR(cartTotal)}</span>
               </div>
               
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', letterSpacing: '0.05em' }}>
@@ -140,7 +141,7 @@ const Cart = () => {
               
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '40px', fontSize: '1.2rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '25px', fontWeight: 300, letterSpacing: '0.1em' }}>
                 <span>Total</span>
-                <span>${cartTotal.toFixed(2)}</span>
+                <span>{formatINR(cartTotal)}</span>
               </div>
               
               <motion.button 
