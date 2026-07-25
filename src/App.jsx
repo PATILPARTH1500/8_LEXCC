@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import CustomCursor from './components/animations/CustomCursor';
 import GrainOverlay from './components/animations/GrainOverlay';
 import CartDrawer from './components/shop/CartDrawer';
+import WhatsAppConcierge from './components/ui/WhatsAppConcierge';
 
 // Auth & Protected Routes
 import Login from './pages/Auth/Login';
@@ -39,6 +40,7 @@ function App() {
   return (
     <>
       <GrainOverlay />
+      <WhatsAppConcierge />
       <BrowserRouter>
         <CartDrawer />
         <Routes>

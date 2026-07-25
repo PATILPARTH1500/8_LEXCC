@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
 import CustomSelect from '../../components/ui/CustomSelect';
+import ShipmentTrackingModal from '../../components/admin/ShipmentTrackingModal';
 import styles from '../Account/Account.module.css';
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchOrders();
@@ -68,6 +71,50 @@ const AdminOrders = () => {
     } catch (err) {
       console.error('Failed to update order status', err);
       fetchOrders(); // Re-fetch to correct UI
+    }
+  };
+
+  const handleSaveShipment = async (id, carrier, trackingNumber) => {
+    try {
+      const updates = { carrier, tracking_number: trackingNumber };
+      const { error } = await supabase.from('orders').update(updates).eq('id', id);
+      if (error) throw error;
+      setOrders(prev => prev.map(o => o.id === id ? { ...o, ...updates } : o));
+      setIsModalOpen(false);
+    } catch (err) {
+      console.error('Failed to save shipment', err);
+      setError('Failed to save shipment details.');
+    }
+  };
+
+  const handleMarkShipped = async (id, carrier, trackingNumber) => {
+    try {
+      const now = new Date().toISOString();
+      const updates = { status: 'shipped', carrier, tracking_number: trackingNumber, shipped_at: now };
+      
+      const { error } = await supabase.from('orders').update(updates).eq('id', id);
+      if (error) throw error;
+      
+      // Attempt to invoke edge function (fail silently for UI but log it)
+      const order = orders.find(o => o.id === id);
+      if (order && order.profiles?.email) {
+        supabase.functions.invoke('send-transactional-email', {
+          body: {
+            type: 'order_shipped',
+            order: order.order_number,
+            customerName: order.profiles.first_name || 'Customer',
+            email: order.profiles.email,
+            trackingNumber,
+            carrier
+          }
+        }).catch(e => console.error('Edge function error:', e));
+      }
+
+      setOrders(prev => prev.map(o => o.id === id ? { ...o, ...updates } : o));
+      setIsModalOpen(false);
+    } catch (err) {
+      console.error('Failed to mark as shipped', err);
+      setError('Failed to mark as shipped.');
     }
   };
 
@@ -157,7 +204,10 @@ const AdminOrders = () => {
                         </CustomSelect>
                       </td>
                       <td style={{ padding: '20px 30px', textAlign: 'right' }}>
-                        <button style={{ background: 'transparent', border: 'none', color: 'var(--accent-color, #D4AF37)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer' }}>
+                        <button 
+                          onClick={() => { setSelectedOrder(order); setIsModalOpen(true); }}
+                          style={{ background: 'transparent', border: 'none', color: 'var(--accent-color, #D4AF37)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer' }}
+                        >
                           View
                         </button>
                       </td>
@@ -169,6 +219,14 @@ const AdminOrders = () => {
           </table>
         </div>
       </motion.div>
+
+      <ShipmentTrackingModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        order={selectedOrder}
+        onSave={handleSaveShipment}
+        onMarkShipped={handleMarkShipped}
+      />
     </motion.div>
   );
 };

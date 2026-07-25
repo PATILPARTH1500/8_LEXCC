@@ -94,6 +94,30 @@ const Orders = () => {
                 </div>
               </div>
 
+              {(order.tracking_number || order.carrier) && (
+                <div style={{ background: '#0F0F0F', padding: '20px', marginBottom: '30px', borderLeft: '2px solid #D4AF37', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <h4 style={{ fontSize: '0.85rem', color: '#D4AF37', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '5px' }}>Shipment Details</h4>
+                    <p style={{ fontSize: '0.9rem', color: '#fff' }}>
+                      Carrier: <span style={{ color: 'rgba(255,255,255,0.7)' }}>{order.carrier || 'N/A'}</span>
+                    </p>
+                    <p style={{ fontSize: '0.9rem', color: '#fff' }}>
+                      Tracking ID: <span style={{ color: 'rgba(255,255,255,0.7)' }}>{order.tracking_number || 'N/A'}</span>
+                    </p>
+                  </div>
+                  {order.tracking_number && (
+                    <a 
+                      href={order.carrier?.toLowerCase().includes('blue dart') || order.carrier?.toLowerCase().includes('bluedart') ? `https://www.bluedart.com/tracking?track=${order.tracking_number}` : `https://www.google.com/search?q=${order.tracking_number}+tracking`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ padding: '10px 20px', background: '#D4AF37', color: '#000', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600, textDecoration: 'none' }}
+                    >
+                      Track Package
+                    </a>
+                  )}
+                </div>
+              )}
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 {order.items?.map((item, idx) => (
                   <div key={idx} style={{ display: 'flex', gap: '25px', alignItems: 'center' }}>
