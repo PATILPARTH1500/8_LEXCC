@@ -166,7 +166,7 @@ const Checkout = () => {
               </motion.div>
 
               <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
-                <Link to="/collections" className={styles.primaryBtn} style={{ textDecoration: 'none' }}>CONTINUE SHOPPING</Link>
+                <Link to="/shop" className={styles.primaryBtn} style={{ textDecoration: 'none' }}>CONTINUE SHOPPING</Link>
                 {user && <Link to="/account/orders" className={styles.wishlistBtn} style={{ textDecoration: 'none' }}>VIEW ORDERS</Link>}
               </div>
             </motion.div>

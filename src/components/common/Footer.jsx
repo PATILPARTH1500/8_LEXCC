@@ -14,9 +14,9 @@ const Footer = () => {
               Own The Streets. Define The Standard. Premium streetwear crafted for those who dictate the culture.
             </p>
             <div className={styles.socials}>
-              <a href="#" className={styles.socialIcon}><FiInstagram size={20} /></a>
-              <a href="#" className={styles.socialIcon}><FiTwitter size={20} /></a>
-              <a href="#" className={styles.socialIcon}><FiFacebook size={20} /></a>
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className={styles.socialIcon}><FiInstagram size={20} /></a>
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className={styles.socialIcon}><FiTwitter size={20} /></a>
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className={styles.socialIcon}><FiFacebook size={20} /></a>
             </div>
           </div>
           
@@ -34,10 +34,10 @@ const Footer = () => {
           <div>
             <h3 className={styles.colTitle}>Support</h3>
             <ul className={styles.linkList}>
-              <li><Link to="/faq" className={styles.link}>FAQ</Link></li>
-              <li><Link to="/shipping" className={styles.link}>Shipping & Returns</Link></li>
-              <li><Link to="/track-order" className={styles.link}>Track Order</Link></li>
-              <li><Link to="/contact" className={styles.link}>Contact Us</Link></li>
+              <li><Link to="/shop" className={styles.link}>FAQ</Link></li>
+              <li><Link to="/shop" className={styles.link}>Shipping & Returns</Link></li>
+              <li><Link to="/account/orders" className={styles.link}>Track Order</Link></li>
+              <li><Link to="/shop" className={styles.link}>Contact Us</Link></li>
             </ul>
           </div>
 
@@ -62,8 +62,8 @@ const Footer = () => {
             &copy; {new Date().getFullYear()} LEXCC. All rights reserved.
           </p>
           <div className={styles.legalLinks}>
-            <Link to="/privacy">Privacy Policy</Link>
-            <Link to="/terms">Terms of Service</Link>
+            <Link to="/shop">Privacy Policy</Link>
+            <Link to="/shop">Terms of Service</Link>
           </div>
         </div>
       </div>

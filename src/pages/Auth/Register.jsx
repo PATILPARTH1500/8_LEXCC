@@ -47,6 +47,13 @@ const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [turnstileToken, setTurnstileToken] = useState('');
+  const turnstileKey = import.meta.env.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY;
+
+  React.useEffect(() => {
+    if (!turnstileKey) {
+      setTurnstileToken('dummy_token_dev');
+    }
+  }, [turnstileKey]);
 
   const { register, handleSubmit, formState: { errors }, watch } = useForm({
     resolver: zodResolver(registerSchema),
@@ -212,13 +219,15 @@ const Register = () => {
           </div>
 
           <div style={{ marginTop: '10px' }}>
-            <Turnstile 
-              siteKey={import.meta.env.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY}
-              onSuccess={(token) => setTurnstileToken(token)}
-              onError={() => setGlobalError('Security check failed. Please try again.')}
-              onExpire={() => setTurnstileToken('')}
-              options={{ theme: 'dark' }}
-            />
+            {turnstileKey && (
+              <Turnstile 
+                siteKey={turnstileKey}
+                onSuccess={(token) => setTurnstileToken(token)}
+                onError={() => setGlobalError('Security check failed. Please try again.')}
+                onExpire={() => setTurnstileToken('')}
+                options={{ theme: 'dark' }}
+              />
+            )}
           </div>
 
           <button type="submit" className={styles.submitBtn} disabled={isLoading}>

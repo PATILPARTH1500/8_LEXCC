@@ -47,10 +47,10 @@ const Header = () => {
 
         {/* Navigation - Desktop */}
         <nav className={styles.nav}>
-          <Link to="/collections?filter=new" className={styles.navLink}>New Arrivals</Link>
-          <Link to="/collections?category=men" className={styles.navLink}>Men</Link>
-          <Link to="/collections?category=footwear" className={styles.navLink}>Footwear</Link>
-          <Link to="/collections" className={styles.navLink}>Collections</Link>
+          <Link to="/shop?filter=new" className={styles.navLink}>New Arrivals</Link>
+          <Link to="/shop?category=men" className={styles.navLink}>Men</Link>
+          <Link to="/shop?category=footwear" className={styles.navLink}>Footwear</Link>
+          <Link to="/shop" className={styles.navLink}>Collections</Link>
         </nav>
 
         {/* Logo */}
@@ -111,7 +111,7 @@ const Header = () => {
             className={`${styles.mobileMenu} will-change-both`}
           >
             <Link to="/shop" className={styles.mobileMenuLink}>Shop All</Link>
-            <Link to="/collections" className={styles.mobileMenuLink}>Collections</Link>
+            <Link to="/shop" className={styles.mobileMenuLink}>Collections</Link>
           </motion.div>
         )}
       </AnimatePresence>

@@ -20,6 +20,13 @@ const Login = () => {
   const [globalError, setGlobalError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState('');
+  const turnstileKey = import.meta.env.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY;
+
+  useEffect(() => {
+    if (!turnstileKey) {
+      setTurnstileToken('dummy_token_dev');
+    }
+  }, [turnstileKey]);
 
   const from = location.state?.from?.pathname || '/account';
 
@@ -97,13 +104,15 @@ const Login = () => {
           </div>
 
           <div style={{ marginTop: '10px' }}>
-            <Turnstile 
-              siteKey={import.meta.env.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY}
-              onSuccess={(token) => setTurnstileToken(token)}
-              onError={() => setGlobalError('Security check failed.')}
-              onExpire={() => setTurnstileToken('')}
-              options={{ theme: 'dark' }}
-            />
+            {turnstileKey && (
+              <Turnstile 
+                siteKey={turnstileKey}
+                onSuccess={(token) => setTurnstileToken(token)}
+                onError={() => setGlobalError('Security check failed.')}
+                onExpire={() => setTurnstileToken('')}
+                options={{ theme: 'dark' }}
+              />
+            )}
           </div>
 
           <button type="submit" className={styles.submitBtn} disabled={isLoading}>

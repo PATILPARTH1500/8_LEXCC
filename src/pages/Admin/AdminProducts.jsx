@@ -141,24 +141,24 @@ const AdminProducts = () => {
                         exit={{ opacity: 0 }}
                         style={{ borderBottom: '1px solid rgba(255,255,255,0.02)', transition: 'background 0.2s', ':hover': { background: 'rgba(255,255,255,0.02)' } }}
                       >
-                        <td style={{ padding: '20px 30px' }}>
+                        <td style={{ padding: '20px 30px' }} data-label="Product">
                           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                             <div style={{ width: '40px', height: '40px', background: '#111', borderRadius: '4px', overflow: 'hidden' }}>
                               <img src={product.image_url || 'https://via.placeholder.com/40'} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             </div>
-                            <div>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                               <p style={{ color: '#fff', fontSize: '0.85rem', letterSpacing: '0.05em', marginBottom: '4px' }}>{product.name}</p>
                               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', letterSpacing: '0.1em' }}>{product.product_variants?.length || 0} VARIANTS</p>
                             </div>
                           </div>
                         </td>
-                        <td style={{ padding: '20px 30px', color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>
+                        <td style={{ padding: '20px 30px', color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }} data-label="Category">
                           {product.categories?.name || 'Uncategorized'}
                         </td>
-                        <td style={{ padding: '20px 30px', color: '#fff', fontSize: '0.85rem' }}>
+                        <td style={{ padding: '20px 30px', color: '#fff', fontSize: '0.85rem' }} data-label="Price">
                           {formatINR(product.price)}
                         </td>
-                        <td style={{ padding: '20px 30px' }}>
+                        <td style={{ padding: '20px 30px' }} data-label="Stock">
                           <span style={{ 
                             fontSize: '0.75rem', 
                             padding: '4px 10px', 
@@ -169,7 +169,7 @@ const AdminProducts = () => {
                             {totalStock} IN STOCK
                           </span>
                         </td>
-                        <td style={{ padding: '20px 30px' }}>
+                        <td style={{ padding: '20px 30px' }} data-label="Status">
                           <button 
                             onClick={() => toggleStatus(product.id, product.status)}
                             style={{
@@ -188,7 +188,7 @@ const AdminProducts = () => {
                             </span>
                           </button>
                         </td>
-                        <td style={{ padding: '20px 30px', textAlign: 'right' }}>
+                        <td style={{ padding: '20px 30px', textAlign: 'right' }} data-label="Actions">
                           <button 
                             onClick={() => handleEdit(product)}
                             style={{ background: 'transparent', border: 'none', color: 'var(--accent-color, #D4AF37)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer' }}

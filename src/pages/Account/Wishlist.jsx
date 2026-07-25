@@ -52,7 +52,7 @@ const Wishlist = () => {
           <div className={styles.emptyIcon}>♥</div>
           <h3 className={styles.emptyTitle}>Your Wishlist is Empty</h3>
           <p className={styles.emptyDesc}>Save items you love to revisit them later. Create your ultimate collection.</p>
-          <Link to="/collections" className={styles.actionBtn} style={{ textDecoration: 'none', marginTop: '20px' }}>
+          <Link to="/shop" className={styles.actionBtn} style={{ textDecoration: 'none', marginTop: '20px' }}>
             Discover Pieces
           </Link>
         </motion.div>

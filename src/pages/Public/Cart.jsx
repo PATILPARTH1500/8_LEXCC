@@ -31,7 +31,7 @@ const Cart = () => {
           <h1 style={{ fontSize: '2rem', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '20px', fontFamily: 'var(--font-heading)', fontWeight: 300 }}>Your Cart is Empty</h1>
           <p style={{ color: 'rgba(255,255,255,0.5)', marginBottom: '40px', letterSpacing: '0.05em' }}>Explore our latest collections to find your next piece.</p>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Link to="/collections" className={styles.primaryBtn} style={{ textDecoration: 'none' }}>CONTINUE SHOPPING</Link>
+            <Link to="/shop" className={styles.primaryBtn} style={{ textDecoration: 'none' }}>CONTINUE SHOPPING</Link>
           </motion.div>
         </motion.div>
       </div>

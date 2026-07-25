@@ -645,3 +645,67 @@
   gap: 15px;
   margin-top: 10px;
 }
+
+@media (max-width: 768px) {
+  .accountContainer {
+    padding-top: 100px;
+    gap: 30px;
+  }
+  .bgTextAccount {
+    font-size: 4rem;
+  }
+  .pageTitle {
+    font-size: 2rem;
+  }
+  .card {
+    padding: 20px;
+  }
+  .addressGrid {
+    grid-template-columns: 1fr;
+  }
+  .productGrid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 15px;
+  }
+  .statCard {
+    padding: 20px;
+    min-height: 160px;
+  }
+  .statCardValue {
+    font-size: 3rem;
+  }
+  
+  /* Responsive Tables for Admin */
+  table, thead, tbody, th, td, tr {
+    display: block;
+    width: 100%;
+  }
+  thead tr {
+    display: none;
+  }
+  tr {
+    border: 1px solid rgba(255,255,255,0.05);
+    margin-bottom: 20px;
+    padding: 15px;
+    background: rgba(255,255,255,0.02);
+  }
+  td {
+    border: none;
+    position: relative;
+    padding: 10px 0 !important;
+    text-align: right !important;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+  td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0;
+    text-align: left;
+    font-weight: 500;
+    color: rgba(255,255,255,0.5);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+  }
+}

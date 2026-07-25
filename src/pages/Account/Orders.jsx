@@ -67,7 +67,7 @@ const Orders = () => {
           <div className={styles.emptyIcon} style={{ fontSize: '4rem', opacity: 0.8 }}>✧</div>
           <h3 className={styles.emptyTitle}>No Orders Found</h3>
           <p className={styles.emptyDesc}>Your history is a blank canvas. Discover our latest collection and define your legacy.</p>
-          <Link to="/collections" className={styles.actionBtn} style={{ textDecoration: 'none', marginTop: '20px' }}>
+          <Link to="/shop" className={styles.actionBtn} style={{ textDecoration: 'none', marginTop: '20px' }}>
             Shop Collection
           </Link>
         </motion.div>

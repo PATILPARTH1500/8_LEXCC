@@ -178,20 +178,22 @@ const AdminOrders = () => {
                       exit={{ opacity: 0 }}
                       style={{ borderBottom: '1px solid rgba(255,255,255,0.02)', transition: 'background 0.2s', ':hover': { background: 'rgba(255,255,255,0.02)' } }}
                     >
-                      <td style={{ padding: '20px 30px', color: '#fff', fontSize: '0.85rem', fontWeight: 500 }}>
+                      <td style={{ padding: '20px 30px', color: '#fff', fontSize: '0.85rem', fontWeight: 500 }} data-label="Order #">
                         {order.order_number}
                       </td>
-                      <td style={{ padding: '20px 30px', color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>
+                      <td style={{ padding: '20px 30px', color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }} data-label="Date">
                         {new Date(order.created_at).toLocaleDateString()}
                       </td>
-                      <td style={{ padding: '20px 30px' }}>
-                        <p style={{ color: '#fff', fontSize: '0.85rem', marginBottom: '2px' }}>{order.profiles?.first_name} {order.profiles?.last_name}</p>
-                        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem' }}>{order.profiles?.email}</p>
+                      <td style={{ padding: '20px 30px' }} data-label="Customer">
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                          <p style={{ color: '#fff', fontSize: '0.85rem', marginBottom: '2px' }}>{order.profiles?.first_name} {order.profiles?.last_name}</p>
+                          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem' }}>{order.profiles?.email}</p>
+                        </div>
                       </td>
-                      <td style={{ padding: '20px 30px', color: '#fff', fontSize: '0.85rem' }}>
+                      <td style={{ padding: '20px 30px', color: '#fff', fontSize: '0.85rem' }} data-label="Total">
                         {formatINR(order.total_amount)}
                       </td>
-                      <td style={{ padding: '20px 30px' }}>
+                      <td style={{ padding: '20px 30px' }} data-label="Status">
                         <CustomSelect 
                           value={order.status}
                           onChange={(e) => updateOrderStatus(order.id, e.target.value)}
@@ -204,7 +206,7 @@ const AdminOrders = () => {
                           <option value="cancelled">Cancelled</option>
                         </CustomSelect>
                       </td>
-                      <td style={{ padding: '20px 30px', textAlign: 'right' }}>
+                      <td style={{ padding: '20px 30px', textAlign: 'right' }} data-label="Actions">
                         <button 
                           onClick={() => { setSelectedOrder(order); setIsModalOpen(true); }}
                           style={{ background: 'transparent', border: 'none', color: 'var(--accent-color, #D4AF37)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer' }}

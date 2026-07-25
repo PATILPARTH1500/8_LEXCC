@@ -87,6 +87,7 @@ const Home = () => {
 
   const handleMouseMove = (e) => {
     const { innerWidth, innerHeight } = window;
+    if (innerWidth < 768) return; // Disable parallax on mobile
     mouseX.set(e.clientX / innerWidth - 0.5);
     mouseY.set(e.clientY / innerHeight - 0.5);
   };
@@ -110,7 +111,7 @@ const Home = () => {
     const ctx = gsap.context(() => {
       // Smooth Parallax Hero Img (Scroll)
       const heroImageContainer = heroRef.current?.querySelector('.hero-parallax-container');
-      if (heroImageContainer) {
+      if (heroImageContainer && window.innerWidth >= 768) { // Disable scroll parallax on mobile
         gsap.to(heroImageContainer, {
           yPercent: 10,
           ease: "none",
