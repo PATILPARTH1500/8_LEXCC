@@ -87,7 +87,7 @@ const AdminDashboard = () => {
         <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', letterSpacing: '0.05em' }}>Real-time metrics for LEXCC commerce engine.</p>
       </motion.div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '25px', marginBottom: '50px' }}>
+      <div className={styles.adminStatsGrid}>
         {/* Revenue */}
         <motion.div variants={itemVariants} className={styles.card} style={{ padding: '30px', margin: 0 }}>
           <h3 style={{ fontSize: '0.75rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', marginBottom: '15px' }}>Total Revenue</h3>
@@ -113,7 +113,7 @@ const AdminDashboard = () => {
         </motion.div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '25px' }}>
+      <div className={styles.adminSplitGrid}>
         <motion.div variants={itemVariants} className={styles.card} style={{ padding: '40px', margin: 0, minHeight: '300px' }}>
           <h3 style={{ fontSize: '0.9rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#fff', marginBottom: '20px' }}>Recent Orders</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>

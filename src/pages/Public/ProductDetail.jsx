@@ -170,7 +170,7 @@ const ProductDetail = () => {
         </motion.div>
       </AnimatePresence>
 
-      <div className={styles.pdpContainer} style={{ position: 'relative', zIndex: 1, paddingTop: '140px', paddingBottom: '100px', maxWidth: '1600px', margin: '0 auto' }}>
+      <div className={`${styles.pdpContainer} ${styles.pdpLayoutContainer}`}>
         
         {/* Left Side: Gallery */}
         <div className={styles.gallerySection}>
@@ -192,7 +192,7 @@ const ProductDetail = () => {
               </motion.div>
             ))}
           </div>
-          <div className={styles.mainImageContainer} style={{ borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
+          <div className={styles.mainImageContainer} style={{ borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,0,0,0.5)', backdropFilter: window.innerWidth < 768 ? 'none' : 'blur(10px)', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeImage}
@@ -232,7 +232,7 @@ const ProductDetail = () => {
 
         {/* Right Side: Product Info */}
         <div className={styles.infoSection}>
-          <div className={accountStyles.card} style={{ padding: '60px', margin: 0, background: 'rgba(10, 10, 10, 0.6)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 30px 60px rgba(0,0,0,0.6)', transform: 'none' }}>
+          <div className={accountStyles.card} style={{ padding: '60px', margin: 0, background: 'rgba(10, 10, 10, 0.6)', backdropFilter: window.innerWidth < 768 ? 'none' : 'blur(20px)', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 30px 60px rgba(0,0,0,0.6)', transform: 'none' }}>
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
                 <h1 style={{ fontSize: '2.8rem', letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'var(--font-heading)', fontWeight: 300, color: '#fff', lineHeight: 1.1 }}>{product.name}</h1>

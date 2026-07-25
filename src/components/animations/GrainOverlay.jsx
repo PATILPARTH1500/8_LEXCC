@@ -2,6 +2,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 const GrainOverlay = () => {
+  if (typeof window !== 'undefined' && window.innerWidth < 768) return null;
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -11,7 +13,7 @@ const GrainOverlay = () => {
         position: 'fixed',
         top: 0,
         left: 0,
-        width: '100vw',
+        width: '100%',
         height: '100vh',
         pointerEvents: 'none',
         zIndex: 9998,

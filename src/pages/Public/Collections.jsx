@@ -22,6 +22,7 @@ const Collections = () => {
   // Filter & Sort State
   const [filters, setFilters] = useState({});
   const [sortParam, setSortParam] = useState('newest');
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   // Derive active category for background text
   const activeCategory = (pathCategory || queryCategory || '').toLowerCase();
@@ -168,14 +169,14 @@ const Collections = () => {
         </motion.div>
       </AnimatePresence>
 
-      <div style={{ position: 'relative', zIndex: 1, maxWidth: '1600px', margin: '0 auto', padding: '140px 40px 100px' }}>
+      <div className={styles.shopLayoutContainer}>
         
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '60px', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '30px' }}>
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            style={{ fontSize: '3.5rem', letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'var(--font-heading)', fontWeight: 300, margin: 0, lineHeight: 1 }}
+            style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'var(--font-heading)', fontWeight: 300, margin: 0, lineHeight: 1 }}
           >
             {getPageTitle()}
           </motion.h1>
@@ -203,16 +204,62 @@ const Collections = () => {
           </motion.div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '60px' }}>
-          {/* Filters Sidebar */}
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            style={{ position: 'sticky', top: '140px', alignSelf: 'start' }}
+        <div className={styles.shopGrid}>
+          {/* Desktop Filters Sidebar */}
+          <div className={styles.desktopFilter}>
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              style={{ position: 'sticky', top: '140px', alignSelf: 'start' }}
+            >
+              <FilterSidebar filters={filters} setFilters={setFilters} />
+            </motion.div>
+          </div>
+          
+          {/* Mobile Filter Button */}
+          <button 
+            className={styles.mobileFilterBtn} 
+            onClick={() => setIsMobileFilterOpen(true)}
           >
-            <FilterSidebar filters={filters} setFilters={setFilters} />
-          </motion.div>
+            Filters & Sorting
+          </button>
+
+          {/* Mobile Filters Drawer */}
+          <AnimatePresence>
+            {isMobileFilterOpen && (
+              <>
+                <motion.div 
+                  className={styles.filterDrawerOverlay}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setIsMobileFilterOpen(false)}
+                />
+                <motion.div 
+                  className={styles.filterDrawerContent}
+                  initial={{ y: '100%' }}
+                  animate={{ y: 0 }}
+                  exit={{ y: '100%' }}
+                  transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                    <h3 style={{ textTransform: 'uppercase', letterSpacing: '0.1em' }}>Filters</h3>
+                    <button onClick={() => setIsMobileFilterOpen(false)} style={{ fontSize: '2rem', lineHeight: 0.5 }}>&times;</button>
+                  </div>
+                  <FilterSidebar filters={filters} setFilters={setFilters} />
+                  
+                  <button 
+                    onClick={() => setIsMobileFilterOpen(false)}
+                    className={accountStyles.actionBtn}
+                    style={{ width: '100%', marginTop: '30px' }}
+                  >
+                    Apply Filters
+                  </button>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
           
           {/* Product Grid */}
           <div style={{ minHeight: '50vh' }}>
@@ -244,7 +291,7 @@ const Collections = () => {
                   hidden: { opacity: 0 },
                   show: {
                     opacity: 1,
-                    transition: { staggerChildren: 0.1 }
+                    transition: { staggerChildren: window.innerWidth < 768 ? 0 : 0.1 }
                   }
                 }}
                 style={{ 
