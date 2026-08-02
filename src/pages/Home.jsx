@@ -6,6 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { supabase } from '../lib/supabase';
 import styles from './Home.module.css';
 import { formatINR } from '../utils/currency';
+import SEO from '../components/common/SEO';
 
 // React Bits Components
 import CurvedLoop from '../components/animations/CurvedLoop';
@@ -269,8 +270,17 @@ const Home = () => {
     visible: { y: 0, opacity: 1, transition: { duration: 1.2, ease: [0.16, 1, 0.3, 1] } }
   };
 
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "LEXCC",
+    "url": "https://lexcc.in",
+    "logo": "https://lexcc.in/apple-touch-icon.png"
+  };
+
   return (
     <div style={{ backgroundColor: 'var(--primary-color)' }}>
+      <SEO title="LEXCC" schema={organizationSchema} />
       {/* 1. HERO SECTION - SPLIT SCREEN EDITORIAL */}
       <section className={styles.hero} ref={heroRef} onMouseMove={handleMouseMove}>
         <div className={styles.heroLeft}>

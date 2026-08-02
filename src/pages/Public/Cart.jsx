@@ -5,6 +5,7 @@ import { useCart } from '../../contexts/CartContext';
 import styles from './Shop.module.css';
 import accountStyles from '../Account/Account.module.css';
 import { formatINR } from '../../utils/currency';
+import SEO from '../../components/common/SEO';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop';
 
@@ -25,6 +26,7 @@ const Cart = () => {
   if (cartItems.length === 0) {
     return (
       <div style={{ position: 'relative', minHeight: '85vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--secondary-color, #0a0a0a)', overflow: 'hidden' }}>
+        <SEO title="Your Cart" />
         <div className={accountStyles.bgTextAccount}>BAG</div>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} style={{ textAlign: 'center', zIndex: 1, position: 'relative' }}>
           <div style={{ fontSize: '3rem', color: 'rgba(212,175,55,0.3)', marginBottom: '20px' }}>✧</div>
@@ -40,6 +42,7 @@ const Cart = () => {
 
   return (
     <div style={{ position: 'relative', minHeight: '100vh', background: 'var(--secondary-color, #0a0a0a)', overflow: 'hidden' }}>
+      <SEO title="Your Cart" />
       {/* Background Typography */}
       <AnimatePresence mode="wait">
         <motion.div

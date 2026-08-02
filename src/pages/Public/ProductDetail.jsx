@@ -8,6 +8,7 @@ import styles from './Shop.module.css';
 import accountStyles from '../Account/Account.module.css';
 import ProductCard from '../../components/shop/ProductCard';
 import { formatINR } from '../../utils/currency';
+import SEO from '../../components/common/SEO';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop';
 
@@ -142,6 +143,25 @@ const ProductDetail = () => {
   
   const displayImages = product.image_url ? [product.image_url, DEFAULT_IMAGE] : [DEFAULT_IMAGE, DEFAULT_IMAGE];
 
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.name,
+    "description": product.description,
+    "image": product.image_url || DEFAULT_IMAGE,
+    "brand": {
+      "@type": "Brand",
+      "name": "LEXCC"
+    },
+    "offers": {
+      "@type": "Offer",
+      "url": `https://lexcc.in/product/${product.slug}`,
+      "priceCurrency": "INR",
+      "price": product.price,
+      "availability": totalStock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+    }
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0 }}
@@ -150,6 +170,13 @@ const ProductDetail = () => {
       transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       style={{ position: 'relative', minHeight: '100vh', background: 'var(--primary-color, #0a0a0a)', overflow: 'hidden' }}
     >
+      <SEO 
+        title={product.name} 
+        description={product.description}
+        image={product.image_url || DEFAULT_IMAGE}
+        url={`https://lexcc.in/product/${product.slug}`}
+        schema={productSchema}
+      />
       <div className={accountStyles.accountBackground}>
         <div className={accountStyles.noiseOverlay} />
         <div className={accountStyles.radialGlow} />

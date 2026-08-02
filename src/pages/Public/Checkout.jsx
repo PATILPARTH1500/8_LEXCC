@@ -8,6 +8,7 @@ import styles from './Shop.module.css';
 import accountStyles from '../Account/Account.module.css';
 import { initiatePayment } from '../../services/PaymentProvider';
 import { formatINR } from '../../utils/currency';
+import SEO from '../../components/common/SEO';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop';
 
@@ -114,6 +115,7 @@ const Checkout = () => {
 
   return (
     <div style={{ position: 'relative', minHeight: '100vh', background: 'var(--secondary-color, #0a0a0a)', overflow: 'hidden' }}>
+      <SEO title="Checkout" />
       {/* Background Typography */}
       <AnimatePresence mode="wait">
         <motion.div

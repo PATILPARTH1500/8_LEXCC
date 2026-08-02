@@ -7,6 +7,7 @@ import { supabase } from '../../lib/supabase';
 import CustomSelect from '../../components/ui/CustomSelect';
 import styles from './Shop.module.css';
 import accountStyles from '../Account/Account.module.css';
+import SEO from '../../components/common/SEO';
 
 const Collections = () => {
   const { category: pathCategory } = useParams();
@@ -155,6 +156,11 @@ const Collections = () => {
 
   return (
     <div style={{ position: 'relative', minHeight: '100vh', background: 'var(--secondary-color, #0a0a0a)', overflow: 'hidden' }}>
+      <SEO 
+        title={getPageTitle()} 
+        description={`Explore the ${getPageTitle().toLowerCase()} collection at LEXCC.`}
+        url={`https://lexcc.in${location.pathname}${location.search}`}
+      />
       {/* Background Typography */}
       <AnimatePresence mode="wait">
         <motion.div
