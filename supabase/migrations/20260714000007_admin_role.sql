@@ -3,7 +3,7 @@ ALTER TABLE public.profiles
 ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE;
 
 -- Optional: Create a secure view for admins to see all profiles
-CREATE OR REPLACE VIEW public.admin_profiles_view AS
+CREATE OR REPLACE VIEW public.admin_profiles_view WITH (security_invoker = true) AS
 SELECT * FROM public.profiles;
 
 -- Ensure RLS allows admins to see other users (if needed in the future)
