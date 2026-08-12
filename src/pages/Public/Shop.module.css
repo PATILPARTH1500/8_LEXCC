@@ -638,4 +638,28 @@
   .searchInputWrapper {
     margin: 60px auto 20px;
   }
+  .actionRow {
+    flex-direction: column;
+  }
+  .primaryBtn {
+    width: 100%;
+  }
+  .wishlistBtn {
+    width: 100%;
+    padding: 18px 24px;
+  }
+}
+
+/* Checkout Responsive */
+.checkoutGrid {
+  display: grid;
+  grid-template-columns: 1fr 450px;
+  gap: 80px;
+}
+
+@media (max-width: 1024px) {
+  .checkoutGrid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
 }

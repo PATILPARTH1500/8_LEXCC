@@ -44,17 +44,17 @@ const Security = () => {
           <h2 className={styles.cardTitle}>Account Status</h2>
           
           <div style={{ display: 'grid', gap: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '25px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+            <div className={styles.securityRow}>
               <div>
                 <h3 style={{ fontSize: '0.95rem', marginBottom: '8px', letterSpacing: '0.1em', fontWeight: 500 }}>Email Address</h3>
-                <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.05em' }}>{session?.user?.email}</p>
+                <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.05em', wordBreak: 'break-all' }}>{session?.user?.email}</p>
               </div>
               <span className={`${styles.badge} ${session?.user?.email_confirmed_at ? styles.badgeSuccess : styles.badgeWarning}`}>
                 {session?.user?.email_confirmed_at ? 'Verified' : 'Unverified'}
               </span>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '25px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+            <div className={styles.securityRow}>
               <div>
                 <h3 style={{ fontSize: '0.95rem', marginBottom: '8px', letterSpacing: '0.1em', fontWeight: 500 }}>Password</h3>
                 <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.05em' }}>Last changed recently</p>
@@ -62,7 +62,7 @@ const Security = () => {
               <span className={`${styles.badge} ${styles.badgeSuccess}`}>Protected</span>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className={styles.securityRow}>
               <div>
                 <h3 style={{ fontSize: '0.95rem', marginBottom: '8px', letterSpacing: '0.1em', fontWeight: 500 }}>Google Authentication</h3>
                 <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.05em' }}>Use Google to sign in</p>

@@ -82,12 +82,12 @@ const Orders = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', paddingBottom: '30px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+              <div className={styles.orderHeader}>
                 <div>
                   <h3 style={{ fontSize: '1.1rem', letterSpacing: '0.15em', fontWeight: 500, marginBottom: '8px' }}>ORDER #{order.order_number}</h3>
                   <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.05em' }}>Placed on {new Date(order.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                 </div>
-                <div style={{ textAlign: 'right' }}>
+                <div>
                   <p style={{ fontSize: '1.4rem', fontWeight: 300, marginBottom: '10px' }}>{formatINR(order.total_amount)}</p>
                   <span className={`${styles.badge} ${order.status === 'delivered' ? styles.badgeSuccess : styles.badgeWarning}`} style={{ display: 'inline-block' }}>
                     {order.status}
@@ -96,7 +96,7 @@ const Orders = () => {
               </div>
 
               {(order.tracking_number || order.carrier) && (
-                <div style={{ background: '#0F0F0F', padding: '20px', marginBottom: '30px', borderLeft: '2px solid #D4AF37', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div className={styles.shipmentDetails}>
                   <div>
                     <h4 style={{ fontSize: '0.85rem', color: '#D4AF37', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '5px' }}>Shipment Details</h4>
                     <p style={{ fontSize: '0.9rem', color: '#fff' }}>

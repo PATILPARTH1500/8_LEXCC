@@ -141,7 +141,7 @@ const AdminOrders = () => {
 
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px' }}>
+      <div className={styles.adminHeader}>
         <motion.div variants={itemVariants}>
           <h1 style={{ fontSize: '1.8rem', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 300, color: '#fff', marginBottom: '10px' }}>Order Fulfillment</h1>
           <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', letterSpacing: '0.05em' }}>Process shipments and manage order statuses.</p>

@@ -89,7 +89,7 @@ const Dashboard = () => {
         </motion.p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '30px', marginBottom: '60px' }}>
+      <div className={styles.dashboardGrid}>
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -146,7 +146,7 @@ const Dashboard = () => {
         transition={{ duration: 0.5, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
       >
         <h2 className={styles.cardTitle}>Account Status</h2>
-        <div style={{ display: 'flex', gap: '40px', alignItems: 'center' }}>
+        <div className={styles.statusGrid}>
           <div>
             <span className={styles.formLabel}>Status</span>
             <span className={`${styles.badge} ${styles.badgeSuccess}`}>Active Member</span>

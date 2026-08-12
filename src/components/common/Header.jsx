@@ -4,6 +4,7 @@ import { FiShoppingBag, FiUser, FiMenu, FiX, FiSearch } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import SearchOverlay from '../layout/SearchOverlay';
 import { useCart } from '../../contexts/CartContext';
+import { useAuth } from '../../contexts/AuthContext';
 import styles from './Header.module.css';
 
 const Header = () => {
@@ -12,7 +13,9 @@ const Header = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const location = useLocation();
   const { cartCount, setIsCartOpen } = useCart();
+  const { profile, logout } = useAuth();
   const [bumpBadge, setBumpBadge] = useState(false);
+  const isAccountPage = location.pathname.startsWith('/account');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -110,8 +113,23 @@ const Header = () => {
             exit={{ opacity: 0, y: -20 }}
             className={`${styles.mobileMenu} will-change-both`}
           >
-            <Link to="/shop" className={styles.mobileMenuLink}>Shop All</Link>
-            <Link to="/shop" className={styles.mobileMenuLink}>Collections</Link>
+            {isAccountPage ? (
+              <>
+                <Link to="/account" className={styles.mobileMenuLink}>Dashboard</Link>
+                <Link to="/account/profile" className={styles.mobileMenuLink}>Profile</Link>
+                <Link to="/account/addresses" className={styles.mobileMenuLink}>Addresses</Link>
+                <Link to="/account/security" className={styles.mobileMenuLink}>Security</Link>
+                <Link to="/account/wishlist" className={styles.mobileMenuLink}>Wishlist</Link>
+                <Link to="/account/orders" className={styles.mobileMenuLink}>Orders</Link>
+                {profile?.is_admin && <Link to="/account/admin" className={styles.mobileMenuLink}>Admin Panel</Link>}
+                <button onClick={() => { logout(); setIsMobileMenuOpen(false); }} className={styles.mobileMenuLink} style={{ background: 'transparent', border: 'none', width: '100%', cursor: 'pointer' }}>Logout</button>
+              </>
+            ) : (
+              <>
+                <Link to="/shop" className={styles.mobileMenuLink}>Shop All</Link>
+                <Link to="/shop" className={styles.mobileMenuLink}>Collections</Link>
+              </>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../contexts/CartContext';
 import { formatINR } from '../../utils/currency';
+import styles from './CartDrawer.module.css';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop';
 
@@ -40,27 +41,17 @@ const CartDrawer = () => {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', stiffness: 280, damping: 30, mass: 0.8 }}
-            style={{ 
-              position: 'relative', 
-              width: '100%', 
-              maxWidth: '480px', 
-              background: '#050505', 
-              borderLeft: '1px solid rgba(212,175,55,0.2)',
-              display: 'flex',
-              flexDirection: 'column',
-              boxShadow: '-20px 0 50px rgba(0,0,0,0.8)'
-            }}
-            className="will-change-transform"
+            className={`${styles.drawer} will-change-transform`}
           >
             {/* Subtle glow effect */}
             <div style={{ position: 'absolute', top: 0, right: 0, width: '100%', height: '30%', background: 'radial-gradient(ellipse at top right, rgba(212,175,55,0.1), transparent 70%)', pointerEvents: 'none' }} />
 
-            <div style={{ padding: '35px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className={styles.header}>
               <h2 style={{ fontSize: '1.1rem', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 400 }}>Your Cart ({cartItems.length})</h2>
               <button onClick={() => setIsCartOpen(false)} style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: '2rem', cursor: 'pointer', opacity: 0.5, transition: 'opacity 0.3s', fontWeight: 200, lineHeight: 0.5 }}>&times;</button>
             </div>
 
-            <div style={{ flex: 1, overflowY: 'auto', padding: '35px' }}>
+            <div className={styles.body}>
               {cartItems.length === 0 ? (
                 <motion.div 
                   initial={{ opacity: 0, y: 20 }}
@@ -126,7 +117,7 @@ const CartDrawer = () => {
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                style={{ padding: '35px', borderTop: '1px solid rgba(255,255,255,0.05)', background: '#050505', position: 'relative' }}
+                className={styles.footer}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '25px', fontSize: '1.2rem', letterSpacing: '0.1em' }}>
                   <span style={{ fontWeight: 400 }}>Subtotal</span>

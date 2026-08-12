@@ -46,7 +46,14 @@ serve(async (req) => {
       
       const { data: orderData, error: orderLookupErr } = await supabaseClient
         .from('orders')
-        .select('id, order_number')
+        .select(`
+          id, 
+          order_number, 
+          total_amount, 
+          created_at, 
+          shipping_address, 
+          user_id
+        `)
         .eq('razorpay_order_id', rzpOrderId)
         .single();
         
@@ -68,7 +75,11 @@ serve(async (req) => {
         // Deduct inventory
         const { data: items } = await supabaseClient
           .from('order_items')
-          .select('variant_id, quantity')
+          .select(`
+            variant_id, 
+            quantity,
+            products ( name )
+          `)
           .eq('order_id', orderData.id);
           
         if (items) {
@@ -79,6 +90,53 @@ serve(async (req) => {
                 p_quantity: item.quantity
               });
             }
+          }
+        }
+
+        // Fetch user profile for email
+        let customerEmail = paymentEntity.email || '';
+        let customerName = 'Customer';
+        
+        if (orderData.user_id) {
+          const { data: profile } = await supabaseClient
+            .from('profiles')
+            .select('email, first_name, last_name')
+            .eq('id', orderData.user_id)
+            .single();
+            
+          if (profile) {
+            customerEmail = profile.email || customerEmail;
+            customerName = profile.first_name ? `${profile.first_name} ${profile.last_name || ''}`.trim() : 'Customer';
+          }
+        }
+
+        // Map items for email
+        const emailItems = items ? items.map(i => ({
+          name: i.products?.name,
+          quantity: i.quantity
+        })) : [];
+
+        // Try to invoke transactional email (fail silently to avoid breaking webhook)
+        if (customerEmail) {
+          try {
+            const formattedAddress = typeof orderData.shipping_address === 'object' && orderData.shipping_address !== null
+              ? Object.values(orderData.shipping_address).filter(Boolean).join(', ')
+              : 'Address on file';
+
+            supabaseClient.functions.invoke('send-transactional-email', {
+              body: {
+                type: 'order_confirmed',
+                order: orderData.order_number,
+                customerName,
+                email: customerEmail,
+                totalAmount: orderData.total_amount,
+                shippingAddress: formattedAddress,
+                orderDate: orderData.created_at,
+                items: emailItems
+              }
+            }).catch(e => console.error('Failed to trigger confirmation email:', e));
+          } catch (e) {
+            console.error('Failed to prepare confirmation email logic:', e);
           }
         }
       } else if (event.event === 'payment.failed') {

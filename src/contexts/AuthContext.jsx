@@ -147,6 +147,15 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
+  const verifyTurnstileToken = async (token) => {
+    const { data, error } = await supabase.functions.invoke('verify-turnstile', {
+      body: { token }
+    });
+    if (error) throw error;
+    if (!data.success) throw new Error("Security check failed. Please try again.");
+    return true;
+  };
+
   const updateProfile = async (updates) => {
     if (!user) throw new Error('No active user');
     
@@ -171,15 +180,12 @@ export const AuthProvider = ({ children }) => {
     // which is required by the avatars bucket INSERT RLS policy.
     const filePath = `${user.id}/${fileName}`;
 
-    console.log(`[Avatar Upload] Using bucket: avatars, path: ${filePath}`);
-
     // Upload image
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('avatars')
       .upload(filePath, file);
 
     if (uploadError) {
-      console.log('UPLOAD ERROR', uploadError);
       throw {
         message: uploadError.message,
         statusCode: uploadError.statusCode || 'N/A',
@@ -361,6 +367,7 @@ export const AuthProvider = ({ children }) => {
     resetPassword,
     updateProfile,
     uploadAvatar,
+    verifyTurnstileToken,
     fetchAddresses,
     addAddress,
     updateAddress,

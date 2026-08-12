@@ -41,7 +41,7 @@ const registerSchema = z.object({
 });
 
 const Register = () => {
-  const { signUp, googleSignIn } = useAuth();
+  const { signUp, googleSignIn, verifyTurnstileToken } = useAuth();
   const navigate = useNavigate();
   const [globalError, setGlobalError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -81,6 +81,10 @@ const Register = () => {
     setIsLoading(true);
     setGlobalError('');
     try {
+      if (turnstileKey && turnstileToken !== 'dummy_token_dev') {
+        await verifyTurnstileToken(turnstileToken);
+      }
+
       await signUp({
         email: data.email,
         password: data.password,

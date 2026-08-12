@@ -192,7 +192,7 @@ const Addresses = () => {
               onClick={handleCloseModal}
             />
             <motion.div 
-              style={{ background: '#0a0a0a', padding: '50px', width: '100%', maxWidth: '650px', position: 'relative', zIndex: 10, border: '1px solid rgba(212,175,55,0.3)', maxHeight: '90vh', overflowY: 'auto' }}
+              className={styles.modalContainer}
               initial={{ opacity: 0, y: 40, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 40, scale: 0.95 }}
@@ -267,7 +267,7 @@ const Addresses = () => {
                   <label htmlFor="isDefault" style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', letterSpacing: '0.05em' }}>Set as default address</label>
                 </div>
 
-                <div style={{ display: 'flex', gap: '20px', marginTop: '40px' }}>
+                <div className={styles.modalActions}>
                   <button type="submit" className={styles.actionBtn}>
                     {editingAddress ? 'Update Address' : 'Save Address'}
                   </button>

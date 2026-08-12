@@ -13,7 +13,7 @@ const forgotSchema = z.object({
 });
 
 const ForgotPassword = () => {
-  const { forgotPassword } = useAuth();
+  const { forgotPassword, verifyTurnstileToken } = useAuth();
   const [globalError, setGlobalError] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -39,6 +39,10 @@ const ForgotPassword = () => {
     setIsLoading(true);
     setGlobalError('');
     try {
+      if (turnstileKey && turnstileToken !== 'dummy_token_dev') {
+        await verifyTurnstileToken(turnstileToken);
+      }
+
       await forgotPassword(data.email);
       setIsSuccess(true);
     } catch (error) {

@@ -114,7 +114,7 @@ const Profile = () => {
 
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible">
-      <div className={styles.pageHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <div className={`${styles.pageHeader} ${styles.profileHeader}`}>
         <motion.div variants={itemVariants}>
           <h1 className={styles.pageTitle}>Profile</h1>
           <p className={styles.pageSubtitle}>Manage your personal information and preferences.</p>
@@ -146,7 +146,7 @@ const Profile = () => {
           
           <h2 className={styles.cardTitle}>Personal Information</h2>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '40px', marginBottom: '50px' }}>
+          <div className={styles.avatarRow}>
             <motion.div 
               style={{ width: '120px', height: '120px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.05)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.1)' }}
               whileHover={{ scale: 1.05 }}
@@ -167,7 +167,7 @@ const Profile = () => {
               </div>
             </motion.div>
             
-            <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+            <div className={styles.avatarActions}>
               <input 
                 type="file" 
                 accept="image/*" 

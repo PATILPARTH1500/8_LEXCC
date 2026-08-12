@@ -174,7 +174,7 @@ const Checkout = () => {
             </motion.div>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 450px', gap: '80px' }}>
+          <div className={styles.checkoutGrid}>
             
             {/* Left: Checkout Flow */}
             <div>
@@ -200,7 +200,7 @@ const Checkout = () => {
                       <h2 style={{ fontSize: '1.8rem', fontWeight: 300, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '40px' }}>Shipping Address</h2>
                       
                       {loadingAddresses ? (
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '25px', marginBottom: '40px' }}>
+                        <div className={accountStyles.addressGrid} style={{ marginBottom: '40px' }}>
                           <div className={accountStyles.card} style={{ height: '160px', animation: 'pulse 2s infinite', margin: 0 }} />
                           <div className={accountStyles.card} style={{ height: '160px', animation: 'pulse 2s infinite', margin: 0 }} />
                         </div>
@@ -218,7 +218,7 @@ const Checkout = () => {
                           <Link to="/account/addresses" className={styles.secondaryBtn} style={{ textDecoration: 'none' }}>Add Address</Link>
                         </div>
                       ) : (
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '25px', marginBottom: '50px' }}>
+                        <div className={accountStyles.addressGrid} style={{ marginBottom: '50px' }}>
                           {addresses.map(addr => (
                             <motion.div 
                               key={addr.id}
@@ -288,7 +288,7 @@ const Checkout = () => {
                         </div>
                       </div>
 
-                      <div style={{ display: 'flex', gap: '20px' }}>
+                      <div style={{ display: 'flex', gap: '20px', flexDirection: 'column' }}>
                         <motion.button 
                           whileHover={{ scale: 1.02 }} 
                           whileTap={{ scale: 0.98 }} 
@@ -298,7 +298,7 @@ const Checkout = () => {
                         >
                           CONTINUE TO PAYMENT
                         </motion.button>
-                        <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => setStep(1)} className={styles.secondaryBtn}>BACK</motion.button>
+                        <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => setStep(1)} className={styles.secondaryBtn} style={{ flex: 1, maxWidth: '300px' }}>BACK</motion.button>
                       </div>
                     </div>
                   )}
@@ -333,8 +333,8 @@ const Checkout = () => {
                         </motion.button>
                       </div>
                       
-                      <div style={{ display: 'flex', gap: '20px' }}>
-                        <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => setStep(2)} className={styles.secondaryBtn} disabled={isProcessingPayment}>BACK</motion.button>
+                      <div style={{ display: 'flex', gap: '20px', flexDirection: 'column' }}>
+                        <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => setStep(2)} className={styles.secondaryBtn} style={{ maxWidth: '300px' }} disabled={isProcessingPayment}>BACK</motion.button>
                       </div>
                     </div>
                   )}

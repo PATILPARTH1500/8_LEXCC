@@ -70,7 +70,7 @@ const Cart = () => {
           My Cart
         </motion.h1>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 420px', gap: '80px' }}>
+        <div className={styles.checkoutGrid}>
           
           {/* Left: Products */}
           <motion.div variants={itemVariants} style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>

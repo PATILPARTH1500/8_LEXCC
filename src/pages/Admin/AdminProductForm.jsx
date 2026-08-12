@@ -155,8 +155,7 @@ const AdminProductForm = ({ onClose, onSuccess, product = null, categories = [] 
         initial={{ y: 50, opacity: 0, scale: 0.95 }}
         animate={{ y: 0, opacity: 1, scale: 1 }}
         exit={{ y: 20, opacity: 0, scale: 0.95 }}
-        className={styles.card}
-        style={{ width: '100%', maxWidth: '900px', maxHeight: '90vh', overflowY: 'auto', position: 'relative', padding: '40px' }}
+        className={`${styles.card} ${styles.modalPadding}`}
       >
         <button 
           onClick={onClose}
@@ -173,13 +172,13 @@ const AdminProductForm = ({ onClose, onSuccess, product = null, categories = [] 
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           
-          <div style={{ display: 'flex', gap: '20px' }}>
+          <div className={styles.adminFormLayout}>
             {/* Image Upload Area */}
-            <div style={{ flex: '0 0 250px' }}>
+            <div className={styles.imageUploadContainer}>
               <label style={{ display: 'block', fontSize: '0.75rem', letterSpacing: '0.15em', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', marginBottom: '15px' }}>Product Image</label>
               <div 
                 style={{ 
-                  width: '250px', height: '320px', 
+                  width: '100%', maxWidth: '250px', height: '320px', 
                   border: '1px solid rgba(212, 175, 55, 0.3)', 
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   cursor: 'pointer', position: 'relative', overflow: 'hidden',
@@ -211,7 +210,7 @@ const AdminProductForm = ({ onClose, onSuccess, product = null, categories = [] 
                 <label className={styles.inputLabel}>Product Name</label>
                 <input type="text" name="name" className={styles.inputField} value={formData.name} onChange={handleInputChange} required />
               </div>
-              <div style={{ display: 'flex', gap: '15px' }}>
+              <div className={styles.formGrid}>
                 <div style={{ flex: 1 }}>
                   <label className={styles.inputLabel}>Price ($)</label>
                   <input type="number" step="0.01" name="price" className={styles.inputField} value={formData.price} onChange={handleInputChange} required />
@@ -253,7 +252,7 @@ const AdminProductForm = ({ onClose, onSuccess, product = null, categories = [] 
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               {variants.map((v, index) => (
-                <div key={index} style={{ display: 'flex', gap: '15px', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '15px', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px' }}>
+                <div key={index} className={styles.variantRow}>
                   <div style={{ flex: 1 }}>
                     <label style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em', display: 'block', marginBottom: '5px' }}>Size</label>
                     <input type="text" placeholder="e.g. M, L, OS" value={v.size} onChange={(e) => handleVariantChange(index, 'size', e.target.value)} className={styles.inputField} style={{ padding: '10px' }} required />
@@ -262,7 +261,7 @@ const AdminProductForm = ({ onClose, onSuccess, product = null, categories = [] 
                     <label style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em', display: 'block', marginBottom: '5px' }}>Color</label>
                     <input type="text" placeholder="e.g. Black" value={v.color} onChange={(e) => handleVariantChange(index, 'color', e.target.value)} className={styles.inputField} style={{ padding: '10px' }} required />
                   </div>
-                  <div style={{ flex: '0 0 100px' }}>
+                  <div>
                     <label style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em', display: 'block', marginBottom: '5px' }}>Stock</label>
                     <input type="number" placeholder="0" value={v.stock} onChange={(e) => handleVariantChange(index, 'stock', e.target.value)} className={styles.inputField} style={{ padding: '10px', width: '100%' }} required />
                   </div>
@@ -274,7 +273,7 @@ const AdminProductForm = ({ onClose, onSuccess, product = null, categories = [] 
             </div>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '15px', marginTop: '20px' }}>
+          <div className={styles.modalActions}>
             <button type="button" onClick={onClose} className={styles.secondaryBtn}>CANCEL</button>
             <button type="submit" className={styles.primaryBtn} disabled={loading}>
               {loading ? 'SAVING...' : 'SAVE PRODUCT'}

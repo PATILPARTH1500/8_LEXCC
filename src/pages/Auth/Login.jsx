@@ -14,7 +14,7 @@ const loginSchema = z.object({
 });
 
 const Login = () => {
-  const { signIn, googleSignIn } = useAuth();
+  const { signIn, googleSignIn, verifyTurnstileToken } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [globalError, setGlobalError] = useState('');
@@ -43,6 +43,10 @@ const Login = () => {
     setIsLoading(true);
     setGlobalError('');
     try {
+      if (turnstileKey && turnstileToken !== 'dummy_token_dev') {
+        await verifyTurnstileToken(turnstileToken);
+      }
+      
       await signIn({ email: data.email, password: data.password });
       navigate(from, { replace: true });
     } catch (error) {
