@@ -104,33 +104,53 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile Menu Drawer */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <motion.div 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className={`${styles.mobileMenu} will-change-both`}
-          >
-            {isAccountPage ? (
-              <>
-                <Link to="/account" className={styles.mobileMenuLink}>Dashboard</Link>
-                <Link to="/account/profile" className={styles.mobileMenuLink}>Profile</Link>
-                <Link to="/account/addresses" className={styles.mobileMenuLink}>Addresses</Link>
-                <Link to="/account/security" className={styles.mobileMenuLink}>Security</Link>
-                <Link to="/account/wishlist" className={styles.mobileMenuLink}>Wishlist</Link>
-                <Link to="/account/orders" className={styles.mobileMenuLink}>Orders</Link>
-                {profile?.is_admin && <Link to="/account/admin" className={styles.mobileMenuLink}>Admin Panel</Link>}
-                <button onClick={() => { logout(); setIsMobileMenuOpen(false); }} className={styles.mobileMenuLink} style={{ background: 'transparent', border: 'none', width: '100%', cursor: 'pointer' }}>Logout</button>
-              </>
-            ) : (
-              <>
-                <Link to="/shop" className={styles.mobileMenuLink}>Shop All</Link>
-                <Link to="/shop" className={styles.mobileMenuLink}>Collections</Link>
-              </>
-            )}
-          </motion.div>
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className={styles.mobileMenuBackdrop}
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            <motion.div 
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className={`${styles.mobileDrawer} will-change-transform`}
+            >
+              <div className={styles.drawerHeader}>
+                <span className={styles.drawerTitle}>Menu</span>
+                <button className={styles.closeDrawerBtn} onClick={() => setIsMobileMenuOpen(false)}>
+                  <FiX size={24} />
+                </button>
+              </div>
+              <div className={styles.drawerContent}>
+                {isAccountPage ? (
+                  <>
+                    <Link to="/account" className={styles.mobileMenuLink}>Dashboard</Link>
+                    <Link to="/account/profile" className={styles.mobileMenuLink}>Profile</Link>
+                    <Link to="/account/addresses" className={styles.mobileMenuLink}>Addresses</Link>
+                    <Link to="/account/security" className={styles.mobileMenuLink}>Security</Link>
+                    <Link to="/account/wishlist" className={styles.mobileMenuLink}>Wishlist</Link>
+                    <Link to="/account/orders" className={styles.mobileMenuLink}>Orders</Link>
+                    {profile?.is_admin && <Link to="/account/admin" className={styles.mobileMenuLink}>Admin Panel</Link>}
+                    <button onClick={() => { logout(); setIsMobileMenuOpen(false); }} className={styles.mobileMenuLink} style={{ background: 'transparent', border: 'none', width: '100%', cursor: 'pointer', textAlign: 'left' }}>Logout</button>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/shop?filter=new" className={styles.mobileMenuLink}>New Arrivals</Link>
+                    <Link to="/shop?category=men" className={styles.mobileMenuLink}>Men</Link>
+                    <Link to="/shop?category=footwear" className={styles.mobileMenuLink}>Footwear</Link>
+                    <Link to="/shop" className={styles.mobileMenuLink}>Collections</Link>
+                  </>
+                )}
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 

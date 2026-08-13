@@ -91,7 +91,7 @@ const Security = () => {
                 <div className={styles.formGroup} style={{ marginBottom: 0 }}>
                   <input type="password" placeholder="New Password" className={styles.formInput} required />
                 </div>
-                <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
+                <div className={styles.formActions}>
                   <button type="submit" className={styles.actionBtn}>Update</button>
                   <button type="button" onClick={() => setIsChangingPwd(false)} className={styles.secondaryBtn}>Cancel</button>
                 </div>

@@ -293,7 +293,7 @@ const Profile = () => {
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              style={{ display: 'flex', gap: '20px', marginTop: '30px' }}
+              className={styles.formActions}
             >
               <button type="submit" className={styles.actionBtn} disabled={isLoading}>
                 {isLoading ? 'SAVING...' : 'SAVE CHANGES'}
