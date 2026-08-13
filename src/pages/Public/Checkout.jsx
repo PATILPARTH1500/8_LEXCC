@@ -8,6 +8,7 @@ import styles from './Shop.module.css';
 import accountStyles from '../Account/Account.module.css';
 import { initiatePayment } from '../../services/PaymentProvider';
 import { formatINR } from '../../utils/currency';
+import { generateInvoice } from '../../utils/invoiceGenerator';
 import SEO from '../../components/common/SEO';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop';
@@ -26,9 +27,24 @@ const Checkout = () => {
   
   // Final Order Info
   const [orderId, setOrderId] = useState(null);
+  const [internalOrderId, setInternalOrderId] = useState(null);
   
   // Payment State
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [downloadingOrderId, setDownloadingOrderId] = useState(null);
+
+  const handleDownloadInvoice = async () => {
+    if (!internalOrderId) return;
+    setDownloadingOrderId(internalOrderId);
+    try {
+      await generateInvoice(internalOrderId);
+    } catch (err) {
+      console.error('Failed to generate invoice', err);
+      alert('Failed to generate invoice. Please try again.');
+    } finally {
+      setDownloadingOrderId(null);
+    }
+  };
 
   useEffect(() => {
     if (cartItems.length === 0 && step !== 4) {
@@ -77,7 +93,8 @@ const Checkout = () => {
       
       if (error) throw error;
       
-      setOrderId(data.orderNumber); // Assuming we return orderNumber for display
+      setOrderId(data.orderNumber); // For display
+      setInternalOrderId(data.orderId); // The UUID for generating invoice
 
       await initiatePayment({
         amount: data.amount,
@@ -170,6 +187,16 @@ const Checkout = () => {
               <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
                 <Link to="/shop" className={styles.primaryBtn} style={{ textDecoration: 'none' }}>CONTINUE SHOPPING</Link>
                 {user && <Link to="/account/orders" className={styles.wishlistBtn} style={{ textDecoration: 'none' }}>VIEW ORDERS</Link>}
+                {internalOrderId && (
+                  <button 
+                    onClick={handleDownloadInvoice}
+                    disabled={downloadingOrderId === internalOrderId}
+                    className={styles.wishlistBtn}
+                    style={{ cursor: downloadingOrderId === internalOrderId ? 'not-allowed' : 'pointer' }}
+                  >
+                    {downloadingOrderId === internalOrderId ? 'GENERATING...' : 'DOWNLOAD INVOICE'}
+                  </button>
+                )}
               </div>
             </motion.div>
           </div>

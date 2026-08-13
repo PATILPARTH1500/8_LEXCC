@@ -5,11 +5,25 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './Account.module.css';
 import { formatINR } from '../../utils/currency';
+import { generateInvoice } from '../../utils/invoiceGenerator';
 
 const Orders = () => {
   const { user } = useAuth();
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [downloadingOrderId, setDownloadingOrderId] = useState(null);
+
+  const handleDownloadInvoice = async (orderId) => {
+    setDownloadingOrderId(orderId);
+    try {
+      await generateInvoice(orderId);
+    } catch (err) {
+      console.error('Failed to generate invoice', err);
+      alert('Failed to generate invoice. Please try again.');
+    } finally {
+      setDownloadingOrderId(null);
+    }
+  };
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -89,9 +103,22 @@ const Orders = () => {
                 </div>
                 <div>
                   <p style={{ fontSize: '1.4rem', fontWeight: 300, marginBottom: '10px' }}>{formatINR(order.total_amount)}</p>
-                  <span className={`${styles.badge} ${order.status === 'delivered' ? styles.badgeSuccess : styles.badgeWarning}`} style={{ display: 'inline-block' }}>
+                  <span className={`${styles.badge} ${order.status === 'delivered' ? styles.badgeSuccess : styles.badgeWarning}`} style={{ display: 'inline-block', marginBottom: '10px' }}>
                     {order.status}
                   </span>
+                  <div>
+                    <button 
+                      onClick={() => handleDownloadInvoice(order.id)}
+                      disabled={downloadingOrderId === order.id}
+                      style={{ 
+                        background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', 
+                        padding: '8px 15px', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.1em',
+                        cursor: downloadingOrderId === order.id ? 'not-allowed' : 'pointer', opacity: downloadingOrderId === order.id ? 0.5 : 1
+                      }}
+                    >
+                      {downloadingOrderId === order.id ? 'GENERATING...' : 'DOWNLOAD INVOICE'}
+                    </button>
+                  </div>
                 </div>
               </div>
 

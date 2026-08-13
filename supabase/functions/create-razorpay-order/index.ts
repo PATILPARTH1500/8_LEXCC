@@ -116,6 +116,7 @@ serve(async (req) => {
       JSON.stringify({
         razorpayOrderId: rpOrder.id,
         orderNumber: orderNumber,
+        orderId: order.id,
         amount: Math.round(totalAmount * 100)
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }

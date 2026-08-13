@@ -5,6 +5,7 @@ import CustomSelect from '../../components/ui/CustomSelect';
 import ShipmentTrackingModal from '../../components/admin/ShipmentTrackingModal';
 import styles from '../Account/Account.module.css';
 import { formatINR } from '../../utils/currency';
+import { generateInvoice } from '../../utils/invoiceGenerator';
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -12,6 +13,19 @@ const AdminOrders = () => {
   const [error, setError] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [downloadingOrderId, setDownloadingOrderId] = useState(null);
+
+  const handleDownloadInvoice = async (orderId) => {
+    setDownloadingOrderId(orderId);
+    try {
+      await generateInvoice(orderId);
+    } catch (err) {
+      console.error('Failed to generate invoice', err);
+      alert('Failed to generate invoice. Please try again.');
+    } finally {
+      setDownloadingOrderId(null);
+    }
+  };
 
   useEffect(() => {
     fetchOrders();
@@ -207,12 +221,21 @@ const AdminOrders = () => {
                         </CustomSelect>
                       </td>
                       <td style={{ padding: '20px 30px', textAlign: 'right' }} data-label="Actions">
-                        <button 
-                          onClick={() => { setSelectedOrder(order); setIsModalOpen(true); }}
-                          style={{ background: 'transparent', border: 'none', color: 'var(--accent-color, #D4AF37)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer' }}
-                        >
-                          View
-                        </button>
+                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                          <button 
+                            onClick={() => handleDownloadInvoice(order.id)}
+                            disabled={downloadingOrderId === order.id}
+                            style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', cursor: downloadingOrderId === order.id ? 'not-allowed' : 'pointer', opacity: downloadingOrderId === order.id ? 0.5 : 1 }}
+                          >
+                            {downloadingOrderId === order.id ? '...' : 'PDF'}
+                          </button>
+                          <button 
+                            onClick={() => { setSelectedOrder(order); setIsModalOpen(true); }}
+                            style={{ background: 'transparent', border: 'none', color: 'var(--accent-color, #D4AF37)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer' }}
+                          >
+                            View
+                          </button>
+                        </div>
                       </td>
                     </motion.tr>
                   ))
