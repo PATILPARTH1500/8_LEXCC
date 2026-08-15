@@ -219,7 +219,7 @@ const ProductDetail = () => {
               </motion.div>
             ))}
           </div>
-          <div className={styles.mainImageContainer} style={{ borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,0,0,0.5)', backdropFilter: window.innerWidth < 768 ? 'none' : 'blur(10px)', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
+          <div className={styles.mainImageContainer} style={{ borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,0,0,0.5)', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeImage}
@@ -259,12 +259,12 @@ const ProductDetail = () => {
 
         {/* Right Side: Product Info */}
         <div className={styles.infoSection}>
-          <div className={accountStyles.card} style={{ padding: '60px', margin: 0, background: 'rgba(10, 10, 10, 0.6)', backdropFilter: window.innerWidth < 768 ? 'none' : 'blur(20px)', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 30px 60px rgba(0,0,0,0.6)', transform: 'none' }}>
+          <div className={`${accountStyles.card} ${styles.pdpInfoCard}`} style={{ margin: 0, transform: 'none' }}>
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
-                <h1 style={{ fontSize: '2.8rem', letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'var(--font-heading)', fontWeight: 300, color: '#fff', lineHeight: 1.1 }}>{product.name}</h1>
+                <h1 className={styles.pdpTitle}>{product.name}</h1>
               </div>
-              <p style={{ fontSize: '1.6rem', color: 'var(--accent-color, #D4AF37)', letterSpacing: '0.05em', marginBottom: '35px', fontWeight: 300, fontFamily: 'var(--font-heading)' }}>{formatINR(product.price)}</p>
+              <p className={styles.pdpPrice}>{formatINR(product.price)}</p>
               
               <div style={{ height: '1px', width: '100%', background: 'linear-gradient(90deg, rgba(255,255,255,0.1), transparent)', marginBottom: '35px' }} />
               
@@ -420,7 +420,7 @@ const ProductDetail = () => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px' }}>
             <h2 style={{ fontSize: '2rem', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 300, color: '#fff' }}>Related Pieces</h2>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '30px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '20px' }}>
             {relatedProducts.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}

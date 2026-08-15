@@ -177,7 +177,7 @@ const Collections = () => {
 
       <div className={styles.shopLayoutContainer}>
         
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '60px', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '30px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '20px', gap: '15px' }}>
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -300,12 +300,7 @@ const Collections = () => {
                     transition: { staggerChildren: window.innerWidth < 768 ? 0 : 0.1 }
                   }
                 }}
-                style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', 
-                  gap: '40px',
-                  rowGap: '60px'
-                }}
+                className={styles.productGrid}
               >
                 {products.map(product => (
                   <motion.div 

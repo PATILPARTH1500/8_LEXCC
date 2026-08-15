@@ -57,6 +57,7 @@ const AccountLayout = () => {
           <motion.div
             key={location.pathname + '-bg'}
             className={styles.bgTextAccount}
+            style={{ maxWidth: '100vw', overflowX: 'hidden' }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
