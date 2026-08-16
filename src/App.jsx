@@ -26,6 +26,7 @@ import Collections from './pages/Public/Collections';
 import ProductDetail from './pages/Public/ProductDetail';
 import Cart from './pages/Public/Cart';
 import Checkout from './pages/Public/Checkout';
+import NotFound from './pages/Public/NotFound';
 
 // Account Pages
 import AccountLayout from './pages/Account/AccountLayout';
@@ -78,6 +79,8 @@ function App() {
                 </Route>
               </Route>
             </Route>
+
+            <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
       </BrowserRouter>

@@ -9,28 +9,34 @@ import { formatINR } from '../../utils/currency';
 const SearchOverlay = ({ isOpen, onClose }) => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     if (query.trim() === '') {
       setResults([]);
+      setIsSearching(false);
       return;
     }
     
     // Live search simulation
     const timer = setTimeout(async () => {
+      setIsSearching(true);
       try {
         const { data, error } = await supabase
           .from('products')
-          .select('id, name, price, image_url')
+          .select('id, name, slug, price, image_url')
           .ilike('name', `%${query}%`)
           .eq('status', 'active')
+          .not('slug', 'is', null)
           .limit(10);
-        
-        if (!error && data) {
-          setResults(data);
-        }
+
+        if (error) throw error;
+        setResults(data || []);
       } catch (err) {
         console.error('Search error:', err);
+        setResults([]);
+      } finally {
+        setIsSearching(false);
       }
     }, 300); // 300ms debounce
     
@@ -57,7 +63,7 @@ const SearchOverlay = ({ isOpen, onClose }) => {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
         >
-          <button className={styles.searchClose} onClick={onClose}>&times;</button>
+          <button className={styles.searchClose} onClick={onClose} aria-label="Close search">&times;</button>
           
           <div className={styles.searchInputWrapper}>
             <input 
@@ -71,7 +77,11 @@ const SearchOverlay = ({ isOpen, onClose }) => {
           </div>
 
           <div className={styles.searchResults}>
-            {query.length > 0 && results.length === 0 ? (
+            {isSearching ? (
+              <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.4)', marginTop: '40px', letterSpacing: '0.1em' }}>
+                SEARCHING...
+              </p>
+            ) : query.length > 0 && results.length === 0 ? (
               <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.4)', marginTop: '40px', letterSpacing: '0.1em' }}>
                 NO RESULTS FOUND FOR "{query.toUpperCase()}"
               </p>

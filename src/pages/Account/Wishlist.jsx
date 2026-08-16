@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCart } from '../../contexts/CartContext';
@@ -9,6 +9,7 @@ import { formatINR } from '../../utils/currency';
 const Wishlist = () => {
   const { wishlistItems, removeFromWishlist } = useAuth();
   const { addToCart } = useCart();
+  const navigate = useNavigate();
   const [isRemoving, setIsRemoving] = useState(null);
 
   const handleRemove = async (itemId) => {
@@ -23,8 +24,18 @@ const Wishlist = () => {
   };
 
   const handleMoveToCart = async (item, product) => {
-    addToCart(product);
-    await handleRemove(item.id);
+    const availableVariants = product.variants?.filter((variant) => variant.stock > 0) || [];
+    if ((product.variants?.length || 0) > 0 && availableVariants.length !== 1) {
+      navigate(`/product/${product.slug}`);
+      return;
+    }
+
+    try {
+      await addToCart(product, availableVariants[0] || null);
+      await handleRemove(item.id);
+    } catch (error) {
+      console.error('Unable to move wishlist item to cart:', error);
+    }
   };
 
   const containerVariants = {

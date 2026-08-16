@@ -12,10 +12,21 @@ import { generateInvoice } from '../../utils/invoiceGenerator';
 import SEO from '../../components/common/SEO';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop';
+const EMPTY_GUEST_ADDRESS = {
+  first_name: '',
+  last_name: '',
+  street: '',
+  city: '',
+  state: '',
+  postal_code: '',
+  country: 'India',
+  email: '',
+  phone: ''
+};
 
 const Checkout = () => {
   const { cartItems, cartTotal, clearCart } = useCart();
-  const { user, fetchAddresses } = useAuth();
+  const { user, profile, fetchAddresses } = useAuth();
   const navigate = useNavigate();
   
   const [step, setStep] = useState(1); // 1: Shipping, 2: Review, 3: Payment, 4: Confirmation
@@ -24,20 +35,24 @@ const Checkout = () => {
   const [addresses, setAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [loadingAddresses, setLoadingAddresses] = useState(true);
+  const [guestAddress, setGuestAddress] = useState(EMPTY_GUEST_ADDRESS);
+  const [checkoutError, setCheckoutError] = useState('');
   
   // Final Order Info
   const [orderId, setOrderId] = useState(null);
   const [internalOrderId, setInternalOrderId] = useState(null);
+  const [guestAccessToken, setGuestAccessToken] = useState(null);
   
   // Payment State
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [paymentVerified, setPaymentVerified] = useState(false);
   const [downloadingOrderId, setDownloadingOrderId] = useState(null);
 
   const handleDownloadInvoice = async () => {
     if (!internalOrderId) return;
     setDownloadingOrderId(internalOrderId);
     try {
-      await generateInvoice(internalOrderId);
+      await generateInvoice(internalOrderId, guestAccessToken);
     } catch (err) {
       console.error('Failed to generate invoice', err);
       alert('Failed to generate invoice. Please try again.');
@@ -47,76 +62,139 @@ const Checkout = () => {
   };
 
   useEffect(() => {
-    if (cartItems.length === 0 && step !== 4) {
+    if (cartItems.length === 0 && step !== 4 && !paymentVerified) {
       navigate('/cart');
     }
     
     if (user) {
-      fetchAddresses().then(data => {
-        setAddresses(data || []);
-        const defaultAddr = data?.find(a => a.is_default);
-        if (defaultAddr) setSelectedAddressId(defaultAddr.id);
-        else if (data?.length > 0) setSelectedAddressId(data[0].id);
-        setLoadingAddresses(false);
-      });
+      fetchAddresses()
+        .then(data => {
+          setAddresses(data || []);
+          const defaultAddr = data?.find(a => a.is_default);
+          if (defaultAddr) setSelectedAddressId(defaultAddr.id);
+          else if (data?.length > 0) setSelectedAddressId(data[0].id);
+        })
+        .catch((error) => {
+          console.error('Unable to load shipping addresses:', error);
+          setCheckoutError('Your saved addresses could not be loaded. Please try again.');
+        })
+        .finally(() => setLoadingAddresses(false));
     } else {
       setLoadingAddresses(false);
     }
-  }, [user, cartItems.length, navigate, step]);
+  }, [user, cartItems.length, navigate, step, paymentVerified]);
 
   const handleNextStep = async () => {
-    if (step === 1 && !selectedAddressId && user) {
-      alert("Please select a shipping address");
-      return;
+    setCheckoutError('');
+
+    if (step === 1) {
+      if (user && !selectedAddressId) {
+        setCheckoutError('Please select a shipping address.');
+        return;
+      }
+
+      if (!user) {
+        const requiredFields = ['first_name', 'last_name', 'street', 'city', 'state', 'postal_code', 'country', 'email', 'phone'];
+        if (requiredFields.some((field) => !guestAddress[field]?.trim())) {
+          setCheckoutError('Please complete every guest shipping field.');
+          return;
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestAddress.email)) {
+          setCheckoutError('Please enter a valid email address.');
+          return;
+        }
+        if (guestAddress.phone.replace(/\D/g, '').length < 7) {
+          setCheckoutError('Please enter a valid phone number.');
+          return;
+        }
+      }
     }
     setStep(prev => prev + 1);
   };
 
+  const handleGuestAddressChange = (event) => {
+    const { name, value } = event.target;
+    setGuestAddress((current) => ({ ...current, [name]: value }));
+  };
+
+  const selectedShippingAddress = user
+    ? addresses.find((address) => address.id === selectedAddressId)
+    : guestAddress;
+
   const handlePaymentInit = async () => {
     setIsProcessingPayment(true);
+    setCheckoutError('');
     try {
-      const selectedAddress = addresses.find(a => a.id === selectedAddressId) || {};
+      if (!selectedShippingAddress) throw new Error('Please select a shipping address.');
+
+      const shippingAddress = {
+        ...selectedShippingAddress,
+        email: selectedShippingAddress.email || user?.email || '',
+        phone: selectedShippingAddress.phone || profile?.phone || ''
+      };
 
       // Convert cartItems to send to backend for validation
       const itemsPayload = cartItems.map(item => ({
         product_id: item.product.id,
         variant_id: item.variant?.id || null,
+        size: item.variant?.size || '',
+        color: item.variant?.color || '',
         quantity: item.quantity
       }));
       
       const { data, error } = await supabase.functions.invoke('create-razorpay-order', {
         body: { 
           items: itemsPayload,
-          shippingAddress: selectedAddress
+          shippingAddress
         }
       });
       
       if (error) throw error;
+      if (!data?.orderId || !data?.razorpayOrderId) throw new Error('The payment order response was incomplete.');
       
       setOrderId(data.orderNumber); // For display
       setInternalOrderId(data.orderId); // The UUID for generating invoice
+      setGuestAccessToken(data.guestAccessToken || null);
 
       await initiatePayment({
         amount: data.amount,
         currency: "INR",
         razorpayOrderId: data.razorpayOrderId,
-        customerName: user?.user_metadata?.first_name || "Guest",
-        customerEmail: user?.email || "",
+        customerName: `${shippingAddress.first_name || ''} ${shippingAddress.last_name || ''}`.trim(),
+        customerEmail: shippingAddress.email,
+        customerPhone: shippingAddress.phone
       }, {
-        onSuccess: (response) => {
-          // Payment successful! Webhook will handle DB status updates.
-          clearCart();
+        onSuccess: async (response) => {
+          const { data: verification, error: verificationError } = await supabase.functions.invoke('verify-razorpay-payment', {
+            body: {
+              orderId: data.orderId,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+              guestAccessToken: data.guestAccessToken || null
+            }
+          });
+
+          if (verificationError) throw verificationError;
+          if (!verification?.verified) throw new Error('Payment could not be verified.');
+
+          setPaymentVerified(true);
+          try {
+            await clearCart();
+          } catch (cartCleanupError) {
+            console.error('Payment verified, but cart cleanup failed:', cartCleanupError);
+            setCheckoutError('Payment was verified, but the cart could not be cleared automatically.');
+          }
           setStep(4);
         },
         onFailure: (err) => {
           console.error(err);
-          alert("Payment failed or was cancelled.");
         }
       });
 
     } catch (error) {
       console.error("Failed to initialize payment:", error);
-      alert("Failed to initialize secure checkout. Please try again.");
+      setCheckoutError(error.message || 'Secure payment could not be completed. Please try again.');
     } finally {
       setIsProcessingPayment(false);
     }
@@ -147,7 +225,7 @@ const Checkout = () => {
         </motion.div>
       </AnimatePresence>
 
-      <div style={{ position: 'relative', zIndex: 1, maxWidth: '1500px', margin: '0 auto', padding: '140px 40px 100px' }}>
+      <div className={styles.checkoutPageContainer}>
         
         {step === 4 ? (
           <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
@@ -170,6 +248,7 @@ const Checkout = () => {
               <h1 style={{ fontSize: '2.5rem', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '20px', fontFamily: 'var(--font-heading)', fontWeight: 300 }}>Order Confirmed</h1>
               <p style={{ color: 'rgba(255,255,255,0.6)', marginBottom: '10px', fontSize: '1.1rem', letterSpacing: '0.05em' }}>Thank you for your purchase.</p>
               <p style={{ color: 'rgba(255,255,255,0.6)', marginBottom: '40px', letterSpacing: '0.05em' }}>Order Number: <strong style={{ color: '#fff', fontWeight: 500 }}>{orderId}</strong></p>
+              {checkoutError && <p role="status" style={{ color: '#facc15', marginBottom: '30px', fontSize: '0.85rem' }}>{checkoutError}</p>}
               
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
@@ -184,7 +263,7 @@ const Checkout = () => {
                 </p>
               </motion.div>
 
-              <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
+              <div className={styles.checkoutConfirmationActions}>
                 <Link to="/shop" className={styles.primaryBtn} style={{ textDecoration: 'none' }}>CONTINUE SHOPPING</Link>
                 {user && <Link to="/account/orders" className={styles.wishlistBtn} style={{ textDecoration: 'none' }}>VIEW ORDERS</Link>}
                 {internalOrderId && (
@@ -213,6 +292,10 @@ const Checkout = () => {
                 <motion.span animate={{ color: step >= 3 ? '#fff' : 'rgba(255,255,255,0.4)' }} style={{ borderBottom: step === 3 ? '1px solid #fff' : 'none', paddingBottom: '5px' }}>Payment</motion.span>
               </div>
 
+              {checkoutError && (
+                <p role="alert" className={styles.checkoutError}>{checkoutError}</p>
+              )}
+
               <AnimatePresence mode="wait">
                 <motion.div
                   key={step}
@@ -233,11 +316,40 @@ const Checkout = () => {
                         </div>
                       ) : !user ? (
                         <div className={accountStyles.card} style={{ padding: '40px', margin: '0 0 40px 0' }}>
-                          <p style={{ marginBottom: '30px', color: 'rgba(255,255,255,0.7)', lineHeight: '1.6' }}>Please log in to use your saved addresses or checkout as a guest.</p>
-                          <div style={{ display: 'flex', gap: '20px' }}>
-                            <Link to="/login" className={styles.secondaryBtn} style={{ textDecoration: 'none' }}>Log In</Link>
-                            <button onClick={handleNextStep} className={styles.primaryBtn}>Guest Checkout</button>
+                          <p style={{ marginBottom: '30px', color: 'rgba(255,255,255,0.7)', lineHeight: '1.6' }}>
+                            Enter the delivery details below, or <Link to="/login" style={{ color: 'var(--accent-color, #D4AF37)' }}>log in</Link> to use a saved address.
+                          </p>
+                          <div className={accountStyles.formGrid}>
+                            {[
+                              ['first_name', 'First Name', 'text', 'given-name'],
+                              ['last_name', 'Last Name', 'text', 'family-name'],
+                              ['email', 'Email Address', 'email', 'email'],
+                              ['phone', 'Phone Number', 'tel', 'tel'],
+                              ['street', 'Street Address', 'text', 'street-address'],
+                              ['city', 'City', 'text', 'address-level2'],
+                              ['state', 'State', 'text', 'address-level1'],
+                              ['postal_code', 'Postal Code', 'text', 'postal-code'],
+                              ['country', 'Country', 'text', 'country-name']
+                            ].map(([name, label, type, autoComplete]) => (
+                              <div key={name} className={accountStyles.formGroup} style={{ marginBottom: 0 }}>
+                                <label htmlFor={`guest-${name}`} className={accountStyles.formLabel}>{label}</label>
+                                <input
+                                  id={`guest-${name}`}
+                                  name={name}
+                                  type={type}
+                                  autoComplete={autoComplete}
+                                  value={guestAddress[name]}
+                                  onChange={handleGuestAddressChange}
+                                  className={accountStyles.formInput}
+                                  maxLength={name === 'street' ? 180 : 100}
+                                  required
+                                />
+                              </div>
+                            ))}
                           </div>
+                          <button onClick={handleNextStep} className={styles.primaryBtn} style={{ marginTop: '30px', width: '100%', maxWidth: '300px' }}>
+                            CONTINUE AS GUEST
+                          </button>
                         </div>
                       ) : addresses.length === 0 ? (
                         <div className={accountStyles.card} style={{ padding: '40px', margin: '0 0 40px 0' }}>
@@ -292,16 +404,14 @@ const Checkout = () => {
                           <h3 style={{ fontSize: '0.8rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)' }}>Shipping To</h3>
                           <button onClick={() => setStep(1)} style={{ background: 'transparent', border: 'none', color: 'var(--accent-color, #D4AF37)', cursor: 'pointer', fontSize: '0.75rem', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Edit</button>
                         </div>
-                        {selectedAddressId ? (() => {
-                          const addr = addresses.find(a => a.id === selectedAddressId);
-                          return addr ? (
-                            <div style={{ fontSize: '0.9rem', lineHeight: '1.8', color: '#fff' }}>
-                              <p>{addr.first_name} {addr.last_name}</p>
-                              <p>{addr.street}, {addr.city}, {addr.state} {addr.postal_code}</p>
-                              <p>{addr.country}</p>
-                            </div>
-                          ) : <p style={{ color: '#fff' }}>Guest Address</p>;
-                        })() : <p style={{ color: '#fff' }}>Guest Address</p>}
+                        {selectedShippingAddress ? (
+                          <div style={{ fontSize: '0.9rem', lineHeight: '1.8', color: '#fff' }}>
+                            <p>{selectedShippingAddress.first_name} {selectedShippingAddress.last_name}</p>
+                            <p>{selectedShippingAddress.street}, {selectedShippingAddress.city}, {selectedShippingAddress.state} {selectedShippingAddress.postal_code}</p>
+                            <p>{selectedShippingAddress.country}</p>
+                            {!user && <p>{selectedShippingAddress.email} · {selectedShippingAddress.phone}</p>}
+                          </div>
+                        ) : <p style={{ color: '#fff' }}>No shipping address selected</p>}
                       </div>
 
                       <div className={accountStyles.card} style={{ padding: '40px', margin: '0 0 50px 0' }}>

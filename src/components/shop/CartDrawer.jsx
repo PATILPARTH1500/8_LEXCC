@@ -8,7 +8,7 @@ import styles from './CartDrawer.module.css';
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop';
 
 const CartDrawer = () => {
-  const { isCartOpen, setIsCartOpen, cartItems, removeFromCart, updateQuantity, cartTotal } = useCart();
+  const { isCartOpen, setIsCartOpen, cartItems, removeFromCart, updateQuantity, cartTotal, cartError } = useCart();
   const navigate = useNavigate();
 
   const handleCheckout = () => {
@@ -48,10 +48,11 @@ const CartDrawer = () => {
 
             <div className={styles.header}>
               <h2 style={{ fontSize: '1.1rem', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 400 }}>Your Cart ({cartItems.length})</h2>
-              <button onClick={() => setIsCartOpen(false)} style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: '2rem', cursor: 'pointer', opacity: 0.5, transition: 'opacity 0.3s', fontWeight: 200, lineHeight: 0.5 }}>&times;</button>
+              <button onClick={() => setIsCartOpen(false)} aria-label="Close cart" style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: '2rem', cursor: 'pointer', opacity: 0.5, transition: 'opacity 0.3s', fontWeight: 200, lineHeight: 0.5 }}>&times;</button>
             </div>
 
             <div className={styles.body}>
+              {cartError && <p role="alert" style={{ color: '#fca5a5', padding: '12px', marginBottom: '20px', border: '1px solid rgba(239,68,68,0.25)', fontSize: '0.8rem', lineHeight: 1.5 }}>{cartError}</p>}
               {cartItems.length === 0 ? (
                 <motion.div 
                   initial={{ opacity: 0, y: 20 }}
@@ -99,11 +100,11 @@ const CartDrawer = () => {
                           
                           <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                             <div style={{ display: 'flex', alignItems: 'center', border: '1px solid rgba(255,255,255,0.1)' }}>
-                              <button onClick={() => updateQuantity(item.id, item.quantity - 1)} style={{ padding: '8px 12px', background: 'transparent', color: 'rgba(255,255,255,0.6)', border: 'none', cursor: 'pointer', transition: 'color 0.3s' }} onMouseOver={e=>e.currentTarget.style.color='#fff'} onMouseOut={e=>e.currentTarget.style.color='rgba(255,255,255,0.6)'}>-</button>
+                              <button onClick={() => updateQuantity(item.id, item.quantity - 1).catch(console.error)} style={{ padding: '8px 12px', background: 'transparent', color: 'rgba(255,255,255,0.6)', border: 'none', cursor: 'pointer', transition: 'color 0.3s' }} onMouseOver={e=>e.currentTarget.style.color='#fff'} onMouseOut={e=>e.currentTarget.style.color='rgba(255,255,255,0.6)'}>-</button>
                               <span style={{ fontSize: '0.85rem', width: '24px', textAlign: 'center' }}>{item.quantity}</span>
-                              <button onClick={() => updateQuantity(item.id, item.quantity + 1)} style={{ padding: '8px 12px', background: 'transparent', color: 'rgba(255,255,255,0.6)', border: 'none', cursor: 'pointer', transition: 'color 0.3s' }} onMouseOver={e=>e.currentTarget.style.color='#fff'} onMouseOut={e=>e.currentTarget.style.color='rgba(255,255,255,0.6)'}>+</button>
+                              <button onClick={() => updateQuantity(item.id, item.quantity + 1).catch(console.error)} style={{ padding: '8px 12px', background: 'transparent', color: 'rgba(255,255,255,0.6)', border: 'none', cursor: 'pointer', transition: 'color 0.3s' }} onMouseOver={e=>e.currentTarget.style.color='#fff'} onMouseOut={e=>e.currentTarget.style.color='rgba(255,255,255,0.6)'}>+</button>
                             </div>
-                            <button onClick={() => removeFromCart(item.id)} style={{ fontSize: '0.75rem', color: 'rgba(239, 68, 68, 0.7)', background: 'transparent', border: 'none', textDecoration: 'none', letterSpacing: '0.05em', cursor: 'pointer', transition: 'color 0.3s' }} onMouseOver={e=>e.currentTarget.style.color='#ef4444'} onMouseOut={e=>e.currentTarget.style.color='rgba(239, 68, 68, 0.7)'}>REMOVE</button>
+                            <button onClick={() => removeFromCart(item.id).catch(console.error)} style={{ fontSize: '0.75rem', color: 'rgba(239, 68, 68, 0.7)', background: 'transparent', border: 'none', textDecoration: 'none', letterSpacing: '0.05em', cursor: 'pointer', transition: 'color 0.3s' }} onMouseOver={e=>e.currentTarget.style.color='#ef4444'} onMouseOut={e=>e.currentTarget.style.color='rgba(239, 68, 68, 0.7)'}>REMOVE</button>
                           </div>
                         </div>
                       </motion.div>

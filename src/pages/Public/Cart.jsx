@@ -10,7 +10,7 @@ import SEO from '../../components/common/SEO';
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop';
 
 const Cart = () => {
-  const { cartItems, updateQuantity, removeFromCart, cartTotal } = useCart();
+  const { cartItems, updateQuantity, removeFromCart, cartTotal, cartError } = useCart();
   const navigate = useNavigate();
 
   const containerVariants = {
@@ -70,6 +70,8 @@ const Cart = () => {
           My Cart
         </motion.h1>
 
+        {cartError && <p role="alert" style={{ color: '#fca5a5', padding: '14px', marginBottom: '30px', border: '1px solid rgba(239,68,68,0.25)', fontSize: '0.85rem' }}>{cartError}</p>}
+
         <div className={styles.checkoutGrid}>
           
           {/* Left: Products */}
@@ -101,7 +103,7 @@ const Cart = () => {
                       <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem', letterSpacing: '0.05em' }}>{formatINR(item.product.price)}</p>
                       {item.variant?.size && <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', letterSpacing: '0.05em' }}>Size: {item.variant.size}</p>}
                       <button 
-                        onClick={() => removeFromCart(item.id)} 
+                        onClick={() => removeFromCart(item.id).catch(console.error)}
                         style={{ color: 'rgba(239, 68, 68, 0.8)', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', marginTop: '10px', fontSize: '0.75rem', letterSpacing: '0.1em', textTransform: 'uppercase', transition: 'color 0.3s', fontWeight: 500 }}
                         onMouseOver={e=>e.currentTarget.style.color='#ef4444'}
                         onMouseOut={e=>e.currentTarget.style.color='rgba(239, 68, 68, 0.8)'}
@@ -113,9 +115,9 @@ const Cart = () => {
                   
                   <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center', border: '1px solid rgba(255,255,255,0.1)', padding: '5px 10px', transition: 'border-color 0.3s' }} onMouseOver={e=>e.currentTarget.style.borderColor='rgba(255,255,255,0.3)'} onMouseOut={e=>e.currentTarget.style.borderColor='rgba(255,255,255,0.1)'}>
-                      <button onClick={() => updateQuantity(item.id, item.quantity - 1)} style={{ width: '25px', background: 'transparent', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '1.2rem', opacity: 0.6, transition: 'opacity 0.3s' }} onMouseOver={e=>e.currentTarget.style.opacity=1} onMouseOut={e=>e.currentTarget.style.opacity=0.6}>-</button>
+                      <button onClick={() => updateQuantity(item.id, item.quantity - 1).catch(console.error)} style={{ width: '25px', background: 'transparent', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '1.2rem', opacity: 0.6, transition: 'opacity 0.3s' }} onMouseOver={e=>e.currentTarget.style.opacity=1} onMouseOut={e=>e.currentTarget.style.opacity=0.6}>-</button>
                       <span style={{ width: '30px', textAlign: 'center', fontSize: '0.95rem', fontWeight: 300 }}>{item.quantity}</span>
-                      <button onClick={() => updateQuantity(item.id, item.quantity + 1)} style={{ width: '25px', background: 'transparent', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '1.2rem', opacity: 0.6, transition: 'opacity 0.3s' }} onMouseOver={e=>e.currentTarget.style.opacity=1} onMouseOut={e=>e.currentTarget.style.opacity=0.6}>+</button>
+                      <button onClick={() => updateQuantity(item.id, item.quantity + 1).catch(console.error)} style={{ width: '25px', background: 'transparent', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '1.2rem', opacity: 0.6, transition: 'opacity 0.3s' }} onMouseOver={e=>e.currentTarget.style.opacity=1} onMouseOut={e=>e.currentTarget.style.opacity=0.6}>+</button>
                     </div>
                   </div>
                   

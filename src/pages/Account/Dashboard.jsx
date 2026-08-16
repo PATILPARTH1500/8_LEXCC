@@ -6,36 +6,38 @@ import { supabase } from '../../lib/supabase';
 import styles from './Account.module.css';
 
 const Dashboard = () => {
-  const { profile, user } = useAuth();
+  const { profile, user, wishlistItems } = useAuth();
   const [stats, setStats] = useState({ orders: 0, wishlist: 0, addresses: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
-      if (!user) return;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
       try {
-        const [ordersRes, wishlistRes, addressesRes] = await Promise.all([
+        const [ordersRes, addressesRes] = await Promise.all([
           supabase.from('orders').select('id', { count: 'exact' }).eq('user_id', user.id),
-          supabase.from('wishlist').select('id', { count: 'exact' }).eq('user_id', user.id),
           supabase.from('addresses').select('id', { count: 'exact' }).eq('user_id', user.id)
         ]);
 
-        // Small animation delay simulation for luxury feel
-        setTimeout(() => {
-          setStats({
-            orders: ordersRes.count || 0,
-            wishlist: wishlistRes.count || 0,
-            addresses: addressesRes.count || 0
-          });
-          setLoading(false);
-        }, 600);
+        if (ordersRes.error) throw ordersRes.error;
+        if (addressesRes.error) throw addressesRes.error;
+
+        setStats({
+          orders: ordersRes.count || 0,
+          wishlist: wishlistItems.length,
+          addresses: addressesRes.count || 0
+        });
+        setLoading(false);
       } catch (err) {
         console.error('Failed to load dashboard stats', err);
         setLoading(false);
       }
     };
     fetchStats();
-  }, [user]);
+  }, [user, wishlistItems.length]);
 
   const firstName = profile?.first_name ? profile.first_name.toUpperCase() : 'MEMBER';
   const lastName = profile?.last_name ? profile.last_name.toUpperCase() : '';

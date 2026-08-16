@@ -1,9 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FiInstagram, FiTwitter, FiFacebook } from 'react-icons/fi';
+import { useNewsletterSubscription } from '../../hooks/useNewsletterSubscription';
 import styles from './Footer.module.css';
 
 const Footer = () => {
+  const newsletter = useNewsletterSubscription('footer');
+
   return (
     <footer className={styles.footer}>
       <div className="container">
@@ -14,9 +17,9 @@ const Footer = () => {
               Own The Streets. Define The Standard. Premium streetwear crafted for those who dictate the culture.
             </p>
             <div className={styles.socials}>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className={styles.socialIcon}><FiInstagram size={20} /></a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className={styles.socialIcon}><FiTwitter size={20} /></a>
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className={styles.socialIcon}><FiFacebook size={20} /></a>
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="LEXCC on Instagram" className={styles.socialIcon}><FiInstagram size={20} /></a>
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="LEXCC on X" className={styles.socialIcon}><FiTwitter size={20} /></a>
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="LEXCC on Facebook" className={styles.socialIcon}><FiFacebook size={20} /></a>
             </div>
           </div>
           
@@ -34,26 +37,37 @@ const Footer = () => {
           <div>
             <h3 className={styles.colTitle}>Support</h3>
             <ul className={styles.linkList}>
-              <li><Link to="/shop" className={styles.link}>FAQ</Link></li>
-              <li><Link to="/shop" className={styles.link}>Shipping & Returns</Link></li>
+              <li><span className={styles.linkPending} title="Support page coming soon">FAQ — Coming soon</span></li>
+              <li><span className={styles.linkPending} title="Support page coming soon">Shipping & Returns — Coming soon</span></li>
               <li><Link to="/account/orders" className={styles.link}>Track Order</Link></li>
-              <li><Link to="/shop" className={styles.link}>Contact Us</Link></li>
+              <li><span className={styles.linkPending} title="Support page coming soon">Contact Us — Coming soon</span></li>
             </ul>
           </div>
 
           <div>
             <h3 className={styles.colTitle}>Newsletter</h3>
             <p className={styles.newsletterDesc}>Subscribe to receive updates, access to exclusive deals, and more.</p>
-            <form className={styles.form}>
+            <form className={styles.form} onSubmit={newsletter.subscribe}>
+              <label htmlFor="footer-newsletter-email" className={styles.srOnly}>Email address</label>
               <input 
+                id="footer-newsletter-email"
                 type="email" 
                 placeholder="Enter your email address" 
                 className={styles.input}
+                value={newsletter.email}
+                onChange={(event) => newsletter.setEmail(event.target.value)}
+                autoComplete="email"
+                required
               />
-              <button type="submit" className={styles.submitBtn}>
-                Subscribe
+              <button type="submit" className={styles.submitBtn} disabled={newsletter.status === 'loading'}>
+                {newsletter.status === 'loading' ? 'Subscribing...' : 'Subscribe'}
               </button>
             </form>
+            {newsletter.message && (
+              <p className={`${styles.formMessage} ${newsletter.status === 'error' ? styles.formMessageError : ''}`} role={newsletter.status === 'error' ? 'alert' : 'status'}>
+                {newsletter.message}
+              </p>
+            )}
           </div>
         </div>
         
@@ -62,8 +76,8 @@ const Footer = () => {
             &copy; {new Date().getFullYear()} LEXCC. All rights reserved.
           </p>
           <div className={styles.legalLinks}>
-            <Link to="/shop">Privacy Policy</Link>
-            <Link to="/shop">Terms of Service</Link>
+            <span className={styles.legalPending}>Privacy Policy — Coming soon</span>
+            <span className={styles.legalPending}>Terms of Service — Coming soon</span>
           </div>
         </div>
       </div>
