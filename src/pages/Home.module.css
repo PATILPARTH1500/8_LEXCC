@@ -6,12 +6,6 @@
   overflow: hidden;
 }
 
-@media (max-width: 768px) {
-  .hero {
-    flex-direction: column;
-  }
-}
-
 .heroLeft {
   flex: 1;
   display: flex;
@@ -22,17 +16,6 @@
   position: relative;
   z-index: 10;
   background-color: var(--primary-color);
-}
-
-@media (max-width: 768px) {
-  .heroLeft {
-    padding: 0 5%;
-    align-items: center;
-    text-align: center;
-  }
-  .heroDesc {
-    text-align: center;
-  }
 }
 
 .giantBgText {
@@ -79,12 +62,6 @@
   position: relative;
   height: 100%;
   overflow: hidden;
-}
-
-@media (max-width: 768px) {
-  .heroRight {
-    display: none;
-  }
 }
 
 .heroImg {

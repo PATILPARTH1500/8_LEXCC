@@ -14,12 +14,6 @@
   padding: 140px 40px 100px;
 }
 
-@media (max-width: 768px) {
-  .shopLayoutContainer {
-    padding: 100px 16px 100px;
-  }
-}
-
 .shopHeader {
   padding: 60px 40px;
   text-align: center;
@@ -42,12 +36,6 @@
   margin: 0 auto;
 }
 
-@media (max-width: 768px) {
-  .pdpLayoutContainer {
-    padding: 100px 20px 60px;
-  }
-}
-
 .shopGrid {
   display: grid;
   grid-template-columns: 240px 1fr;
@@ -55,14 +43,6 @@
   max-width: 1800px;
   margin: 0 auto;
   padding: 40px;
-}
-
-@media (max-width: 1024px) {
-  .shopGrid {
-    grid-template-columns: 1fr;
-    gap: 30px;
-    min-width: 0;
-  }
 }
 
 /* Product Grid Layout */
@@ -79,23 +59,6 @@
   }
 }
 
-@media (max-width: 900px) {
-  .productGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 15px;
-    row-gap: 30px;
-    min-width: 0;
-  }
-}
-
-@media (max-width: 500px) {
-  .productGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-    row-gap: 24px;
-  }
-}
-
 .mobileFilterBtn {
   width: 100%;
   padding: 15px;
@@ -107,12 +70,6 @@
   margin-bottom: 20px;
   display: none;
   text-align: center;
-}
-
-@media (max-width: 1024px) {
-  .mobileFilterBtn {
-    display: block;
-  }
 }
 
 .filterDrawerOverlay {
@@ -143,12 +100,6 @@
 /* Sidebar Filters */
 .desktopFilter {
   display: block;
-}
-
-@media (max-width: 1024px) {
-  .desktopFilter {
-    display: none;
-  }
 }
 
 .filterSidebar {
@@ -238,12 +189,6 @@
   margin-bottom: 15px;
 }
 
-@media (max-width: 768px) {
-  .imageContainer {
-    margin-bottom: 10px;
-  }
-}
-
 .productImage {
   width: 100%;
   height: 100%;
@@ -326,28 +271,9 @@
   line-height: 1.4;
 }
 
-@media (max-width: 768px) {
-  .productName {
-    font-size: 0.75rem;
-    letter-spacing: 0.02em;
-    margin-bottom: 3px;
-    line-height: 1.3;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-}
-
 .productPrice {
   font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.7);
-}
-
-@media (max-width: 768px) {
-  .productPrice {
-    font-size: 0.8rem;
-  }
 }
 
 /* Product Detail Page */
@@ -362,12 +288,6 @@
   margin: 0 auto;
 }
 
-@media (max-width: 1024px) {
-  .pdpContainer {
-    grid-template-columns: 1fr;
-  }
-}
-
 .gallerySection {
   display: flex;
   gap: 20px;
@@ -375,14 +295,6 @@
   height: calc(100vh - 80px);
   position: sticky;
   top: 80px;
-}
-
-@media (max-width: 1024px) {
-  .gallerySection {
-    position: relative;
-    height: auto;
-    top: 0;
-  }
 }
 
 .thumbnailList {
@@ -430,12 +342,6 @@
   background: transparent;
 }
 
-@media (max-width: 1024px) {
-  .infoSection {
-    padding: 40px 20px;
-  }
-}
-
 .pdpTitle {
   font-size: clamp(1.6rem, 5vw, 2.8rem);
   font-weight: 300;
@@ -467,12 +373,6 @@
 @media (min-width: 769px) {
   .pdpInfoCard {
     backdrop-filter: blur(20px);
-  }
-}
-
-@media (max-width: 768px) {
-  .pdpInfoCard {
-    padding: 25px;
   }
 }
 
@@ -666,64 +566,6 @@
   overflow-y: auto;
 }
 
-@media (max-width: 768px) {
-  .shopHeader {
-    padding: 40px 20px;
-  }
-  .shopTitle {
-    font-size: 2rem;
-  }
-  .shopGrid {
-    padding: 20px 0;
-  }
-  .gallerySection {
-    flex-direction: column-reverse;
-    padding: 20px 0;
-    gap: 10px;
-  }
-  .thumbnailList {
-    flex-direction: row;
-    width: 100%;
-    height: auto;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 0 20px;
-  }
-  .thumbnail {
-    width: 60px;
-    min-width: 60px;
-  }
-  .infoSection {
-    padding: 20px;
-  }
-  .pdpTitle {
-    font-size: 2rem;
-  }
-  .searchInput {
-    font-size: 2.5rem;
-  }
-  .searchOverlay {
-    padding: 40px 20px;
-  }
-  .searchClose {
-    top: 20px;
-    right: 20px;
-  }
-  .searchInputWrapper {
-    margin: 60px auto 20px;
-  }
-  .actionRow {
-    flex-direction: column;
-  }
-  .primaryBtn {
-    width: 100%;
-  }
-  .wishlistBtn {
-    width: 100%;
-    padding: 18px 24px;
-  }
-}
-
 @media (hover: none) and (pointer: coarse) {
   .wishlistFloatingBtn {
     top: 8px;
@@ -769,21 +611,4 @@
   display: grid;
   grid-template-columns: 1fr 450px;
   gap: 80px;
-}
-
-@media (max-width: 1024px) {
-  .checkoutGrid {
-    grid-template-columns: 1fr;
-    gap: 40px;
-  }
-}
-
-@media (max-width: 768px) {
-  .checkoutPageContainer {
-    padding: 100px 16px 100px;
-  }
-
-  .checkoutConfirmationActions {
-    flex-direction: column;
-  }
 }

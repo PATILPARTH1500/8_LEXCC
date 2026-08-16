@@ -10,6 +10,8 @@ import { initiatePayment } from '../../services/PaymentProvider';
 import { formatINR } from '../../utils/currency';
 import { generateInvoice } from '../../utils/invoiceGenerator';
 import SEO from '../../components/common/SEO';
+import MobileCheckoutView from '../../components/mobile/MobileCheckoutView';
+import { useResponsive } from '../../contexts/ResponsiveContext';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop';
 const EMPTY_GUEST_ADDRESS = {
@@ -25,6 +27,7 @@ const EMPTY_GUEST_ADDRESS = {
 };
 
 const Checkout = () => {
+  const { isMobile } = useResponsive();
   const { cartItems, cartTotal, clearCart } = useCart();
   const { user, profile, fetchAddresses } = useAuth();
   const navigate = useNavigate();
@@ -207,6 +210,33 @@ const Checkout = () => {
     if (step === 4) return 'CONFIRMED';
     return '';
   };
+
+  if (isMobile) {
+    return (
+      <MobileCheckoutView
+        addresses={addresses}
+        cartItems={cartItems}
+        cartTotal={cartTotal}
+        checkoutError={checkoutError}
+        downloadingOrderId={downloadingOrderId}
+        guestAddress={guestAddress}
+        internalOrderId={internalOrderId}
+        isProcessingPayment={isProcessingPayment}
+        loadingAddresses={loadingAddresses}
+        onAddressSelect={setSelectedAddressId}
+        onDownloadInvoice={handleDownloadInvoice}
+        onGuestAddressChange={handleGuestAddressChange}
+        onNext={handleNextStep}
+        onPayment={handlePaymentInit}
+        onStepChange={setStep}
+        orderId={orderId}
+        selectedAddressId={selectedAddressId}
+        selectedShippingAddress={selectedShippingAddress}
+        step={step}
+        user={user}
+      />
+    );
+  }
 
   return (
     <div style={{ position: 'relative', minHeight: '100vh', background: 'var(--secondary-color, #0a0a0a)', overflow: 'hidden' }}>

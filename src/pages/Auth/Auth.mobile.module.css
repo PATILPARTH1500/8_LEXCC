@@ -1,0 +1,36 @@
+.authPage { min-height: 100dvh; width: 100%; min-width: 0; display: flex; align-items: center; justify-content: center; overflow-x: clip; padding: calc(96px + env(safe-area-inset-top)) max(12px, env(safe-area-inset-left)) calc(48px + env(safe-area-inset-bottom)); background: radial-gradient(circle at 50% 18%, rgba(212, 175, 55, 0.07), transparent 34%), #080808; color: #fff; }
+.bgText { display: none; }
+.authCard { position: relative; z-index: 1; width: 100%; max-width: 480px; min-width: 0; padding: 26px 17px; border: 1px solid rgba(255, 255, 255, 0.11); background: rgba(14, 14, 14, 0.95); box-sizing: border-box; }
+.authHeader { margin-bottom: 27px; text-align: left; }
+.authTitle { margin: 0 0 9px; max-width: 100%; overflow-wrap: anywhere; font-family: var(--font-heading); font-size: clamp(1.65rem, 9vw, 2.5rem); font-weight: 300; line-height: 1.05; letter-spacing: 0.06em; text-transform: uppercase; }
+.authSubtitle { margin: 0; color: rgba(255, 255, 255, 0.56); font-size: 0.82rem; line-height: 1.55; overflow-wrap: anywhere; }
+.authForm { min-width: 0; display: flex; flex-direction: column; gap: 17px; }
+.authForm > div { min-width: 0; max-width: 100%; overflow: hidden; }
+.authForm iframe { max-width: 100% !important; }
+.inputGroup { min-width: 0; display: flex; flex-direction: column; gap: 7px; }
+.inputGroup label { color: rgba(255, 255, 255, 0.55); font-size: 0.64rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+.input { width: 100%; min-width: 0; height: 48px; padding: 0 11px; border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 0; outline: 0; background: #151515; color: #fff; font: inherit; font-size: 1rem; box-sizing: border-box; }
+.input:focus { border-color: #d4af37; box-shadow: 0 0 0 1px #d4af37; }
+.inputError { border-color: #ef4444; }
+.errorText { margin-top: 1px; color: #fca5a5; font-size: 0.69rem; line-height: 1.4; }
+.globalError { margin-bottom: 18px; padding: 11px; border: 1px solid rgba(239, 68, 68, 0.38); background: rgba(239, 68, 68, 0.08); color: #fca5a5; font-size: 0.78rem; line-height: 1.5; text-align: left; }
+.passwordMeter { display: flex; gap: 4px; height: 4px; margin-top: 6px; }
+.meterBar { flex: 1; border-radius: 2px; background: rgba(255, 255, 255, 0.1); }
+.meterLabel { margin-top: 5px; font-size: 0.63rem; font-weight: 600; letter-spacing: 0.05em; text-align: right; text-transform: uppercase; }
+.submitBtn,
+.googleBtn { width: 100%; min-width: 0; min-height: 50px; display: flex; align-items: center; justify-content: center; padding: 0 13px; border: 1px solid #fff; background: #fff; color: #080808; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-align: center; text-transform: uppercase; box-sizing: border-box; }
+.submitBtn { margin-top: 5px; }
+.submitBtn:disabled { opacity: 0.5; }
+.googleBtn { gap: 10px; border-color: rgba(255, 255, 255, 0.2); background: transparent; color: #fff; }
+.divider { display: flex; align-items: center; gap: 8px; margin: 23px 0; color: rgba(255, 255, 255, 0.42); font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.divider::before,
+.divider::after { content: ''; flex: 1; height: 1px; background: rgba(255, 255, 255, 0.1); }
+.authFooter { margin-top: 23px; color: rgba(255, 255, 255, 0.55); font-size: 0.78rem; line-height: 1.7; text-align: center; }
+.authLink { min-height: 44px; display: inline-flex; align-items: center; color: #fff; text-decoration: underline; text-underline-offset: 4px; }
+.authCard a:focus-visible,
+.authCard button:focus-visible,
+.authCard input:focus-visible { outline: 2px solid #d4af37; outline-offset: 2px; }
+
+@media (min-width: 720px) {
+  .authCard { padding: 38px 34px; }
+}

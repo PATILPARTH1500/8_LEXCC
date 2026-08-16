@@ -3,9 +3,10 @@ import { createPortal } from 'react-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import CustomSelect from '../../components/ui/CustomSelect';
-import styles from './Account.module.css';
+import { useAccountStyles } from './useAccountStyles';
 
 const Addresses = () => {
+  const styles = useAccountStyles();
   const { fetchAddresses, addAddress, updateAddress, deleteAddress } = useAuth();
   const [addresses, setAddresses] = useState([]);
   const [isLoading, setIsLoading] = useState(true);

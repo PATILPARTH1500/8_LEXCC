@@ -1,0 +1,39 @@
+.layer { position: fixed; inset: 0; z-index: 13000; }
+.backdrop { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: rgba(0, 0, 0, 0.72); backdrop-filter: blur(5px); }
+.drawer { position: absolute; inset: 0 0 0 auto; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; width: min(94%, 430px); padding-top: env(safe-area-inset-top); background: #0c0c0c; color: #fff; border-left: 1px solid rgba(255, 255, 255, 0.12); box-shadow: -18px 0 48px rgba(0, 0, 0, 0.5); }
+.drawer > header { min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 18px 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+.drawer header p { margin: 0 0 6px; color: #b79a64; font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; }
+.drawer header h2 { margin: 0; font-family: var(--font-heading); font-size: 1.4rem; font-weight: 300; letter-spacing: 0.07em; text-transform: uppercase; }
+.drawer header h2 span { color: rgba(255, 255, 255, 0.5); font-size: 0.8rem; }
+.drawer header button { flex: 0 0 44px; width: 44px; height: 44px; display: grid; place-items: center; border: 1px solid rgba(255, 255, 255, 0.16); color: #fff; font-size: 1.25rem; }
+.body { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 4px 16px 24px; }
+.error { padding: 11px; border: 1px solid rgba(239, 68, 68, 0.32); color: #fca5a5; font-size: 0.78rem; }
+.item { min-width: 0; display: grid; grid-template-columns: 86px minmax(0, 1fr); gap: 12px; padding: 17px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+.item > img { width: 86px; height: 112px; object-fit: cover; background: #111; }
+.item > div { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; }
+.item h3 { max-width: 100%; margin: 0; font-size: 0.76rem; font-weight: 400; line-height: 1.35; letter-spacing: 0.07em; text-transform: uppercase; overflow-wrap: anywhere; }
+.item p { margin: 7px 0; color: rgba(255, 255, 255, 0.5); font-size: 0.67rem; }
+.item strong { font-size: 0.77rem; font-weight: 400; }
+.itemActions { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-top: auto; }
+.quantity { display: grid; grid-template-columns: 38px 28px 38px; align-items: center; border: 1px solid rgba(255, 255, 255, 0.16); }
+.quantity button { width: 38px; height: 40px; display: grid; place-items: center; color: #fff; font-size: 0.82rem; }
+.quantity span { font-size: 0.73rem; text-align: center; }
+.remove { width: 44px; height: 44px; display: grid; place-items: center; color: #e69393; }
+.empty { height: 100%; min-height: 320px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.empty > span { color: #b79a64; font-size: 2.5rem; }
+.empty p { margin: 14px 0 22px; color: rgba(255, 255, 255, 0.58); font-size: 0.82rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.empty button { min-height: 46px; padding: 0 20px; border: 1px solid rgba(255, 255, 255, 0.25); color: #fff; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.drawer > footer { padding: 16px 16px calc(14px + env(safe-area-inset-bottom)); border-top: 1px solid rgba(255, 255, 255, 0.1); background: #0c0c0c; }
+.drawer > footer > div { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 15px; font-size: 0.9rem; }
+.drawer > footer strong { font-weight: 400; }
+.drawer > footer button { width: 100%; min-height: 49px; padding: 0 12px; border: 1px solid #fff; background: #fff; color: #080808; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; }
+.drawer > footer button:last-child { margin-top: 7px; background: transparent; color: #fff; border-color: rgba(255, 255, 255, 0.2); }
+.drawer button:focus-visible { outline: 2px solid #d4af37; outline-offset: 2px; }
+
+@media (max-width: 359px) {
+  .drawer { width: 100%; }
+  .item { grid-template-columns: 76px minmax(0, 1fr); }
+  .item > img { width: 76px; height: 102px; }
+  .quantity { grid-template-columns: 34px 25px 34px; }
+  .quantity button { width: 34px; }
+}

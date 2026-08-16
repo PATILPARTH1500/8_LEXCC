@@ -5,8 +5,11 @@ import styles from '../../pages/Public/Shop.module.css';
 
 import { supabase } from '../../lib/supabase';
 import { formatINR } from '../../utils/currency';
+import MobileSearchOverlay from '../mobile/MobileSearchOverlay';
+import { useResponsive } from '../../contexts/ResponsiveContext';
 
 const SearchOverlay = ({ isOpen, onClose }) => {
+  const { isMobile } = useResponsive();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -52,6 +55,22 @@ const SearchOverlay = ({ isOpen, onClose }) => {
     }
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
+
+  if (isMobile) {
+    return (
+      <AnimatePresence>
+        {isOpen && (
+          <MobileSearchOverlay
+            isSearching={isSearching}
+            onClose={onClose}
+            onQueryChange={setQuery}
+            query={query}
+            results={results}
+          />
+        )}
+      </AnimatePresence>
+    );
+  }
 
   return (
     <AnimatePresence>

@@ -3,11 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
 import CustomSelect from '../../components/ui/CustomSelect';
 import ShipmentTrackingModal from '../../components/admin/ShipmentTrackingModal';
-import styles from '../Account/Account.module.css';
+import { useAccountStyles } from '../Account/useAccountStyles';
 import { formatINR } from '../../utils/currency';
 import { generateInvoice } from '../../utils/invoiceGenerator';
 
 const AdminOrders = () => {
+  const styles = useAccountStyles();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

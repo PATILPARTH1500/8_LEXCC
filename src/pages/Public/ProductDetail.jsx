@@ -9,10 +9,13 @@ import accountStyles from '../Account/Account.module.css';
 import ProductCard from '../../components/shop/ProductCard';
 import { formatINR } from '../../utils/currency';
 import SEO from '../../components/common/SEO';
+import MobileProductDetailView from '../../components/mobile/MobileProductDetailView';
+import { useResponsive } from '../../contexts/ResponsiveContext';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop';
 
 const ProductDetail = () => {
+  const { isMobile } = useResponsive();
   const { slug } = useParams();
   const navigate = useNavigate();
   const { user, wishlistItems, addToWishlist, removeFromWishlist } = useAuth();
@@ -161,6 +164,42 @@ const ProductDetail = () => {
       "availability": totalStock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
     }
   };
+
+  if (isMobile) {
+    return (
+      <MobileProductDetailView
+        activeImage={activeImage}
+        cartSuccess={cartSuccess}
+        displayImages={displayImages}
+        imageLoading={imageLoading}
+        isAddingToCart={isAddingToCart}
+        isInWishlist={isInWishlist}
+        isWishlistLoading={isWishlistLoading}
+        onAddToCart={handleAddToCart}
+        onImageLoad={() => setImageLoading(false)}
+        onSelectColor={(color) => {
+          setSelectedColor(color);
+          setSelectedSize('');
+        }}
+        onSelectImage={(image) => {
+          if (activeImage !== image) {
+            setImageLoading(true);
+            setActiveImage(image);
+          }
+        }}
+        onSelectSize={setSelectedSize}
+        onToggleWishlist={toggleWishlist}
+        product={product}
+        productSchema={productSchema}
+        relatedProducts={relatedProducts}
+        selectedColor={selectedColor}
+        selectedSize={selectedSize}
+        totalStock={totalStock}
+        uniqueColors={uniqueColors}
+        uniqueSizes={uniqueSizes}
+      />
+    );
+  }
 
   return (
     <motion.div 

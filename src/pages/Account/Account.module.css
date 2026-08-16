@@ -588,26 +588,6 @@
   margin-top: 30px;
 }
 
-@media (max-width: 1024px) {
-  .addressGrid {
-    grid-template-columns: 1fr;
-  }
-  
-  .formGrid {
-    grid-template-columns: 1fr;
-    gap: 15px;
-  }
-
-  .formGroup {
-    margin-bottom: 20px;
-  }
-
-  .formActions {
-    flex-direction: column;
-    gap: 15px;
-  }
-}
-
 .adminStatsGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -619,21 +599,6 @@
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 25px;
-}
-
-@media (max-width: 1024px) {
-  .adminStatsGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .adminSplitGrid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 768px) {
-  .adminStatsGrid {
-    grid-template-columns: 1fr;
-  }
 }
 
 /* Badges */
@@ -891,141 +856,13 @@
   margin-top: 10px;
 }
 
-@media (max-width: 768px) {
-  .accountContainer {
-    padding-top: 108px;
-    gap: 20px;
-    padding-left: 15px;
-    padding-right: 15px;
-    padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px));
-    min-height: auto;
-    max-width: 100%;
-    overflow-x: hidden;
-  }
-  .bgTextAccount {
-    font-size: 3rem;
-    top: 60px;
-  }
-  .pageTitle {
-    font-size: 2rem;
-    margin-bottom: 10px;
-  }
-  .pageSubtitle {
-    font-size: 0.9rem;
-  }
-  .pageHeader {
-    margin-bottom: 30px;
-  }
-  .card {
-    padding: 20px;
-    margin-bottom: 20px;
-    overflow: visible;
-  }
-  .cardTitle {
-    font-size: 1rem;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-  .addressGrid {
-    grid-template-columns: 1fr;
-    gap: 15px;
-  }
-  .addressCard {
-    padding: 20px;
-  }
-  .addressCardHeader {
-    align-items: flex-start;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
-  }
-  .productGrid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 15px;
-  }
-  .productActions {
-    flex-direction: column;
-    gap: 10px;
-  }
-  .statCard {
-    padding: 20px;
-    min-height: 160px;
-  }
-  .statCardValue {
-    font-size: 3rem;
-    margin: 10px 0;
-  }
-  .actionBtn, .secondaryBtn {
-    width: 100%;
-    padding: 14px 20px;
-    text-align: center;
-    box-sizing: border-box;
-  }
-  .emptyState .actionBtn {
-    width: auto;
-  }
-}
-
 .responsiveTable {
   width: 100%;
-}
-
-@media (max-width: 768px) {
-  .responsiveTable table,
-  .responsiveTable thead,
-  .responsiveTable tbody,
-  .responsiveTable th,
-  .responsiveTable td,
-  .responsiveTable tr {
-    display: block;
-    width: 100%;
-  }
-
-  .responsiveTable thead {
-    display: none;
-  }
-
-  .responsiveTable tr {
-    margin-bottom: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.02);
-    padding: 10px;
-  }
-
-  .responsiveTable td {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 15px !important;
-    text-align: right !important;
-  }
-
-  .responsiveTable td:last-child {
-    border-bottom: none;
-  }
-
-  .responsiveTable td::before {
-    content: attr(data-label);
-    font-weight: bold;
-    text-transform: uppercase;
-    font-size: 0.7rem;
-    color: rgba(255, 255, 255, 0.5);
-    margin-right: 15px;
-    text-align: left;
-  }
 }
 
 .adminFormLayout {
   display: flex;
   gap: 30px;
-}
-@media (max-width: 768px) {
-  .adminFormLayout {
-    flex-direction: column;
-  }
 }
 
 .dashboardGrid {
@@ -1132,19 +969,6 @@
   align-items: center;
 }
 
-@media (max-width: 768px) {
-  .dashboardGrid {
-    grid-template-columns: 1fr;
-    gap: 15px;
-    margin-bottom: 30px;
-  }
-  .statusGrid {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
-  }
-}
-
 .orderHeader {
   display: flex;
   justify-content: space-between;
@@ -1196,50 +1020,11 @@
   text-align: center;
 }
 
-@media (max-width: 768px) {
-  .orderHeader {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 20px;
-  }
-  .orderHeader > div:last-child {
-    text-align: left;
-  }
-  .orderSummary {
-    width: 100%;
-  }
-  .orderItem {
-    gap: 14px;
-    align-items: flex-start;
-  }
-  .orderItemImage {
-    width: 68px;
-    height: 86px;
-    flex-basis: 68px;
-  }
-  .trackingLink {
-    width: 100%;
-  }
-  .shipmentDetails {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 20px;
-  }
-}
-
 .adminHeader {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
   margin-bottom: 40px;
-}
-
-@media (max-width: 768px) {
-  .adminHeader {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 20px;
-  }
 }
 
 .modalOverlay {
@@ -1323,41 +1108,6 @@
   flex: 0 0 250px;
 }
 
-@media (max-width: 768px) {
-  .modalOverlay {
-    align-items: flex-start;
-    padding: max(16px, env(safe-area-inset-top, 0px)) 12px max(16px, env(safe-area-inset-bottom, 0px));
-  }
-  .modalContainer, .modalPadding {
-    padding: 20px;
-  }
-  .modalContainer {
-    max-height: calc(100dvh - 32px);
-  }
-  .variantRow {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .variantRow > div {
-    flex: 1 1 100% !important;
-  }
-  .imageUploadContainer {
-    flex: 1 1 100%;
-    margin-bottom: 20px;
-  }
-  .imageUploadContainer > div {
-    max-width: 100% !important;
-    height: 250px !important;
-  }
-  .modalActions {
-    flex-direction: column;
-    gap: 15px;
-  }
-  .modalActions > button {
-    width: 100%;
-  }
-}
-
 .profileHeader {
   display: flex;
   justify-content: space-between;
@@ -1375,27 +1125,6 @@
   display: flex;
   gap: 15px;
   align-items: center;
-}
-
-@media (max-width: 768px) {
-  .profileHeader {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 20px;
-  }
-  .avatarRow {
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-  }
-  .avatarActions {
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
-  }
-  .avatarActions > button {
-    width: 100%;
-  }
 }
 
 .securityRow {
@@ -1416,16 +1145,6 @@
   padding-bottom: 0;
 }
 
-@media (max-width: 768px) {
-  .securityRow {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
-  }
-}
-
-
-
 .mainContentArea {
   width: 100%;
   max-width: 100%;
@@ -1443,40 +1162,4 @@
   width: 100%;
   max-width: 100%;
   min-width: 0;
-}
-
-@media (max-width: 420px) {
-  .accountContainer {
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-
-  .pageTitle {
-    font-size: clamp(1.65rem, 8.5vw, 2rem);
-    letter-spacing: 0.035em;
-  }
-
-  .card,
-  .addressCard {
-    padding: 16px;
-  }
-
-  .badge {
-    padding: 7px 12px;
-    letter-spacing: 0.1em;
-  }
-
-  .productGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-  }
-
-  .orderNumber {
-    font-size: 1rem;
-    letter-spacing: 0.1em;
-  }
-
-  .invoiceBtn {
-    width: 100%;
-  }
 }

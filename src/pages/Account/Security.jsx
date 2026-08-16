@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { motion } from 'framer-motion';
-import styles from './Account.module.css';
+import { useAccountStyles } from './useAccountStyles';
 
 const Security = () => {
+  const styles = useAccountStyles();
   const { session, logoutAllDevices, changePassword } = useAuth();
   const [isChangingPwd, setIsChangingPwd] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
-import styles from '../Account/Account.module.css';
+import { useAccountStyles } from '../Account/useAccountStyles';
 import { formatINR } from '../../utils/currency';
 
 const AdminCustomers = () => {
+  const styles = useAccountStyles();
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

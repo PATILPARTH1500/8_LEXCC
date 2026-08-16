@@ -1,0 +1,51 @@
+.page,
+.emptyPage { min-height: 100vh; width: 100%; overflow-x: clip; padding: calc(72px + env(safe-area-inset-top)) max(14px, env(safe-area-inset-left)) calc(64px + env(safe-area-inset-bottom)); background: #080808; color: #fff; }
+.header { padding: 38px 2px 26px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+.header p,
+.emptyPage > p:first-of-type { margin: 0 0 9px; color: #b79a64; font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase; }
+.header h1,
+.emptyPage h1 { margin: 0; font-family: var(--font-heading); font-size: clamp(2rem, 11vw, 3.3rem); font-weight: 300; line-height: 1; letter-spacing: 0.06em; text-transform: uppercase; overflow-wrap: anywhere; }
+.header > span { display: block; margin-top: 13px; color: rgba(255, 255, 255, 0.52); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; }
+.error { margin: 16px 0 0; padding: 12px; border: 1px solid rgba(239, 68, 68, 0.35); color: #fca5a5; font-size: 0.82rem; line-height: 1.5; }
+.items { display: grid; gap: 0; }
+.item { min-width: 0; display: grid; grid-template-columns: 104px minmax(0, 1fr); gap: 14px; padding: 20px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+.imageLink { width: 104px; height: 132px; background: #111; }
+.imageLink img { width: 100%; height: 100%; object-fit: cover; }
+.itemInfo { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; }
+.itemName { max-width: 100%; color: #fff; font-size: 0.83rem; line-height: 1.35; letter-spacing: 0.07em; text-transform: uppercase; overflow-wrap: anywhere; }
+.itemInfo > p { margin: 8px 0; color: rgba(255, 255, 255, 0.5); font-size: 0.7rem; letter-spacing: 0.06em; }
+.itemInfo > strong { font-size: 0.83rem; font-weight: 400; }
+.itemActions { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; }
+.quantity { display: grid; grid-template-columns: 40px 34px 40px; align-items: center; border: 1px solid rgba(255, 255, 255, 0.16); }
+.quantity button { width: 40px; height: 42px; display: grid; place-items: center; color: #fff; font-size: 0.9rem; }
+.quantity span { text-align: center; font-size: 0.78rem; }
+.remove { flex: 0 0 44px; width: 44px; height: 44px; display: grid; place-items: center; color: #e69393; font-size: 1rem; }
+.summary { margin-top: 26px; padding: 22px 16px; border: 1px solid rgba(255, 255, 255, 0.12); background: #0f0f0f; }
+.summary h2 { margin: 0 0 22px; font-size: 0.82rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; }
+.summary dl { margin: 0; }
+.summary dl > div { display: flex; justify-content: space-between; gap: 14px; margin-bottom: 16px; color: rgba(255, 255, 255, 0.6); font-size: 0.8rem; }
+.summary dd { margin: 0; color: #fff; text-align: right; }
+.summary .total { margin: 22px 0; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); color: #fff; font-size: 1rem; }
+.summary button { width: 100%; min-height: 52px; padding: 0 14px; border: 1px solid #fff; background: #fff; color: #080808; font-size: 0.75rem; letter-spacing: 0.13em; text-transform: uppercase; }
+.summary > p { margin: 15px 0 0; color: rgba(255, 255, 255, 0.43); font-size: 0.68rem; line-height: 1.5; text-align: center; }
+.emptyPage { min-height: 78vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-inline: 24px; text-align: center; }
+.emptyPage > span { margin-bottom: 18px; color: #b79a64; font-size: 2.6rem; }
+.emptyPage h1 { font-size: clamp(1.8rem, 9vw, 2.8rem); }
+.emptyPage > p:last-of-type { max-width: 330px; margin: 18px 0 28px; color: rgba(255, 255, 255, 0.6); font-size: 0.88rem; line-height: 1.6; }
+.emptyPage > a { min-height: 48px; display: inline-flex; align-items: center; padding: 0 22px; border: 1px solid #fff; background: #fff; color: #080808; font-size: 0.73rem; letter-spacing: 0.12em; text-transform: uppercase; }
+.page a:focus-visible,
+.page button:focus-visible,
+.emptyPage a:focus-visible { outline: 2px solid #d4af37; outline-offset: 2px; }
+
+@media (min-width: 720px) {
+  .page { display: grid; grid-template-columns: minmax(0, 1fr) 320px; column-gap: 28px; padding-inline: 24px; }
+  .header { grid-column: 1 / -1; }
+  .summary { position: sticky; top: calc(90px + env(safe-area-inset-top)); align-self: start; }
+}
+
+@media (max-width: 359px) {
+  .item { grid-template-columns: 88px minmax(0, 1fr); gap: 10px; }
+  .imageLink { width: 88px; height: 116px; }
+  .quantity { grid-template-columns: 36px 28px 36px; }
+  .quantity button { width: 36px; }
+}

@@ -3,9 +3,10 @@ import { useForm } from 'react-hook-form';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
 import CustomSelect from '../../components/ui/CustomSelect';
-import styles from './Account.module.css';
+import { useAccountStyles } from './useAccountStyles';
 
 const Profile = () => {
+  const styles = useAccountStyles();
   const { profile, updateProfile, uploadAvatar } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

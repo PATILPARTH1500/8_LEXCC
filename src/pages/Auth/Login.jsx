@@ -6,7 +6,8 @@ import * as z from 'zod';
 import { motion } from 'framer-motion';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { useAuth } from '../../contexts/AuthContext';
-import styles from './Auth.module.css';
+import { useAuthStyles } from './useAuthStyles';
+import { useResponsive } from '../../contexts/ResponsiveContext';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -14,6 +15,8 @@ const loginSchema = z.object({
 });
 
 const Login = () => {
+  const styles = useAuthStyles();
+  const { isMobile } = useResponsive();
   const { signIn, googleSignIn, verifyTurnstileToken } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -114,7 +117,7 @@ const Login = () => {
                 onSuccess={(token) => setTurnstileToken(token)}
                 onError={() => setGlobalError('Security check failed.')}
                 onExpire={() => setTurnstileToken('')}
-                options={{ theme: 'dark' }}
+                options={{ theme: 'dark', size: isMobile ? 'flexible' : 'normal' }}
               />
             )}
           </div>

@@ -5,11 +5,14 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useCart } from '../../contexts/CartContext';
 import styles from '../../pages/Public/Shop.module.css';
 import { formatINR } from '../../utils/currency';
+import MobileProductCard from '../mobile/MobileProductCard';
+import { useResponsive } from '../../contexts/ResponsiveContext';
 
 const ProductCard = ({ product }) => {
   const { user, wishlistItems, addToWishlist, removeFromWishlist } = useAuth();
   const { addToCart } = useCart();
   const navigate = useNavigate();
+  const { isMobile } = useResponsive();
   
   const [loadingWishlist, setLoadingWishlist] = useState(false);
   
@@ -37,6 +40,34 @@ const ProductCard = ({ product }) => {
     }
   };
 
+  const handleQuickAdd = async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const availableVariants = product.variants?.filter((variant) => variant.stock > 0) || [];
+    if ((product.variants?.length || 0) > 0 && availableVariants.length !== 1) {
+      navigate(`/product/${product.slug}`);
+      return;
+    }
+
+    try {
+      await addToCart(product, availableVariants[0] || null);
+    } catch (error) {
+      console.error('Unable to add product to cart:', error);
+    }
+  };
+
+  if (isMobile) {
+    return (
+      <MobileProductCard
+        isInWishlist={isInWishlist}
+        isWishlistLoading={loadingWishlist}
+        onQuickAdd={handleQuickAdd}
+        onToggleWishlist={toggleWishlist}
+        product={product}
+      />
+    );
+  }
+
   return (
     <div className={`${styles.productCard} will-change-transform`}>
       <Link to={`/product/${product.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
@@ -45,20 +76,7 @@ const ProductCard = ({ product }) => {
           
           <button 
             className={styles.quickAddBtn}
-            onClick={async (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              const availableVariants = product.variants?.filter((variant) => variant.stock > 0) || [];
-              if ((product.variants?.length || 0) > 0 && availableVariants.length !== 1) {
-                navigate(`/product/${product.slug}`);
-                return;
-              }
-              try {
-                await addToCart(product, availableVariants[0] || null);
-              } catch (error) {
-                console.error('Unable to add product to cart:', error);
-              }
-            }}
+            onClick={handleQuickAdd}
           >
             QUICK ADD
           </button>

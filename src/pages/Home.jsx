@@ -8,6 +8,8 @@ import styles from './Home.module.css';
 import { formatINR } from '../utils/currency';
 import SEO from '../components/common/SEO';
 import { useNewsletterSubscription } from '../hooks/useNewsletterSubscription';
+import MobileHome from '../components/mobile/MobileHome';
+import { useResponsive } from '../contexts/ResponsiveContext';
 
 // React Bits Components
 import CurvedLoop from '../components/animations/CurvedLoop';
@@ -51,6 +53,7 @@ const Home = () => {
   const [customers, setCustomers] = useState(0);
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const newsletter = useNewsletterSubscription('home');
+  const { isMobile } = useResponsive();
 
   useEffect(() => {
     const fetchFeatured = async () => {
@@ -112,6 +115,8 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
+    if (isMobile) return undefined;
+
     const ctx = gsap.context(() => {
       // Smooth Parallax Hero Img (Scroll)
       const heroImageContainer = heroRef.current?.querySelector('.hero-parallax-container');
@@ -256,7 +261,7 @@ const Home = () => {
     });
 
     return () => ctx.revert();
-  }, []);
+  }, [isMobile]);
 
   const titleLines = ["DEFINE", "THE", "STANDARD"];
   const titleContainerVariants = {
@@ -280,6 +285,20 @@ const Home = () => {
     "url": "https://lexcc.in",
     "logo": "https://lexcc.in/apple-touch-icon.png"
   };
+
+  if (isMobile) {
+    return (
+      <div style={{ backgroundColor: 'var(--primary-color)' }}>
+        <SEO title="LEXCC" schema={organizationSchema} />
+        <MobileHome
+          customers={customers}
+          featuredProducts={featuredProducts}
+          instaImages={instaImages}
+          newsletter={newsletter}
+        />
+      </div>
+    );
+  }
 
   return (
     <div style={{ backgroundColor: 'var(--primary-color)' }}>
