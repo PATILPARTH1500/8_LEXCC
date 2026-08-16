@@ -8,6 +8,7 @@ const AccountLayout = () => {
   const { logout, profile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const navRef = useRef(null);
   const navLinkRefs = useRef(new Map());
 
   useLayoutEffect(() => {
@@ -44,16 +45,23 @@ const AccountLayout = () => {
         ? location.pathname === item.path
         : location.pathname === item.path || location.pathname.startsWith(`${item.path}/`)
     ));
+    const navElement = navRef.current;
     const activeElement = activeItem ? navLinkRefs.current.get(activeItem.path) : null;
 
-    if (!activeElement) return undefined;
+    if (!navElement || !activeElement) return undefined;
 
     const frame = window.requestAnimationFrame(() => {
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      activeElement.scrollIntoView({
+      const navRect = navElement.getBoundingClientRect();
+      const activeRect = activeElement.getBoundingClientRect();
+      const centeredLeft = navElement.scrollLeft
+        + activeRect.left
+        - navRect.left
+        - ((navElement.clientWidth - activeRect.width) / 2);
+
+      navElement.scrollTo({
+        left: Math.max(0, centeredLeft),
         behavior: reduceMotion ? 'auto' : 'smooth',
-        inline: 'center',
-        block: 'nearest'
       });
     });
 
@@ -120,7 +128,7 @@ const AccountLayout = () => {
             </div>
           )}
 
-          <nav className={styles.sidebarNav} aria-label="Account sections">
+          <nav ref={navRef} className={styles.sidebarNav} aria-label="Account sections">
             {navItems.map((item, index) => (
               <motion.div
                 key={item.path}
@@ -166,8 +174,7 @@ const AccountLayout = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15, scale: 0.98 }}
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              style={{ width: '100%' }}
-              className="will-change-both"
+              className={styles.routeContent}
             >
               <Outlet />
             </motion.div>

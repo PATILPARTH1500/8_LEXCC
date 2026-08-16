@@ -86,7 +86,7 @@ const Orders = () => {
           </Link>
         </motion.div>
       ) : (
-        <motion.div variants={itemVariants} style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
+        <motion.div variants={itemVariants} className={styles.ordersList}>
           {orders.map((order, index) => (
             <motion.div 
               key={order.id} 
@@ -97,12 +97,12 @@ const Orders = () => {
               transition={{ duration: 0.8, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
             >
               <div className={styles.orderHeader}>
-                <div>
-                  <h3 style={{ fontSize: '1.1rem', letterSpacing: '0.15em', fontWeight: 500, marginBottom: '8px' }}>ORDER #{order.order_number}</h3>
-                  <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.05em' }}>Placed on {new Date(order.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                <div className={styles.orderIdentity}>
+                  <h3 className={styles.orderNumber}>ORDER #{order.order_number}</h3>
+                  <p className={styles.orderDate}>Placed on {new Date(order.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                 </div>
-                <div>
-                  <p style={{ fontSize: '1.4rem', fontWeight: 300, marginBottom: '10px' }}>{formatINR(order.total_amount)}</p>
+                <div className={styles.orderSummary}>
+                  <p className={styles.orderTotal}>{formatINR(order.total_amount)}</p>
                   <span className={`${styles.badge} ${order.status === 'delivered' ? styles.badgeSuccess : styles.badgeWarning}`} style={{ display: 'inline-block', marginBottom: '10px' }}>
                     {order.status}
                   </span>
@@ -110,11 +110,7 @@ const Orders = () => {
                     <button 
                       onClick={() => handleDownloadInvoice(order.id)}
                       disabled={downloadingOrderId === order.id}
-                      style={{ 
-                        background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', 
-                        padding: '8px 15px', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.1em',
-                        cursor: downloadingOrderId === order.id ? 'not-allowed' : 'pointer', opacity: downloadingOrderId === order.id ? 0.5 : 1
-                      }}
+                      className={styles.invoiceBtn}
                     >
                       {downloadingOrderId === order.id ? 'GENERATING...' : 'DOWNLOAD INVOICE'}
                     </button>
@@ -124,13 +120,13 @@ const Orders = () => {
 
               {(order.tracking_number || order.carrier) && (
                 <div className={styles.shipmentDetails}>
-                  <div>
-                    <h4 style={{ fontSize: '0.85rem', color: '#D4AF37', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '5px' }}>Shipment Details</h4>
-                    <p style={{ fontSize: '0.9rem', color: '#fff' }}>
-                      Carrier: <span style={{ color: 'rgba(255,255,255,0.7)' }}>{order.carrier || 'N/A'}</span>
+                  <div className={styles.shipmentCopy}>
+                    <h4 className={styles.shipmentTitle}>Shipment Details</h4>
+                    <p className={styles.shipmentLine}>
+                      Carrier: <span className={styles.shipmentValue}>{order.carrier || 'N/A'}</span>
                     </p>
-                    <p style={{ fontSize: '0.9rem', color: '#fff' }}>
-                      Tracking ID: <span style={{ color: 'rgba(255,255,255,0.7)' }}>{order.tracking_number || 'N/A'}</span>
+                    <p className={styles.shipmentLine}>
+                      Tracking ID: <span className={styles.shipmentValue}>{order.tracking_number || 'N/A'}</span>
                     </p>
                   </div>
                   {order.tracking_number && (
@@ -138,7 +134,7 @@ const Orders = () => {
                       href={order.carrier?.toLowerCase().includes('blue dart') || order.carrier?.toLowerCase().includes('bluedart') ? `https://www.bluedart.com/tracking?track=${order.tracking_number}` : `https://www.google.com/search?q=${order.tracking_number}+tracking`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ padding: '10px 20px', background: '#D4AF37', color: '#000', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600, textDecoration: 'none' }}
+                      className={styles.trackingLink}
                     >
                       Track Package
                     </a>
@@ -146,19 +142,18 @@ const Orders = () => {
                 </div>
               )}
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div className={styles.orderItems}>
                 {order.items?.map((item, idx) => (
-                  <div key={idx} style={{ display: 'flex', gap: '25px', alignItems: 'center' }}>
-                    <div style={{ width: '80px', height: '100px', background: '#050505', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div key={idx} className={styles.orderItem}>
+                    <div className={styles.orderItemImage}>
                       <img 
                         src={item.product?.image_url || 'https://via.placeholder.com/80x100/111/fff?text=No+Image'} 
                         alt={item.product?.name} 
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                       />
                     </div>
-                    <div>
-                      <h4 style={{ fontSize: '0.95rem', letterSpacing: '0.1em', marginBottom: '8px', fontWeight: 400 }}>{item.product?.name}</h4>
-                      <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.05em' }}>Qty: {item.quantity} × {formatINR(item.price_at_time)}</p>
+                    <div className={styles.orderItemContent}>
+                      <h4 className={styles.orderItemName}>{item.product?.name}</h4>
+                      <p className={styles.orderItemMeta}>Qty: {item.quantity} × {formatINR(item.price_at_time)}</p>
                     </div>
                   </div>
                 ))}

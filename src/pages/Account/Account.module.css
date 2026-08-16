@@ -2,6 +2,7 @@
 .accountContainer {
   width: 100%;
   max-width: 100%;
+  min-width: 0;
   margin: 0 auto;
   padding: 100px 20px 60px;
   display: flex;
@@ -66,6 +67,7 @@
   flex-direction: column;
   width: 100%;
   max-width: 100%;
+  min-width: 0;
   position: relative;
   top: auto;
   left: auto;
@@ -98,6 +100,7 @@
   background: rgba(255, 255, 255, 0.02);
   text-align: center;
   justify-content: center;
+  min-height: 44px;
 }
 
 @media (min-width: 1025px) {
@@ -253,12 +256,16 @@
   overflow-y: hidden;
   width: 100%;
   max-width: 100%;
+  min-width: 0;
   white-space: nowrap;
   padding-bottom: 10px;
   gap: 10px;
   scrollbar-width: none;
   -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-inline: contain;
+  scroll-padding-inline: 10px;
+  touch-action: pan-x;
 }
 
 .sidebarNav > div {
@@ -329,6 +336,7 @@
   cursor: pointer;
   position: relative;
   flex: 0 0 auto;
+  min-height: 44px;
 }
 
 @media (min-width: 1025px) {
@@ -367,6 +375,8 @@
   margin-bottom: 15px;
   font-family: var(--font-heading, inherit);
   line-height: 1.1;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .pageTitle span {
@@ -394,6 +404,7 @@
   backdrop-filter: blur(10px);
   width: 100%;
   max-width: 100%;
+  min-width: 0;
   box-sizing: border-box;
   overflow-wrap: break-word;
 }
@@ -542,6 +553,7 @@
 
 .formInput {
   width: 100%;
+  min-width: 0;
   padding: 18px 20px;
   background: rgba(255,255,255,0.02);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -727,6 +739,65 @@
   padding: 40px;
   position: relative;
   transition: all 0.4s ease;
+  min-width: 0;
+}
+
+.addressCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 25px;
+  min-width: 0;
+}
+
+.addressType {
+  min-width: 0;
+  font-size: 0.95rem;
+  letter-spacing: 0.15em;
+  font-weight: 500;
+  color: #fff;
+  overflow-wrap: anywhere;
+}
+
+.addressCopy {
+  color: rgba(255,255,255,0.6);
+  font-size: 0.95rem;
+  line-height: 1.8;
+  margin-bottom: 35px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.addressName {
+  color: #fff;
+  font-weight: 400;
+  margin-bottom: 10px;
+  letter-spacing: 0.05em;
+}
+
+.addressCountry {
+  margin-top: 5px;
+}
+
+.addressActions {
+  display: flex;
+  gap: 15px;
+  margin-top: auto;
+  flex-wrap: wrap;
+}
+
+.addressActions > button {
+  flex: 1 1 120px;
+}
+
+.addAddressLabel {
+  font-size: 0.85rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.7);
+  font-weight: 500;
+  text-align: center;
 }
 
 .addressCard:hover {
@@ -774,6 +845,7 @@
   flex-direction: column;
   gap: 20px;
   position: relative;
+  min-width: 0;
 }
 
 .productImageWrapper {
@@ -798,12 +870,14 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  min-width: 0;
 }
 
 .productName {
   font-size: 0.95rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  overflow-wrap: anywhere;
 }
 
 .productPrice {
@@ -819,11 +893,11 @@
 
 @media (max-width: 768px) {
   .accountContainer {
-    padding-top: 80px;
+    padding-top: 108px;
     gap: 20px;
     padding-left: 15px;
     padding-right: 15px;
-    padding-bottom: 50px;
+    padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px));
     min-height: auto;
     max-width: 100%;
     overflow-x: hidden;
@@ -845,6 +919,7 @@
   .card {
     padding: 20px;
     margin-bottom: 20px;
+    overflow: visible;
   }
   .cardTitle {
     font-size: 1rem;
@@ -860,6 +935,11 @@
   }
   .addressCard {
     padding: 20px;
+  }
+  .addressCardHeader {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
   }
   .productGrid {
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -885,40 +965,6 @@
   }
   .emptyState .actionBtn {
     width: auto;
-  }
-  
-  /* Responsive Tables for Admin */
-  table, thead, tbody, th, td, tr {
-    display: block;
-    width: 100%;
-  }
-  thead tr {
-    display: none;
-  }
-  tr {
-    border: 1px solid rgba(255,255,255,0.05);
-    margin-bottom: 20px;
-    padding: 15px;
-    background: rgba(255,255,255,0.02);
-  }
-  td {
-    border: none;
-    position: relative;
-    padding: 10px 0 !important;
-    text-align: right !important;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-  }
-  td::before {
-    content: attr(data-label);
-    position: absolute;
-    left: 0;
-    text-align: left;
-    font-weight: 500;
-    color: rgba(255,255,255,0.5);
-    font-size: 0.75rem;
-    text-transform: uppercase;
   }
 }
 
@@ -989,6 +1035,97 @@
   margin-bottom: 60px;
 }
 
+.ordersList {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  min-width: 0;
+}
+
+.orderIdentity,
+.orderSummary,
+.orderItemContent,
+.shipmentCopy {
+  min-width: 0;
+}
+
+.orderNumber {
+  font-size: 1.1rem;
+  letter-spacing: 0.15em;
+  font-weight: 500;
+  margin-bottom: 8px;
+  overflow-wrap: anywhere;
+}
+
+.orderDate,
+.orderItemMeta {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.05em;
+  overflow-wrap: anywhere;
+}
+
+.orderTotal {
+  font-size: 1.4rem;
+  font-weight: 300;
+  margin-bottom: 10px;
+}
+
+.invoiceBtn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+  padding: 8px 15px;
+  min-height: 44px;
+  max-width: 100%;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  white-space: normal;
+}
+
+.invoiceBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.orderItems {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.orderItem {
+  display: flex;
+  gap: 25px;
+  align-items: center;
+  min-width: 0;
+}
+
+.orderItemImage {
+  width: 80px;
+  height: 100px;
+  flex: 0 0 80px;
+  background: #050505;
+  border: 1px solid rgba(255,255,255,0.05);
+  overflow: hidden;
+}
+
+.orderItemImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.orderItemName {
+  font-size: 0.95rem;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}
+
 .statusGrid {
   display: flex;
   gap: 40px;
@@ -1027,6 +1164,38 @@
   align-items: center;
 }
 
+.shipmentTitle {
+  font-size: 0.85rem;
+  color: #D4AF37;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 5px;
+}
+
+.shipmentLine {
+  font-size: 0.9rem;
+  color: #fff;
+  overflow-wrap: anywhere;
+}
+
+.shipmentValue {
+  color: rgba(255,255,255,0.7);
+  overflow-wrap: anywhere;
+}
+
+.trackingLink {
+  flex: 0 0 auto;
+  padding: 10px 20px;
+  background: #D4AF37;
+  color: #000;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  text-decoration: none;
+  text-align: center;
+}
+
 @media (max-width: 768px) {
   .orderHeader {
     flex-direction: column;
@@ -1035,6 +1204,21 @@
   }
   .orderHeader > div:last-child {
     text-align: left;
+  }
+  .orderSummary {
+    width: 100%;
+  }
+  .orderItem {
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .orderItemImage {
+    width: 68px;
+    height: 86px;
+    flex-basis: 68px;
+  }
+  .trackingLink {
+    width: 100%;
   }
   .shipmentDetails {
     flex-direction: column;
@@ -1058,6 +1242,25 @@
   }
 }
 
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10020;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.modalBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(10px);
+}
+
 .modalContainer {
   background: #0a0a0a;
   padding: 50px;
@@ -1068,6 +1271,27 @@
   border: 1px solid rgba(212,175,55,0.3);
   max-height: 90vh;
   overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.defaultToggle {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.defaultCheckbox {
+  accent-color: #D4AF37;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+}
+
+.defaultLabel {
+  min-width: 0;
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 0.05em;
 }
 
 .modalActions {
@@ -1100,8 +1324,15 @@
 }
 
 @media (max-width: 768px) {
+  .modalOverlay {
+    align-items: flex-start;
+    padding: max(16px, env(safe-area-inset-top, 0px)) 12px max(16px, env(safe-area-inset-bottom, 0px));
+  }
   .modalContainer, .modalPadding {
     padding: 20px;
+  }
+  .modalContainer {
+    max-height: calc(100dvh - 32px);
   }
   .variantRow {
     flex-direction: column;
@@ -1175,6 +1406,11 @@
   border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 
+.securityRow > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
 .securityRow:last-child {
   border-bottom: none;
   padding-bottom: 0;
@@ -1194,4 +1430,53 @@
   width: 100%;
   max-width: 100%;
   min-width: 0;
+}
+
+.routeContent {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  will-change: opacity;
+}
+
+.routeContent > * {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 420px) {
+  .accountContainer {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .pageTitle {
+    font-size: clamp(1.65rem, 8.5vw, 2rem);
+    letter-spacing: 0.035em;
+  }
+
+  .card,
+  .addressCard {
+    padding: 16px;
+  }
+
+  .badge {
+    padding: 7px 12px;
+    letter-spacing: 0.1em;
+  }
+
+  .productGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .orderNumber {
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+  }
+
+  .invoiceBtn {
+    width: 100%;
+  }
 }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import CustomSelect from '../../components/ui/CustomSelect';
@@ -39,6 +40,17 @@ const Addresses = () => {
   useEffect(() => {
     loadAddresses();
   }, []);
+
+  useEffect(() => {
+    if (!isModalOpen) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isModalOpen]);
 
   const handleOpenModal = (address = null) => {
     if (address) {
@@ -142,19 +154,19 @@ const Addresses = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
-                <h3 style={{ fontSize: '0.95rem', letterSpacing: '0.15em', fontWeight: 500, color: '#fff' }}>{addr.title}</h3>
+              <div className={styles.addressCardHeader}>
+                <h3 className={styles.addressType}>{addr.title}</h3>
                 {addr.is_default && <span className={`${styles.badge} ${styles.badgeSuccess}`}>Default Address</span>}
               </div>
               
-              <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.95rem', lineHeight: '1.8', marginBottom: '35px' }}>
-                <p style={{ color: '#fff', fontWeight: 400, marginBottom: '10px', letterSpacing: '0.05em' }}>{addr.first_name} {addr.last_name}</p>
+              <div className={styles.addressCopy}>
+                <p className={styles.addressName}>{addr.first_name} {addr.last_name}</p>
                 <p>{addr.street}</p>
                 <p>{addr.city}, {addr.state} {addr.postal_code}</p>
-                <p style={{ marginTop: '5px' }}>{addr.country}</p>
+                <p className={styles.addressCountry}>{addr.country}</p>
               </div>
 
-              <div style={{ display: 'flex', gap: '15px', marginTop: 'auto', flexWrap: 'wrap' }}>
+              <div className={styles.addressActions}>
                 <button onClick={() => handleOpenModal(addr)} className={styles.secondaryBtn} style={{ padding: '12px 20px', fontSize: '0.75rem', flex: 1 }}>Edit</button>
                 <button onClick={() => handleDelete(addr.id)} className={styles.secondaryBtn} style={{ padding: '12px 20px', fontSize: '0.75rem', flex: 1, borderColor: 'transparent', color: '#ef4444' }}>Remove</button>
                 {!addr.is_default && (
@@ -174,18 +186,19 @@ const Addresses = () => {
             transition={{ duration: 0.8, delay: addresses.length * 0.1, ease: [0.16, 1, 0.3, 1] }}
           >
             <div className={styles.addAddressIcon}>+</div>
-            <span style={{ fontSize: '0.85rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>Add New Address</span>
+            <span className={styles.addAddressLabel}>Add New Address</span>
           </motion.div>
 
         </motion.div>
       )}
 
       {/* Address Modal Overlay */}
-      <AnimatePresence>
-        {isModalOpen && (
-          <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      {createPortal(
+        <AnimatePresence>
+          {isModalOpen && (
+            <div className={styles.modalOverlay}>
             <motion.div 
-              style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)' }}
+              className={styles.modalBackdrop}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -255,16 +268,16 @@ const Addresses = () => {
                   </div>
                 </div>
 
-                <div className={styles.formGroup} style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                <div className={`${styles.formGroup} ${styles.defaultToggle}`}>
                   <input 
                     type="checkbox" 
                     name="is_default" 
                     checked={formData.is_default} 
                     onChange={handleChange} 
                     id="isDefault" 
-                    style={{ accentColor: '#D4AF37', width: '18px', height: '18px' }}
+                    className={styles.defaultCheckbox}
                   />
-                  <label htmlFor="isDefault" style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', letterSpacing: '0.05em' }}>Set as default address</label>
+                  <label htmlFor="isDefault" className={styles.defaultLabel}>Set as default address</label>
                 </div>
 
                 <div className={styles.modalActions}>
@@ -277,9 +290,11 @@ const Addresses = () => {
                 </div>
               </form>
             </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+            </div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
 
     </motion.div>
   );
