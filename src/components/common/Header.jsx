@@ -41,12 +41,17 @@ const Header = () => {
     <header className={`${styles.header} ${isScrolled ? styles.headerScrolled : ''}`}>
       <div className={styles.headerContainer}>
         {/* Mobile Menu Toggle */}
-        <button 
-          className={styles.menuButton}
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        >
-          {isMobileMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
-        </button>
+        {isAccountPage ? (
+          <span className={styles.accountMenuSpacer} aria-hidden="true" />
+        ) : (
+          <button
+            className={styles.menuButton}
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          >
+            {isMobileMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+          </button>
+        )}
 
         {/* Navigation - Desktop */}
         <nav className={styles.nav}>
