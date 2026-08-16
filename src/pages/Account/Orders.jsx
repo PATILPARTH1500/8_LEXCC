@@ -3,11 +3,12 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
-import styles from './Account.module.css';
+import { useAccountStyles } from './useAccountStyles';
 import { formatINR } from '../../utils/currency';
 import { generateInvoice } from '../../utils/invoiceGenerator';
 
 const Orders = () => {
+  const styles = useAccountStyles();
   const { user } = useAuth();
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
-import styles from '../Account/Account.module.css';
+import { useAccountStyles } from '../Account/useAccountStyles';
 import { formatINR } from '../../utils/currency';
 
 const AdminDashboard = () => {
+  const styles = useAccountStyles();
   const [stats, setStats] = useState({
     totalOrders: 0,
     totalRevenue: 0,

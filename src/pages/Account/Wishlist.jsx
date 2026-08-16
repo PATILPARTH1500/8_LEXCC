@@ -3,10 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCart } from '../../contexts/CartContext';
-import styles from './Account.module.css';
+import { useAccountStyles } from './useAccountStyles';
 import { formatINR } from '../../utils/currency';
 
 const Wishlist = () => {
+  const styles = useAccountStyles();
   const { wishlistItems, removeFromWishlist } = useAuth();
   const { addToCart } = useCart();
   const navigate = useNavigate();

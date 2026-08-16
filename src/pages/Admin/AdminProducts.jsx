@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
-import styles from '../Account/Account.module.css';
+import { useAccountStyles } from '../Account/useAccountStyles';
 import AdminProductForm from './AdminProductForm';
 import { formatINR } from '../../utils/currency';
 
 const AdminProducts = () => {
+  const styles = useAccountStyles();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);

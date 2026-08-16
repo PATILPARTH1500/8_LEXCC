@@ -7,7 +7,8 @@ import zxcvbn from 'zxcvbn';
 import { motion } from 'framer-motion';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { useAuth } from '../../contexts/AuthContext';
-import styles from './Auth.module.css';
+import { useAuthStyles } from './useAuthStyles';
+import { useResponsive } from '../../contexts/ResponsiveContext';
 
 // Strict validation matching requirements
 const registerSchema = z.object({
@@ -41,6 +42,8 @@ const registerSchema = z.object({
 });
 
 const Register = () => {
+  const styles = useAuthStyles();
+  const { isMobile } = useResponsive();
   const { signUp, googleSignIn, verifyTurnstileToken } = useAuth();
   const navigate = useNavigate();
   const [globalError, setGlobalError] = useState('');
@@ -229,7 +232,7 @@ const Register = () => {
                 onSuccess={(token) => setTurnstileToken(token)}
                 onError={() => setGlobalError('Security check failed. Please try again.')}
                 onExpire={() => setTurnstileToken('')}
-                options={{ theme: 'dark' }}
+                options={{ theme: 'dark', size: isMobile ? 'flexible' : 'normal' }}
               />
             )}
           </div>

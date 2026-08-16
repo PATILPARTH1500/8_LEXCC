@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FiShoppingBag, FiUser, FiMenu, FiX, FiSearch } from 'react-icons/fi';
+import { FiShoppingBag, FiUser, FiSearch } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import SearchOverlay from '../layout/SearchOverlay';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './Header.module.css';
+import MobileHeader from '../mobile/MobileHeader';
+import { useResponsive } from '../../contexts/ResponsiveContext';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -14,8 +16,8 @@ const Header = () => {
   const location = useLocation();
   const { cartCount, setIsCartOpen } = useCart();
   const { profile, logout } = useAuth();
+  const { isMobile } = useResponsive();
   const [bumpBadge, setBumpBadge] = useState(false);
-  const isAccountPage = location.pathname.startsWith('/account');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -37,21 +39,30 @@ const Header = () => {
     }
   }, [cartCount]);
 
+  if (isMobile) {
+    return (
+      <>
+        <MobileHeader
+          cartCount={cartCount}
+          isMenuOpen={isMobileMenuOpen}
+          isScrolled={isScrolled}
+          onCartOpen={() => setIsCartOpen(true)}
+          onCloseMenu={() => setIsMobileMenuOpen(false)}
+          onLogout={logout}
+          onSearchOpen={() => setIsSearchOpen(true)}
+          onToggleMenu={() => setIsMobileMenuOpen((open) => !open)}
+          profile={profile}
+        />
+        <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+      </>
+    );
+  }
+
   return (
     <header className={`${styles.header} ${isScrolled ? styles.headerScrolled : ''}`}>
       <div className={styles.headerContainer}>
         {/* Mobile Menu Toggle */}
-        {isAccountPage ? (
-          <span className={styles.accountMenuSpacer} aria-hidden="true" />
-        ) : (
-          <button
-            className={styles.menuButton}
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-          >
-            {isMobileMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
-          </button>
-        )}
+        <span className={styles.menuButton} aria-hidden="true" />
 
         {/* Navigation - Desktop */}
         <nav className={styles.nav}>
@@ -108,56 +119,6 @@ const Header = () => {
           </button>
         </div>
       </div>
-
-      {/* Mobile Menu Drawer */}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className={styles.mobileMenuBackdrop}
-              onClick={() => setIsMobileMenuOpen(false)}
-            />
-            <motion.div 
-              initial={{ x: '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className={`${styles.mobileDrawer} will-change-transform`}
-            >
-              <div className={styles.drawerHeader}>
-                <span className={styles.drawerTitle}>Menu</span>
-                <button className={styles.closeDrawerBtn} onClick={() => setIsMobileMenuOpen(false)}>
-                  <FiX size={24} />
-                </button>
-              </div>
-              <div className={styles.drawerContent}>
-                {isAccountPage ? (
-                  <>
-                    <Link to="/account" className={styles.mobileMenuLink}>Dashboard</Link>
-                    <Link to="/account/profile" className={styles.mobileMenuLink}>Profile</Link>
-                    <Link to="/account/addresses" className={styles.mobileMenuLink}>Addresses</Link>
-                    <Link to="/account/security" className={styles.mobileMenuLink}>Security</Link>
-                    <Link to="/account/wishlist" className={styles.mobileMenuLink}>Wishlist</Link>
-                    <Link to="/account/orders" className={styles.mobileMenuLink}>Orders</Link>
-                    {profile?.is_admin && <Link to="/account/admin" className={styles.mobileMenuLink}>Admin Panel</Link>}
-                    <button onClick={() => { logout(); setIsMobileMenuOpen(false); }} className={styles.mobileMenuLink} style={{ background: 'transparent', border: 'none', width: '100%', cursor: 'pointer', textAlign: 'left' }}>Logout</button>
-                  </>
-                ) : (
-                  <>
-                    <Link to="/shop?filter=new" className={styles.mobileMenuLink}>New Arrivals</Link>
-                    <Link to="/shop?category=men" className={styles.mobileMenuLink}>Men</Link>
-                    <Link to="/shop?category=footwear" className={styles.mobileMenuLink}>Footwear</Link>
-                    <Link to="/shop" className={styles.mobileMenuLink}>Collections</Link>
-                  </>
-                )}
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
 
       <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </header>

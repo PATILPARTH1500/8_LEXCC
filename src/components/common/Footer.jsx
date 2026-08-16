@@ -3,9 +3,16 @@ import { Link } from 'react-router-dom';
 import { FiInstagram, FiTwitter, FiFacebook } from 'react-icons/fi';
 import { useNewsletterSubscription } from '../../hooks/useNewsletterSubscription';
 import styles from './Footer.module.css';
+import MobileFooter from '../mobile/MobileFooter';
+import { useResponsive } from '../../contexts/ResponsiveContext';
 
 const Footer = () => {
   const newsletter = useNewsletterSubscription('footer');
+  const { isMobile } = useResponsive();
+
+  if (isMobile) {
+    return <MobileFooter newsletter={newsletter} />;
+  }
 
   return (
     <footer className={styles.footer}>

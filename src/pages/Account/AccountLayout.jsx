@@ -3,8 +3,11 @@ import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './Account.module.css';
+import MobileAccountLayout from './MobileAccountLayout';
+import { useResponsive } from '../../contexts/ResponsiveContext';
 
 const AccountLayout = () => {
+  const { isMobile } = useResponsive();
   const { logout, profile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -80,6 +83,19 @@ const AccountLayout = () => {
       default: return '';
     }
   };
+
+  if (isMobile) {
+    return (
+      <MobileAccountLayout
+        handleLogout={handleLogout}
+        location={location}
+        navItems={navItems}
+        navLinkRefs={navLinkRefs}
+        navRef={navRef}
+        profile={profile}
+      />
+    );
+  }
 
   return (
     <>

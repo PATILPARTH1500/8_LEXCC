@@ -1,0 +1,29 @@
+.overlay { position: fixed; inset: 0; z-index: 15000; width: 100%; min-width: 0; overflow-x: clip; overflow-y: auto; overscroll-behavior: contain; padding: env(safe-area-inset-top) max(14px, env(safe-area-inset-left)) calc(40px + env(safe-area-inset-bottom)); background: rgba(8, 8, 8, 0.98); color: #fff; }
+.overlay > header { min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 76px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+.overlay header p { margin: 0 0 5px; color: #b79a64; font-size: 0.61rem; letter-spacing: 0.16em; text-transform: uppercase; }
+.overlay header h2 { margin: 0; font-family: var(--font-heading); font-size: 1.5rem; font-weight: 300; letter-spacing: 0.08em; text-transform: uppercase; }
+.overlay header button { flex: 0 0 44px; width: 44px; height: 44px; display: grid; place-items: center; border: 1px solid rgba(255, 255, 255, 0.16); color: #fff; font-size: 1.25rem; }
+.searchBox { min-width: 0; min-height: 58px; display: grid; grid-template-columns: 24px minmax(0, 1fr); align-items: center; gap: 10px; margin-top: 20px; padding: 0 13px; border: 1px solid rgba(255, 255, 255, 0.18); background: #101010; }
+.searchBox svg { color: rgba(255, 255, 255, 0.55); font-size: 1.15rem; }
+.searchBox input { width: 100%; min-width: 0; height: 56px; padding: 0; border: 0; outline: 0; background: transparent; color: #fff; font-size: 1rem; }
+.searchBox input::placeholder { color: rgba(255, 255, 255, 0.42); }
+.srOnly { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+.results { min-height: 55vh; padding-top: 24px; }
+.state,
+.prompt { min-height: 48vh; display: flex; align-items: center; justify-content: center; color: rgba(255, 255, 255, 0.5); font-size: 0.76rem; line-height: 1.6; letter-spacing: 0.08em; text-align: center; }
+.prompt { flex-direction: column; gap: 12px; }
+.prompt svg { color: #b79a64; font-size: 1.8rem; }
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 8px; }
+.grid a { min-width: 0; color: #fff; }
+.grid a > div { width: 100%; aspect-ratio: 3 / 4; overflow: hidden; background: #111; }
+.grid img { width: 100%; height: 100%; object-fit: cover; }
+.grid h3 { margin: 10px 0 5px; max-width: 100%; font-size: 0.7rem; font-weight: 400; line-height: 1.4; letter-spacing: 0.06em; text-transform: uppercase; overflow-wrap: anywhere; }
+.grid p { margin: 0; color: rgba(255, 255, 255, 0.58); font-size: 0.7rem; }
+.overlay button:focus-visible,
+.overlay input:focus-visible,
+.overlay a:focus-visible { outline: 2px solid #d4af37; outline-offset: 2px; }
+
+@media (min-width: 720px) {
+  .overlay { padding-inline: 24px; }
+  .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap-inline: 14px; }
+}

@@ -6,10 +6,13 @@ import styles from './Shop.module.css';
 import accountStyles from '../Account/Account.module.css';
 import { formatINR } from '../../utils/currency';
 import SEO from '../../components/common/SEO';
+import MobileCartView from '../../components/mobile/MobileCartView';
+import { useResponsive } from '../../contexts/ResponsiveContext';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop';
 
 const Cart = () => {
+  const { isMobile } = useResponsive();
   const { cartItems, updateQuantity, removeFromCart, cartTotal, cartError } = useCart();
   const navigate = useNavigate();
 
@@ -22,6 +25,19 @@ const Cart = () => {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } }
   };
+
+  if (isMobile) {
+    return (
+      <MobileCartView
+        cartError={cartError}
+        cartItems={cartItems}
+        cartTotal={cartTotal}
+        onCheckout={() => navigate('/checkout')}
+        onRemove={(itemId) => removeFromCart(itemId).catch(console.error)}
+        onUpdateQuantity={(itemId, quantity) => updateQuantity(itemId, quantity).catch(console.error)}
+      />
+    );
+  }
 
   if (cartItems.length === 0) {
     return (

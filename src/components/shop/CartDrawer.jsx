@@ -4,10 +4,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../contexts/CartContext';
 import { formatINR } from '../../utils/currency';
 import styles from './CartDrawer.module.css';
+import MobileCartDrawer from '../mobile/MobileCartDrawer';
+import { useResponsive } from '../../contexts/ResponsiveContext';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop';
 
 const CartDrawer = () => {
+  const { isMobile } = useResponsive();
   const { isCartOpen, setIsCartOpen, cartItems, removeFromCart, updateQuantity, cartTotal, cartError } = useCart();
   const navigate = useNavigate();
 
@@ -20,6 +23,22 @@ const CartDrawer = () => {
     setIsCartOpen(false);
     navigate('/cart');
   };
+
+  if (isMobile) {
+    return (
+      <MobileCartDrawer
+        cartError={cartError}
+        cartItems={cartItems}
+        cartTotal={cartTotal}
+        isOpen={isCartOpen}
+        onCheckout={handleCheckout}
+        onClose={() => setIsCartOpen(false)}
+        onRemove={(itemId) => removeFromCart(itemId).catch(console.error)}
+        onUpdateQuantity={(itemId, quantity) => updateQuantity(itemId, quantity).catch(console.error)}
+        onViewCart={handleViewCart}
+      />
+    );
+  }
 
   return (
     <AnimatePresence>

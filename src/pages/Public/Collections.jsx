@@ -8,8 +8,11 @@ import CustomSelect from '../../components/ui/CustomSelect';
 import styles from './Shop.module.css';
 import accountStyles from '../Account/Account.module.css';
 import SEO from '../../components/common/SEO';
+import MobileCollectionsView from '../../components/mobile/MobileCollectionsView';
+import { useResponsive } from '../../contexts/ResponsiveContext';
 
 const Collections = () => {
+  const { isMobile } = useResponsive();
   const { category: pathCategory } = useParams();
   const [searchParams] = useSearchParams();
   const location = useLocation();
@@ -153,6 +156,24 @@ const Collections = () => {
       setLoading(false);
     }
   };
+
+  if (isMobile) {
+    return (
+      <MobileCollectionsView
+        filters={filters}
+        isFilterOpen={isMobileFilterOpen}
+        loading={loading}
+        onCloseFilters={() => setIsMobileFilterOpen(false)}
+        onOpenFilters={() => setIsMobileFilterOpen(true)}
+        products={products}
+        setFilters={setFilters}
+        setSortParam={setSortParam}
+        sortParam={sortParam}
+        title={getPageTitle()}
+        url={`https://lexcc.in${location.pathname}${location.search}`}
+      />
+    );
+  }
 
   return (
     <div style={{ position: 'relative', minHeight: '100vh', background: 'var(--secondary-color, #0a0a0a)', overflow: 'hidden' }}>

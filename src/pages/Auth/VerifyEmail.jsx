@@ -1,9 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import styles from './Auth.module.css';
+import { useAuthStyles } from './useAuthStyles';
 
 const VerifyEmail = () => {
+  const styles = useAuthStyles();
   return (
     <div className={styles.authPage}>
       <div className={styles.bgText}>VERIFY</div>

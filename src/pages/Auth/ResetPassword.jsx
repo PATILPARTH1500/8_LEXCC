@@ -6,7 +6,7 @@ import * as z from 'zod';
 import zxcvbn from 'zxcvbn';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
-import styles from './Auth.module.css';
+import { useAuthStyles } from './useAuthStyles';
 
 const resetSchema = z.object({
   password: z.string()
@@ -22,6 +22,7 @@ const resetSchema = z.object({
 });
 
 const ResetPassword = () => {
+  const styles = useAuthStyles();
   const { resetPassword } = useAuth();
   const navigate = useNavigate();
   const [globalError, setGlobalError] = useState('');

@@ -1,0 +1,2 @@
+.concierge { position: fixed; right: max(14px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 9000; width: 52px; height: 52px; display: grid; place-items: center; border: 1px solid rgba(212, 175, 55, 0.55); border-radius: 50%; background: rgba(8, 8, 8, 0.94); color: #d4af37; box-shadow: 0 9px 28px rgba(0, 0, 0, 0.42); font-size: 1.45rem; }
+.concierge:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }

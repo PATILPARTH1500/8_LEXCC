@@ -1,0 +1,139 @@
+.pageHeader { min-width: 0; margin-bottom: 24px; }
+.pageTitle { margin: 0 0 9px; max-width: 100%; overflow-wrap: anywhere; font-family: var(--font-heading); font-size: clamp(1.7rem, 8.5vw, 2.7rem); font-weight: 300; line-height: 1.02; letter-spacing: 0.045em; text-transform: uppercase; }
+.pageTitle span { display: block; font-weight: 500; }
+.pageSubtitle { max-width: 520px; margin: 0; color: rgba(255, 255, 255, 0.56); font-size: 0.84rem; line-height: 1.55; overflow-wrap: anywhere; }
+.card,
+.addressCard,
+.statCard { width: 100%; min-width: 0; margin: 0 0 14px; padding: 18px 15px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.11); background: #0f0f0f; box-sizing: border-box; overflow-wrap: anywhere; }
+.cardTitle { min-width: 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin: 0 0 20px; padding-bottom: 13px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); font-size: 0.78rem; font-weight: 400; letter-spacing: 0.12em; text-transform: uppercase; }
+.dashboardGrid,
+.addressGrid,
+.adminStatsGrid,
+.adminSplitGrid { min-width: 0; display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 25px; }
+.statCard { min-height: 150px; display: flex; flex-direction: column; justify-content: space-between; }
+.statCardTitle { color: rgba(255, 255, 255, 0.52); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; }
+.statCardValue { margin: 12px 0; font-size: clamp(2.4rem, 14vw, 4rem); font-weight: 200; line-height: 1; }
+.statCardLink { min-height: 44px; display: inline-flex; align-items: center; color: #d4af37; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.statusGrid { min-width: 0; display: grid; gap: 14px; }
+.badge { display: inline-flex; align-items: center; max-width: 100%; min-height: 30px; padding: 6px 11px; border: 1px solid rgba(255, 255, 255, 0.13); border-radius: 999px; background: rgba(255, 255, 255, 0.05); color: #fff; font-size: 0.62rem; letter-spacing: 0.09em; text-transform: uppercase; overflow-wrap: anywhere; }
+.badgeSuccess { border-color: rgba(212, 175, 55, 0.3); background: rgba(212, 175, 55, 0.1); color: #e7ca78; }
+.badgeWarning { background: rgba(245, 158, 11, 0.1); color: #fbbf24; }
+.formGrid { min-width: 0; display: grid; grid-template-columns: 1fr; gap: 14px; }
+.formGroup { min-width: 0; margin: 0; }
+.formLabel,
+.inputLabel { display: block; margin-bottom: 7px; color: rgba(255, 255, 255, 0.55); font-size: 0.64rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.formInput,
+.inputField { width: 100%; min-width: 0; min-height: 46px; padding: 10px 11px; border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 0; outline: 0; background: #151515; color: #fff; font: inherit; font-size: 0.84rem; box-sizing: border-box; }
+.formInput:focus,
+.inputField:focus { border-color: #d4af37; box-shadow: 0 0 0 1px #d4af37; }
+.formInput:disabled,
+.inputField:disabled { opacity: 0.5; }
+.formActions,
+.modalActions,
+.avatarActions,
+.productActions,
+.addressActions { min-width: 0; display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 18px; }
+.actionBtn,
+.primaryBtn,
+.secondaryBtn,
+.invoiceBtn { width: 100%; min-width: 0; min-height: 48px; display: inline-flex; align-items: center; justify-content: center; padding: 0 13px; border: 1px solid #fff; background: #fff; color: #080808; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.11em; text-align: center; text-transform: uppercase; overflow-wrap: anywhere; box-sizing: border-box; }
+.secondaryBtn,
+.invoiceBtn { border-color: rgba(255, 255, 255, 0.2); background: transparent; color: #fff; }
+.invoiceBtn:disabled { opacity: 0.5; }
+.emptyState { min-height: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 35px 18px; border: 1px solid rgba(255, 255, 255, 0.1); text-align: center; }
+.emptyIcon { margin-bottom: 15px; color: #b79a64; font-size: 2.2rem; }
+.emptyTitle { margin: 0 0 10px; font-size: 1.15rem; font-weight: 300; letter-spacing: 0.08em; text-transform: uppercase; }
+.emptyDesc { max-width: 360px; margin: 0 0 22px; color: rgba(255, 255, 255, 0.54); font-size: 0.82rem; line-height: 1.55; }
+.emptyState .actionBtn { width: auto; padding-inline: 20px; }
+.addressCard { display: flex; flex-direction: column; }
+.addressCardHeader { min-width: 0; display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 9px; margin-bottom: 15px; }
+.addressType { min-width: 0; color: #fff; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; overflow-wrap: anywhere; }
+.addressCopy { min-width: 0; margin-bottom: 10px; color: rgba(255, 255, 255, 0.59); font-size: 0.8rem; line-height: 1.6; overflow-wrap: anywhere; }
+.addressName { margin-bottom: 7px; color: #fff; }
+.addressCountry { margin-top: 4px; }
+.addAddressCard { min-height: 170px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px dashed rgba(255, 255, 255, 0.25); background: transparent; color: #fff; }
+.addAddressIcon { margin-bottom: 11px; color: #b79a64; font-size: 1.9rem; }
+.addAddressLabel { font-size: 0.7rem; letter-spacing: 0.11em; text-align: center; text-transform: uppercase; }
+.defaultToggle { display: flex; align-items: center; gap: 10px; }
+.defaultCheckbox { flex: 0 0 18px; width: 18px; height: 18px; accent-color: #d4af37; }
+.defaultLabel { min-width: 0; color: rgba(255, 255, 255, 0.65); font-size: 0.77rem; overflow-wrap: anywhere; }
+.productGrid { min-width: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 8px; }
+.productCard { min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.productImageWrapper { position: relative; width: 100%; aspect-ratio: 3 / 4; overflow: hidden; background: #111; }
+.productImage { width: 100%; height: 100%; object-fit: cover; }
+.productInfo { min-width: 0; display: flex; flex-direction: column; gap: 7px; }
+.productName { max-width: 100%; font-size: 0.7rem; line-height: 1.4; letter-spacing: 0.06em; text-transform: uppercase; overflow-wrap: anywhere; }
+.productPrice { color: rgba(255, 255, 255, 0.65); font-size: 0.72rem; }
+.productActions { margin-top: 2px; }
+.ordersList { min-width: 0; display: grid; gap: 15px; }
+.orderHeader { min-width: 0; display: grid; gap: 14px; margin-bottom: 17px; padding-bottom: 17px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+.orderIdentity,
+.orderSummary,
+.orderItemContent,
+.shipmentCopy { min-width: 0; }
+.orderNumber { margin-bottom: 6px; max-width: 100%; font-size: 0.85rem; font-weight: 500; letter-spacing: 0.09em; overflow-wrap: anywhere; }
+.orderDate,
+.orderItemMeta { color: rgba(255, 255, 255, 0.5); font-size: 0.69rem; line-height: 1.5; overflow-wrap: anywhere; }
+.orderTotal { margin-bottom: 8px; font-size: 1rem; font-weight: 300; }
+.orderItems { min-width: 0; display: grid; gap: 13px; }
+.orderItem { min-width: 0; display: grid; grid-template-columns: 62px minmax(0, 1fr); gap: 11px; align-items: start; }
+.orderItemImage { width: 62px; height: 80px; overflow: hidden; background: #050505; }
+.orderItemImage img { width: 100%; height: 100%; object-fit: cover; }
+.orderItemName { margin: 0 0 6px; max-width: 100%; font-size: 0.72rem; font-weight: 400; line-height: 1.4; letter-spacing: 0.06em; overflow-wrap: anywhere; }
+.shipmentDetails { min-width: 0; display: grid; gap: 13px; margin-bottom: 17px; padding: 14px; border-left: 2px solid #d4af37; background: #111; }
+.shipmentTitle { margin-bottom: 5px; color: #d4af37; font-size: 0.67rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.shipmentLine,
+.shipmentValue { color: rgba(255, 255, 255, 0.7); font-size: 0.75rem; overflow-wrap: anywhere; }
+.trackingLink { min-height: 44px; display: flex; align-items: center; justify-content: center; padding: 0 12px; background: #d4af37; color: #080808; font-size: 0.65rem; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; }
+.profileHeader,
+.securityRow { min-width: 0; display: grid; gap: 13px; }
+.avatarRow { min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 18px; margin-bottom: 25px; }
+.securityRow { padding-bottom: 18px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+.securityRow + .securityRow { padding-top: 18px; }
+.adminHeader { min-width: 0; display: grid; gap: 14px; margin-bottom: 22px; }
+.responsiveTable { width: 100%; min-width: 0; overflow: hidden; }
+.responsiveTable table,
+.responsiveTable thead,
+.responsiveTable tbody,
+.responsiveTable th,
+.responsiveTable td,
+.responsiveTable tr { display: block; width: 100%; box-sizing: border-box; }
+.responsiveTable thead { display: none; }
+.responsiveTable tr { min-width: 0; margin-bottom: 10px; padding: 7px; border: 1px solid rgba(255, 255, 255, 0.1); background: #111; }
+.responsiveTable td { min-width: 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 11px !important; border-bottom: 1px solid rgba(255, 255, 255, 0.07); text-align: right !important; overflow-wrap: anywhere; }
+.responsiveTable td::before { content: attr(data-label); flex: 0 0 36%; color: rgba(255, 255, 255, 0.5); font-size: 0.6rem; font-weight: 600; letter-spacing: 0.07em; text-align: left; text-transform: uppercase; }
+.responsiveTable td:last-child { border-bottom: 0; }
+.adminFormLayout { min-width: 0; display: grid; gap: 18px; }
+.imageUploadContainer { min-width: 0; width: 100%; }
+.imageUploadContainer > div { max-width: 100% !important; height: 230px !important; }
+.variantRow { min-width: 0; display: grid; gap: 10px; padding: 12px; border: 1px solid rgba(255, 255, 255, 0.1); background: #111; }
+.variantRow > div { min-width: 0; width: 100% !important; }
+.modalOverlay { position: fixed; inset: 0; z-index: 14000; display: flex; align-items: flex-start; justify-content: center; overflow-y: auto; overscroll-behavior: contain; padding: max(12px, env(safe-area-inset-top)) 10px max(12px, env(safe-area-inset-bottom)); }
+.modalBackdrop { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.82); backdrop-filter: blur(8px); }
+.modalContainer,
+.modalPadding { position: relative; z-index: 1; width: 100%; max-width: 650px; max-height: calc(100dvh - 24px); overflow-y: auto; padding: 18px 14px; border: 1px solid rgba(212, 175, 55, 0.35); background: #0a0a0a; box-sizing: border-box; }
+
+.actionBtn:focus-visible,
+.primaryBtn:focus-visible,
+.secondaryBtn:focus-visible,
+.invoiceBtn:focus-visible,
+.formInput:focus-visible,
+.inputField:focus-visible,
+.addAddressCard:focus-visible,
+.address:focus-visible { outline: 2px solid #d4af37; outline-offset: 2px; }
+
+@media (min-width: 720px) {
+  .dashboardGrid,
+  .addressGrid,
+  .adminStatsGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .formGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .productGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap-inline: 14px; }
+  .orderHeader { grid-template-columns: minmax(0, 1fr) auto; }
+  .orderSummary { text-align: right; }
+  .shipmentDetails { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+  .adminHeader { grid-template-columns: minmax(0, 1fr) auto; align-items: end; }
+  .formActions,
+  .modalActions,
+  .addressActions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .adminFormLayout { grid-template-columns: minmax(0, 1fr) minmax(220px, 0.45fr); }
+}

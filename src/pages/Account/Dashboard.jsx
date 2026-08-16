@@ -3,9 +3,10 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import styles from './Account.module.css';
+import { useAccountStyles } from './useAccountStyles';
 
 const Dashboard = () => {
+  const styles = useAccountStyles();
   const { profile, user, wishlistItems } = useAuth();
   const [stats, setStats] = useState({ orders: 0, wishlist: 0, addresses: 0 });
   const [loading, setLoading] = useState(true);
