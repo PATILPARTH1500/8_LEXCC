@@ -88,13 +88,25 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
-  const signIn = async ({ email, password }) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: email.toLowerCase().trim(),
-      password,
-    });
-    if (error) throw error;
-    return data;
+  const signIn = async (credentials) => {
+    try {
+      setLoading(true);
+      
+      // MOCK LOGIN FOR DEBUGGING
+      console.log('MOCK SIGN IN EXECUTED');
+      const mockSession = { user: { id: 'mock-123', email: credentials.email || 'test@lexcc.com' } };
+      const mockProfile = { id: 'mock-123', first_name: 'Test', last_name: 'User' };
+      
+      setSession(mockSession);
+      setUser(mockSession.user);
+      setProfile(mockProfile);
+      
+      return { data: { session: mockSession }, error: null };
+    } catch (error) {
+      return { data: null, error };
+    } finally {
+      setLoading(false);
+    }
   };
 
   const googleSignIn = async () => {
