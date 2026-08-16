@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useLayoutEffect } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
@@ -8,6 +8,10 @@ const AccountLayout = () => {
   const { logout, profile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   const handleLogout = async () => {
     try {
@@ -57,7 +61,6 @@ const AccountLayout = () => {
           <motion.div
             key={location.pathname + '-bg'}
             className={styles.bgTextAccount}
-            style={{ maxWidth: '100%', overflowX: 'hidden' }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}

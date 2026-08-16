@@ -32,6 +32,10 @@
   color: #fff;
 }
 
+.accountMenuSpacer {
+  display: none;
+}
+
 .nav {
   display: flex;
   gap: 32px;
@@ -116,6 +120,12 @@
   }
   .headerContainer {
     padding: 0 16px;
+  }
+  .accountMenuSpacer {
+    display: block;
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
   }
 }
 
