@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabase';
 import styles from './Home.module.css';
 import { formatINR } from '../utils/currency';
 import SEO from '../components/common/SEO';
+import { useNewsletterSubscription } from '../hooks/useNewsletterSubscription';
 
 // React Bits Components
 import CurvedLoop from '../components/animations/CurvedLoop';
@@ -49,6 +50,7 @@ const Home = () => {
   const brandStatementRef = useRef(null);
   const [customers, setCustomers] = useState(0);
   const [featuredProducts, setFeaturedProducts] = useState([]);
+  const newsletter = useNewsletterSubscription('home');
 
   useEffect(() => {
     const fetchFeatured = async () => {
@@ -58,6 +60,7 @@ const Home = () => {
           .select(`
             id,
             name,
+            slug,
             price,
             image_url
           `)
@@ -778,7 +781,7 @@ const Home = () => {
                 transition={{ duration: 1, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
                 className={styles.wantedCard}
               >
-                <Link to={`/product/${product.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                <Link to={`/product/${product.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                   <div className={styles.wantedCardImgWrapper}>
                     <img 
                       src={product.image_url || 'https://via.placeholder.com/800x1200/111/fff?text=No+Image'} 
@@ -874,16 +877,27 @@ const Home = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
-            onSubmit={(e) => e.preventDefault()}
+            onSubmit={newsletter.subscribe}
           >
+            <label htmlFor="home-newsletter-email" className={styles.srOnly}>Email address</label>
             <input 
+              id="home-newsletter-email"
               type="email" 
               placeholder="ENTER YOUR EMAIL" 
               className={styles.newsletterInput}
+              value={newsletter.email}
+              onChange={(event) => newsletter.setEmail(event.target.value)}
+              autoComplete="email"
+              required
             />
-            <button type="submit" className={styles.newsletterSubmit}>
-              Subscribe
+            <button type="submit" className={styles.newsletterSubmit} disabled={newsletter.status === 'loading'}>
+              {newsletter.status === 'loading' ? 'Subscribing...' : 'Subscribe'}
             </button>
+            {newsletter.message && (
+              <p className={`${styles.newsletterMessage} ${newsletter.status === 'error' ? styles.newsletterMessageError : ''}`} role={newsletter.status === 'error' ? 'alert' : 'status'}>
+                {newsletter.message}
+              </p>
+            )}
           </motion.form>
         </div>
       </section>

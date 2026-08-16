@@ -70,6 +70,13 @@
   color: #fff;
 }
 
+.linkPending,
+.legalPending {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 14px;
+  cursor: default;
+}
+
 .newsletterDesc {
   color: var(--text-muted);
   font-size: 14px;
@@ -114,6 +121,34 @@
   color: var(--accent-color);
 }
 
+.submitBtn:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.formMessage {
+  color: #86efac;
+  font-size: 12px;
+  margin-top: 12px;
+  line-height: 1.5;
+}
+
+.formMessageError {
+  color: #fca5a5;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .bottomBar {
   border-top: 1px solid var(--border-color);
   padding-top: 32px;
@@ -140,6 +175,10 @@
   gap: 24px;
   font-size: 12px;
   color: var(--text-muted);
+}
+
+.legalPending {
+  font-size: 12px;
 }
 
 .legalLinks a:hover {

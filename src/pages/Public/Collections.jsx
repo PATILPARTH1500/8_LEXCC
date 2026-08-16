@@ -62,7 +62,7 @@ const Collections = () => {
     setLoading(true);
     try {
       const hasVariantFilter = (filters.size && filters.size.length > 0) || (filters.color && filters.color.length > 0);
-      const variantJoin = hasVariantFilter ? 'variants:product_variants!inner(size, color, stock)' : 'variants:product_variants(size, color, stock)';
+      const variantJoin = hasVariantFilter ? 'variants:product_variants!inner(id, size, color, stock)' : 'variants:product_variants(id, size, color, stock)';
 
       let query = supabase
         .from('products')

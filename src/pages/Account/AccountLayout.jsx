@@ -1,4 +1,4 @@
-import React, { useLayoutEffect } from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
@@ -8,6 +8,7 @@ const AccountLayout = () => {
   const { logout, profile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const navLinkRefs = useRef(new Map());
 
   useLayoutEffect(() => {
     window.scrollTo(0, 0);
@@ -34,6 +35,30 @@ const AccountLayout = () => {
   if (profile?.is_admin) {
     navItems.push({ path: '/account/admin', label: 'Admin Panel' });
   }
+
+  useLayoutEffect(() => {
+    if (!window.matchMedia('(max-width: 1024px)').matches) return undefined;
+
+    const activeItem = navItems.find((item) => (
+      item.exact
+        ? location.pathname === item.path
+        : location.pathname === item.path || location.pathname.startsWith(`${item.path}/`)
+    ));
+    const activeElement = activeItem ? navLinkRefs.current.get(activeItem.path) : null;
+
+    if (!activeElement) return undefined;
+
+    const frame = window.requestAnimationFrame(() => {
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      activeElement.scrollIntoView({
+        behavior: reduceMotion ? 'auto' : 'smooth',
+        inline: 'center',
+        block: 'nearest'
+      });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [location.pathname, profile?.is_admin]);
 
   const getBackgroundText = () => {
     if (location.pathname.startsWith('/account/admin')) return 'SYSTEM';
@@ -95,7 +120,7 @@ const AccountLayout = () => {
             </div>
           )}
 
-          <div className={styles.sidebarNav}>
+          <nav className={styles.sidebarNav} aria-label="Account sections">
             {navItems.map((item, index) => (
               <motion.div
                 key={item.path}
@@ -106,6 +131,10 @@ const AccountLayout = () => {
                 <NavLink
                   to={item.path}
                   end={item.exact}
+                  ref={(element) => {
+                    if (element) navLinkRefs.current.set(item.path, element);
+                    else navLinkRefs.current.delete(item.path);
+                  }}
                   className={({ isActive }) => `${styles.navLink} ${isActive ? styles.activeLink : ''}`}
                 >
                   {item.label}
@@ -121,7 +150,7 @@ const AccountLayout = () => {
                 Log Out
               </button>
             </motion.div>
-          </div>
+          </nav>
         </motion.aside>
 
         <motion.main 

@@ -3,25 +3,16 @@ import autoTable from 'jspdf-autotable';
 import { supabase } from '../lib/supabase';
 import { formatINR } from './currency';
 
-export const generateInvoice = async (orderId) => {
+export const generateInvoice = async (orderId, guestAccessToken = null) => {
   try {
-    // 1. Fetch complete order data
-    const { data: order, error } = await supabase
-      .from('orders')
-      .select(`
-        *,
-        user:profiles(first_name, last_name, email),
-        items:order_items(
-          quantity,
-          price_at_time,
-          product:products(name),
-          variant:product_variants(size, color)
-        )
-      `)
-      .eq('id', orderId)
-      .single();
+    // Fetch through an authorization-aware Edge Function so guest access does not
+    // require weakening order RLS.
+    const { data, error } = await supabase.functions.invoke('get-order-invoice', {
+      body: { orderId, guestAccessToken }
+    });
 
     if (error) throw error;
+    const order = data?.order;
     if (!order) throw new Error('Order not found');
 
     // 2. Initialize PDF Document
@@ -41,7 +32,7 @@ export const generateInvoice = async (orderId) => {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
-    doc.text('www.lexcc.com', margin, currentY + 6);
+    doc.text('www.lexcc.in', margin, currentY + 6);
     
     // Invoice Title
     doc.setFont('helvetica', 'bold');
@@ -74,8 +65,11 @@ export const generateInvoice = async (orderId) => {
     doc.text('Billed To:', customerX, currentY);
     doc.setFont('helvetica', 'normal');
     
-    const customerName = order.user ? `${order.user.first_name} ${order.user.last_name}` : 'Guest Customer';
-    const customerEmail = order.user?.email || 'N/A';
+    const customer = Array.isArray(order.user) ? order.user[0] : order.user;
+    const customerName = customer
+      ? `${customer.first_name || ''} ${customer.last_name || ''}`.trim()
+      : `${order.shipping_address?.first_name || ''} ${order.shipping_address?.last_name || ''}`.trim() || 'Guest Customer';
+    const customerEmail = customer?.email || order.shipping_address?.email || 'N/A';
     doc.text(customerName, customerX, currentY + 6);
     doc.text(customerEmail, customerX, currentY + 12);
 
@@ -83,8 +77,7 @@ export const generateInvoice = async (orderId) => {
     let addrLines = [];
     if (order.shipping_address) {
       const s = order.shipping_address;
-      if (s.address_line1) addrLines.push(s.address_line1);
-      if (s.address_line2) addrLines.push(s.address_line2);
+      if (s.street) addrLines.push(s.street);
       if (s.city || s.state || s.postal_code) {
         addrLines.push(`${s.city || ''} ${s.state || ''} ${s.postal_code || ''}`.trim());
       }
@@ -110,10 +103,12 @@ export const generateInvoice = async (orderId) => {
     const tableRows = [];
 
     order.items?.forEach(item => {
-      const productName = item.product?.name || 'Unknown Product';
+      const product = Array.isArray(item.product) ? item.product[0] : item.product;
+      const variant = Array.isArray(item.variant) ? item.variant[0] : item.variant;
+      const productName = product?.name || 'Unknown Product';
       let variantStr = '-';
-      if (item.variant) {
-        variantStr = `${item.variant.size || ''} / ${item.variant.color || ''}`.replace(/^\s*\/\s*|\s*\/\s*$/g, '');
+      if (variant) {
+        variantStr = `${variant.size || ''} / ${variant.color || ''}`.replace(/^\s*\/\s*|\s*\/\s*$/g, '');
       }
       const quantity = item.quantity.toString();
       const unitPrice = formatINR(item.price_at_time);
@@ -178,7 +173,7 @@ export const generateInvoice = async (orderId) => {
     
     doc.setFont('helvetica', 'normal');
     // uppercase status
-    const pStatus = (order.status || 'Pending').toUpperCase();
+    const pStatus = (order.payment_status || 'Pending').toUpperCase();
     doc.text(pStatus, margin + 35, currentY);
     
     currentY += 8;

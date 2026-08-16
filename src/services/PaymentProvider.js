@@ -20,43 +20,60 @@ export const initiatePayment = async (orderData, handlers) => {
   const res = await loadRazorpay();
 
   if (!res) {
-    alert('Razorpay SDK failed to load. Are you online?');
-    if (handlers.onError) handlers.onError(new Error('SDK load failed'));
-    return;
+    throw new Error('Razorpay checkout could not be loaded. Please check your connection.');
   }
 
-  const options = {
-    key: import.meta.env.VITE_RAZORPAY_KEY_ID, 
-    amount: orderData.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
-    currency: orderData.currency || "INR",
-    name: "LEXCC",
-    description: "Order Checkout",
-    order_id: orderData.razorpayOrderId, // This is a sample Order ID. Pass the `id` obtained in the response of create-razorpay-order
-    handler: function (response) {
-      if (handlers.onSuccess) {
-        handlers.onSuccess(response);
+  if (!import.meta.env.VITE_RAZORPAY_KEY_ID) {
+    throw new Error('Razorpay checkout is not configured.');
+  }
+
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const fail = async (error) => {
+      if (settled) return;
+      settled = true;
+      try {
+        if (handlers.onFailure) await handlers.onFailure(error);
+      } finally {
+        reject(error instanceof Error ? error : new Error(error?.description || 'Payment was not completed'));
       }
-    },
-    prefill: {
-      name: orderData.customerName || "",
-      email: orderData.customerEmail || "",
-      contact: orderData.customerPhone || ""
-    },
-    notes: {
-      address: "LEXCC Corporate Office"
-    },
-    theme: {
-      color: "#D4AF37"
-    }
-  };
+    };
 
-  const paymentObject = new window.Razorpay(options);
-  
-  paymentObject.on('payment.failed', function (response) {
-    if (handlers.onFailure) {
-      handlers.onFailure(response.error);
-    }
+    const options = {
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+      amount: orderData.amount,
+      currency: orderData.currency || 'INR',
+      name: 'LEXCC',
+      description: 'Order Checkout',
+      order_id: orderData.razorpayOrderId,
+      handler: async (response) => {
+        if (settled) return;
+        try {
+          const result = handlers.onSuccess ? await handlers.onSuccess(response) : response;
+          settled = true;
+          resolve(result);
+        } catch (error) {
+          await fail(error);
+        }
+      },
+      modal: {
+        ondismiss: () => fail(new Error('Payment was cancelled.'))
+      },
+      prefill: {
+        name: orderData.customerName || '',
+        email: orderData.customerEmail || '',
+        contact: orderData.customerPhone || ''
+      },
+      notes: {
+        address: 'LEXCC Corporate Office'
+      },
+      theme: {
+        color: '#D4AF37'
+      }
+    };
+
+    const paymentObject = new window.Razorpay(options);
+    paymentObject.on('payment.failed', (response) => fail(response.error));
+    paymentObject.open();
   });
-
-  paymentObject.open();
 };

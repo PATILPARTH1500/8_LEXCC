@@ -1,0 +1,111 @@
+.page {
+  position: relative;
+  min-height: 78vh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: 140px 20px 90px;
+  background: #0a0a0a;
+  color: #fff;
+}
+
+.backgroundText {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-heading, inherit);
+  font-size: clamp(10rem, 35vw, 32rem);
+  font-weight: 700;
+  line-height: 0.8;
+  color: rgba(255, 255, 255, 0.025);
+  user-select: none;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 680px);
+  text-align: center;
+}
+
+.eyebrow {
+  display: block;
+  margin-bottom: 22px;
+  color: var(--accent-color, #d4af37);
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin-bottom: 24px;
+  font-family: var(--font-heading, inherit);
+  font-size: clamp(2.2rem, 8vw, 4.8rem);
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+.description {
+  max-width: 520px;
+  margin: 0 auto 38px;
+  color: rgba(255, 255, 255, 0.58);
+  line-height: 1.7;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+}
+
+.primaryAction,
+.secondaryAction {
+  min-width: 190px;
+  padding: 16px 24px;
+  border: 1px solid #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.primaryAction {
+  background: #fff;
+  color: #000;
+}
+
+.secondaryAction {
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
+.primaryAction:hover,
+.secondaryAction:hover {
+  border-color: var(--accent-color, #d4af37);
+  background: var(--accent-color, #d4af37);
+  color: #000;
+}
+
+@media (max-width: 480px) {
+  .page {
+    padding-top: 110px;
+  }
+
+  .actions,
+  .primaryAction,
+  .secondaryAction {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primaryAction,
+  .secondaryAction {
+    transition: none;
+  }
+}

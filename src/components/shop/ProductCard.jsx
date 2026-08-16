@@ -45,9 +45,19 @@ const ProductCard = ({ product }) => {
           
           <button 
             className={styles.quickAddBtn}
-            onClick={(e) => {
+            onClick={async (e) => {
               e.preventDefault();
-              addToCart(product);
+              e.stopPropagation();
+              const availableVariants = product.variants?.filter((variant) => variant.stock > 0) || [];
+              if ((product.variants?.length || 0) > 0 && availableVariants.length !== 1) {
+                navigate(`/product/${product.slug}`);
+                return;
+              }
+              try {
+                await addToCart(product, availableVariants[0] || null);
+              } catch (error) {
+                console.error('Unable to add product to cart:', error);
+              }
             }}
           >
             QUICK ADD
@@ -56,21 +66,8 @@ const ProductCard = ({ product }) => {
           <button 
             onClick={toggleWishlist}
             disabled={loadingWishlist}
+            aria-label={isInWishlist ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
             className={`${styles.wishlistFloatingBtn} ${isInWishlist ? styles.wishlistFloatingBtnActive : ''}`}
-            style={{
-              position: 'absolute',
-              top: '15px',
-              right: '15px',
-              width: '32px',
-              height: '32px',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              zIndex: 10,
-              transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
-            }}
           >
             <span style={{ fontSize: '1rem', marginTop: '2px' }}>{isInWishlist ? '♥' : '♡'}</span>
           </button>

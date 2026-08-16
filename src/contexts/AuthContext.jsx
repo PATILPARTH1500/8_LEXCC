@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext();
@@ -8,59 +8,141 @@ export const AuthProvider = ({ children }) => {
   const [profile, setProfile] = useState(null);
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [authInitialized, setAuthInitialized] = useState(false);
   const [wishlistItems, setWishlistItems] = useState([]);
 
+  const fetchProfile = useCallback(async (userId) => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (error) throw error;
+    setProfile(data || null);
+    return data;
+  }, []);
+
+  const fetchWishlist = useCallback(async (uid) => {
+    if (!uid) {
+      setWishlistItems([]);
+      return [];
+    }
+
+    const { data: wishlist, error: wishlistError } = await supabase
+      .from('wishlists')
+      .select('id')
+      .eq('user_id', uid)
+      .maybeSingle();
+
+    if (wishlistError) throw wishlistError;
+    if (!wishlist) {
+      setWishlistItems([]);
+      return [];
+    }
+
+    const { data, error } = await supabase
+      .from('wishlist_items')
+      .select(`
+        id,
+        product_id,
+        products (
+          id,
+          name,
+          slug,
+          price,
+          image_url,
+          variants:product_variants (
+            id,
+            size,
+            color,
+            stock
+          )
+        )
+      `)
+      .eq('wishlist_id', wishlist.id)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    setWishlistItems(data || []);
+    return data || [];
+  }, []);
+
   useEffect(() => {
-    // Check active sessions and sets the user
-    const getSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        await fetchProfile(session.user.id);
-        await fetchWishlist(session.user.id);
-      }
-      
-      setLoading(false);
-    };
+    let mounted = true;
 
-    getSession();
+    const applySession = (nextSession) => {
+      if (!mounted) return;
+      setSession(nextSession);
+      setUser(nextSession?.user ?? null);
 
-    // Listen for changes on auth state (log in, log out, etc.)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        await fetchProfile(session.user.id);
-        await fetchWishlist(session.user.id);
-      } else {
+      if (!nextSession?.user) {
         setProfile(null);
         setWishlistItems([]);
       }
-      
-      setLoading(false);
+    };
+
+    const initializeSession = async () => {
+      try {
+        const { data: { session: activeSession }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        applySession(activeSession);
+      } catch (error) {
+        console.error('Error restoring authentication session:', error.message);
+        applySession(null);
+      } finally {
+        if (mounted) setAuthInitialized(true);
+      }
+    };
+
+    initializeSession();
+
+    // Keep the auth callback synchronous. Profile and wishlist hydration happens below.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      applySession(nextSession);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
-  const fetchProfile = async (userId) => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-        
-      if (error) throw error;
-      setProfile(data);
-    } catch (error) {
-      console.error('Error fetching profile:', error.message);
-    }
-  };
+  useEffect(() => {
+    if (!authInitialized) return undefined;
+
+    let active = true;
+
+    const hydrateAuthenticatedUser = async () => {
+      if (!user) {
+        setProfile(null);
+        setWishlistItems([]);
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      const results = await Promise.allSettled([
+        fetchProfile(user.id),
+        fetchWishlist(user.id)
+      ]);
+
+      if (!active) return;
+
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          const resource = index === 0 ? 'profile' : 'wishlist';
+          console.error(`Error fetching ${resource}:`, result.reason?.message || result.reason);
+        }
+      });
+      setLoading(false);
+    };
+
+    hydrateAuthenticatedUser();
+    return () => {
+      active = false;
+    };
+  }, [authInitialized, user?.id, fetchProfile, fetchWishlist]);
 
   const signUp = async ({ email, password, firstName, lastName, phone }) => {
     // 1. Create auth user
@@ -88,25 +170,19 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
-  const signIn = async (credentials) => {
-    try {
-      setLoading(true);
-      
-      // MOCK LOGIN FOR DEBUGGING
-      console.log('MOCK SIGN IN EXECUTED');
-      const mockSession = { user: { id: 'mock-123', email: credentials.email || 'test@lexcc.com' } };
-      const mockProfile = { id: 'mock-123', first_name: 'Test', last_name: 'User' };
-      
-      setSession(mockSession);
-      setUser(mockSession.user);
-      setProfile(mockProfile);
-      
-      return { data: { session: mockSession }, error: null };
-    } catch (error) {
-      return { data: null, error };
-    } finally {
+  const signIn = async ({ email, password }) => {
+    setLoading(true);
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.toLowerCase().trim(),
+      password
+    });
+
+    if (error) {
       setLoading(false);
+      throw error;
     }
+
+    return data;
   };
 
   const googleSignIn = async () => {
@@ -159,6 +235,21 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
+  const changePassword = async (currentPassword, newPassword) => {
+    if (!user?.email) throw new Error('No password-based account is available');
+
+    const { error: verificationError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: currentPassword
+    });
+
+    if (verificationError) {
+      throw new Error('The current password is incorrect');
+    }
+
+    return resetPassword(newPassword);
+  };
+
   const verifyTurnstileToken = async (token) => {
     const { data, error } = await supabase.functions.invoke('verify-turnstile', {
       body: { token }
@@ -170,10 +261,28 @@ export const AuthProvider = ({ children }) => {
 
   const updateProfile = async (updates) => {
     if (!user) throw new Error('No active user');
+
+    const allowedFields = new Set([
+      'first_name',
+      'last_name',
+      'phone',
+      'avatar_url',
+      'dob',
+      'gender',
+      'language',
+      'currency'
+    ]);
+    const safeUpdates = Object.fromEntries(
+      Object.entries(updates || {}).filter(([key]) => allowedFields.has(key))
+    );
+
+    if (Object.keys(safeUpdates).length === 0) {
+      throw new Error('No editable profile fields were provided');
+    }
     
     const { data, error } = await supabase
       .from('profiles')
-      .update(updates)
+      .update(safeUpdates)
       .eq('id', user.id)
       .select()
       .single();
@@ -280,35 +389,31 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Wishlist Management
-  const fetchWishlist = async (uid = user?.id) => {
-    if (!uid) return [];
-
-    const { data, error } = await supabase
-      .from('wishlist')
-      .select(`
-        id,
-        product_id,
-        products (
-          id,
-          name,
-          slug,
-          price,
-          image_url
-        )
-      `)
-      .eq('user_id', uid);
-      
-    if (error) throw error;
-    setWishlistItems(data || []);
-    return data;
-  };
-
   const addToWishlist = async (productId) => {
     if (!user) throw new Error('Please log in to save items to your wishlist');
 
+    let { data: wishlist, error: wishlistError } = await supabase
+      .from('wishlists')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (wishlistError) throw wishlistError;
+
+    if (!wishlist) {
+      const { data: createdWishlist, error: createError } = await supabase
+        .from('wishlists')
+        .insert([{ user_id: user.id }])
+        .select('id')
+        .single();
+
+      if (createError) throw createError;
+      wishlist = createdWishlist;
+    }
+
     const { data, error } = await supabase
-      .from('wishlist')
-      .insert([{ user_id: user.id, product_id: productId }])
+      .from('wishlist_items')
+      .insert([{ wishlist_id: wishlist.id, product_id: productId }])
       .select(`
         id,
         product_id,
@@ -317,13 +422,22 @@ export const AuthProvider = ({ children }) => {
           name,
           slug,
           price,
-          image_url
+          image_url,
+          variants:product_variants (
+            id,
+            size,
+            color,
+            stock
+          )
         )
       `)
       .single();
       
-    // Ignore duplicate insert errors
-    if (error && error.code !== '23505') throw error;
+    if (error?.code === '23505') {
+      await fetchWishlist(user.id);
+      return null;
+    }
+    if (error) throw error;
     
     if (data) {
       setWishlistItems(prev => {
@@ -336,7 +450,7 @@ export const AuthProvider = ({ children }) => {
 
   const removeFromWishlist = async (itemId) => {
     const { error } = await supabase
-      .from('wishlist')
+      .from('wishlist_items')
       .delete()
       .eq('id', itemId);
       
@@ -377,6 +491,7 @@ export const AuthProvider = ({ children }) => {
     verifyOTP,
     forgotPassword,
     resetPassword,
+    changePassword,
     updateProfile,
     uploadAvatar,
     verifyTurnstileToken,
