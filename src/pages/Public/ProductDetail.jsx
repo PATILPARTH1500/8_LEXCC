@@ -31,6 +31,7 @@ const ProductDetail = () => {
   const [isWishlistLoading, setIsWishlistLoading] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [cartSuccess, setCartSuccess] = useState(false);
+  const [showSizeGuide, setShowSizeGuide] = useState(false);
   
   const [imageLoading, setImageLoading] = useState(true);
 
@@ -144,6 +145,14 @@ const ProductDetail = () => {
   const totalStock = variantsForColor.reduce((sum, v) => sum + v.stock, 0) || 0;
   const uniqueSizes = [...new Set(variantsForColor.map(v => v.size))].filter(Boolean);
   
+  const isFootwear = product?.category?.name?.toLowerCase()?.includes('footwear') || false;
+  const displaySize = (sizeStr) => {
+    if (isFootwear && sizeStr.startsWith('UK ')) {
+      return sizeStr.replace('UK ', '');
+    }
+    return sizeStr;
+  };
+  
   const displayImages = product.image_url ? [product.image_url, DEFAULT_IMAGE] : [DEFAULT_IMAGE, DEFAULT_IMAGE];
 
   const productSchema = {
@@ -197,6 +206,10 @@ const ProductDetail = () => {
         totalStock={totalStock}
         uniqueColors={uniqueColors}
         uniqueSizes={uniqueSizes}
+        variantsForColor={variantsForColor}
+        isFootwear={isFootwear}
+        displaySize={displaySize}
+        onShowSizeGuide={() => setShowSizeGuide(true)}
       />
     );
   }
@@ -346,33 +359,47 @@ const ProductDetail = () => {
 
               {/* Size Selection */}
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px', fontSize: '0.75rem', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-                <span style={{ color: 'rgba(255,255,255,0.5)' }}>Size</span>
-                <span style={{ color: 'rgba(255,255,255,0.3)', cursor: 'pointer', transition: 'color 0.4s ease' }} onMouseOver={e=>e.currentTarget.style.color='#fff'} onMouseOut={e=>e.currentTarget.style.color='rgba(255,255,255,0.3)'}>Size Guide</span>
+                <span style={{ color: 'rgba(255,255,255,0.5)' }}>{isFootwear ? 'UK SIZE' : 'Size'}</span>
+                <span 
+                  style={{ color: 'rgba(255,255,255,0.3)', cursor: 'pointer', transition: 'color 0.4s ease' }} 
+                  onMouseOver={e=>e.currentTarget.style.color='#fff'} 
+                  onMouseOut={e=>e.currentTarget.style.color='rgba(255,255,255,0.3)'}
+                  onClick={() => setShowSizeGuide(true)}
+                >
+                  Size Guide
+                </span>
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-                {uniqueSizes.map(size => (
-                  <motion.button 
-                    key={size} 
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    style={{ 
-                      flex: '1 0 calc(33.333% - 8px)',
-                      padding: '14px',
-                      background: selectedSize === size ? 'rgba(212,175,55,0.05)' : 'transparent',
-                      color: selectedSize === size ? 'var(--accent-color, #D4AF37)' : '#fff',
-                      border: `1px solid ${selectedSize === size ? 'var(--accent-color, #D4AF37)' : 'rgba(255,255,255,0.1)'}`,
-                      boxShadow: selectedSize === size ? '0 0 15px rgba(212,175,55,0.15)' : 'none',
-                      cursor: 'pointer',
-                      fontSize: '0.85rem',
-                      letterSpacing: '0.1em',
-                      textTransform: 'uppercase',
-                      transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-                    }}
-                    onClick={() => setSelectedSize(size)}
-                  >
-                    {size}
-                  </motion.button>
-                ))}
+                {uniqueSizes.map(size => {
+                  const variant = variantsForColor.find(v => v.size === size);
+                  const isOutOfStock = !variant || variant.stock <= 0;
+                  
+                  return (
+                    <motion.button 
+                      key={size} 
+                      disabled={isOutOfStock}
+                      whileHover={!isOutOfStock ? { scale: 1.02 } : {}}
+                      whileTap={!isOutOfStock ? { scale: 0.98 } : {}}
+                      style={{ 
+                        flex: '1 0 calc(33.333% - 8px)',
+                        padding: '14px',
+                        background: selectedSize === size ? 'rgba(212,175,55,0.05)' : 'transparent',
+                        color: isOutOfStock ? 'rgba(255,255,255,0.2)' : selectedSize === size ? 'var(--accent-color, #D4AF37)' : '#fff',
+                        border: `1px solid ${selectedSize === size ? 'var(--accent-color, #D4AF37)' : 'rgba(255,255,255,0.1)'}`,
+                        boxShadow: selectedSize === size ? '0 0 15px rgba(212,175,55,0.15)' : 'none',
+                        cursor: isOutOfStock ? 'not-allowed' : 'pointer',
+                        fontSize: '0.85rem',
+                        letterSpacing: '0.1em',
+                        textTransform: 'uppercase',
+                        transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                        textDecoration: isOutOfStock ? 'line-through' : 'none',
+                      }}
+                      onClick={() => setSelectedSize(size)}
+                    >
+                      {displaySize(size)}
+                    </motion.button>
+                  );
+                })}
               </div>
             </motion.div>
 
@@ -453,7 +480,6 @@ const ProductDetail = () => {
         </div>
       </div>
       
-      {/* Related Products Section */}
       {relatedProducts.length > 0 && (
         <div style={{ padding: '80px 20px', maxWidth: '1600px', margin: '0 auto' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px' }}>
@@ -466,6 +492,67 @@ const ProductDetail = () => {
           </div>
         </div>
       )}
+
+      {/* Size Guide Modal */}
+      <AnimatePresence>
+        {showSizeGuide && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(5px)' }}
+            onClick={() => setShowSizeGuide(false)}
+          >
+            <motion.div 
+              initial={{ y: 20, opacity: 0 }} 
+              animate={{ y: 0, opacity: 1 }} 
+              exit={{ y: 20, opacity: 0 }}
+              style={{ background: '#111', border: '1px solid rgba(255,255,255,0.1)', padding: '40px', maxWidth: '400px', width: '90%', position: 'relative' }}
+              onClick={e => e.stopPropagation()}
+            >
+              <button 
+                onClick={() => setShowSizeGuide(false)} 
+                style={{ position: 'absolute', top: '15px', right: '15px', background: 'transparent', border: 'none', color: '#fff', fontSize: '1.2rem', cursor: 'pointer' }}
+              >
+                &times;
+              </button>
+              <h3 style={{ fontSize: '1.2rem', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '20px', color: '#fff' }}>Size Guide</h3>
+              
+              {isFootwear ? (
+                <table style={{ width: '100%', color: '#fff', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
+                      <th style={{ textAlign: 'left', padding: '10px 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>UK Size</th>
+                      <th style={{ textAlign: 'right', padding: '10px 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Foot Length Approx.</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      { size: '5', length: '24 cm' },
+                      { size: '6', length: '25 cm' },
+                      { size: '7', length: '26 cm' },
+                      { size: '8', length: '27 cm' },
+                      { size: '9', length: '28 cm' },
+                      { size: '10', length: '29 cm' },
+                      { size: '11', length: '30 cm' },
+                      { size: '12', length: '31 cm' },
+                    ].map(row => (
+                      <tr key={row.size} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                        <td style={{ padding: '10px 0' }}>{row.size}</td>
+                        <td style={{ padding: '10px 0', textAlign: 'right', color: 'rgba(255,255,255,0.6)' }}>{row.length}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem', lineHeight: '1.6' }}>
+                  <p>Fit measurements will be updated once official LEXCC measurements are finalized.</p>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };

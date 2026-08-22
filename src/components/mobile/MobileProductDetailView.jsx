@@ -28,6 +28,10 @@ const MobileProductDetailView = ({
   totalStock,
   uniqueColors,
   uniqueSizes,
+  variantsForColor,
+  isFootwear,
+  displaySize,
+  onShowSizeGuide,
 }) => {
   const reduceMotion = useReducedMotion();
 
@@ -109,20 +113,39 @@ const MobileProductDetailView = ({
           )}
 
           <fieldset className={styles.optionGroup}>
-            <legend>Size <span>{selectedSize || 'Select one'}</span></legend>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <legend>Size <span>{selectedSize ? displaySize(selectedSize) : 'Select one'}</span></legend>
+              <button 
+                type="button" 
+                onClick={onShowSizeGuide} 
+                style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', textDecoration: 'underline', fontSize: '0.75rem', padding: 0 }}
+              >
+                Size Guide
+              </button>
+            </div>
             {uniqueSizes.length > 0 ? (
-              <div className={styles.sizeOptions}>
-                {uniqueSizes.map((size) => (
-                  <button
-                    type="button"
-                    key={size}
-                    className={selectedSize === size ? styles.optionActive : styles.option}
-                    aria-pressed={selectedSize === size}
-                    onClick={() => onSelectSize(size)}
-                  >
-                    {size}
-                  </button>
-                ))}
+              <div className={styles.sizeOptions} style={isFootwear ? { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' } : {}}>
+                {uniqueSizes.map((size) => {
+                  const variant = variantsForColor.find(v => v.size === size);
+                  const isOutOfStock = !variant || variant.stock <= 0;
+                  return (
+                    <button
+                      type="button"
+                      key={size}
+                      disabled={isOutOfStock}
+                      style={{ 
+                        opacity: isOutOfStock ? 0.3 : 1, 
+                        textDecoration: isOutOfStock ? 'line-through' : 'none',
+                        ...(isFootwear ? { padding: '12px 4px', minWidth: 0, textAlign: 'center' } : {}) 
+                      }}
+                      className={selectedSize === size ? styles.optionActive : styles.option}
+                      aria-pressed={selectedSize === size}
+                      onClick={() => onSelectSize(size)}
+                    >
+                      {displaySize(size)}
+                    </button>
+                  );
+                })}
               </div>
             ) : (
               <p className={styles.unavailable}>No sizes available in this color.</p>

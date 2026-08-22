@@ -37,7 +37,8 @@ const Orders = () => {
             items:order_items(
               quantity,
               price_at_time,
-              product:products(name, image_url)
+              product:products(name, image_url),
+              variant:product_variants(size, color)
             )
           `)
           .eq('user_id', user.id)
@@ -187,6 +188,7 @@ const Orders = () => {
                     </div>
                     <div className={styles.orderItemContent}>
                       <h4 className={styles.orderItemName}>{item.product?.name}</h4>
+                      {item.variant && <p className={styles.orderItemMeta} style={{ fontSize: '0.75rem', marginBottom: '4px' }}>Size: {item.variant.size} {item.variant.color ? `· ${item.variant.color}` : ''}</p>}
                       <p className={styles.orderItemMeta}>Qty: {item.quantity} × {formatINR(item.price_at_time)}</p>
                     </div>
                   </div>

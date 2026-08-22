@@ -23,6 +23,22 @@ const AdminProductForm = ({ onClose, onSuccess, product = null, categories = [] 
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(product?.image_url || null);
 
+  // Categories logic for sizing
+  const selectedCategory = categories.find(c => c.id === formData.category_id);
+  const categoryName = selectedCategory?.name?.toLowerCase() || '';
+  
+  const getCategorySizing = (catName) => {
+    if (catName.includes('footwear') || catName.includes('shoe') || catName.includes('sneaker')) {
+      return { type: 'footwear', options: ['UK 5', 'UK 6', 'UK 7', 'UK 8', 'UK 9', 'UK 10', 'UK 11', 'UK 12'] };
+    }
+    if (catName.includes('accessori') || catName.includes('collection')) {
+      return { type: 'accessories', options: ['OS'] };
+    }
+    return { type: 'apparel', options: ['XS', 'S', 'M', 'L', 'XL', 'XXL'] };
+  };
+
+  const sizingSystem = getCategorySizing(categoryName);
+
   // Variants State
   const [variants, setVariants] = useState(
     product?.product_variants || [{ size: 'OS', color: 'Black', stock: 0 }]
@@ -81,6 +97,13 @@ const AdminProductForm = ({ onClose, onSuccess, product = null, categories = [] 
     setError(null);
 
     try {
+      // Validate sizes based on category
+      for (const v of variants) {
+        if (!sizingSystem.options.includes(v.size)) {
+          throw new Error(`Invalid size "${v.size}" for category type "${sizingSystem.type}". Please update it.`);
+        }
+      }
+
       // 1. Upload Image (if new file selected)
       const imageUrl = await uploadImage();
 
@@ -108,22 +131,36 @@ const AdminProductForm = ({ onClose, onSuccess, product = null, categories = [] 
       }
 
       // 4. Upsert Variants
-      // Simple approach: delete existing variants and insert new ones
-      if (product?.id) {
-        await supabase.from('product_variants').delete().eq('product_id', productId);
-      }
+      const variantsToUpsert = variants.map(v => {
+        const base = {
+          product_id: productId,
+          size: v.size,
+          color: v.color,
+          stock: v.stock,
+          sku: `${slug}-${v.size}-${v.color}`.toUpperCase().replace(/[^A-Z0-9-]/g, '')
+        };
+        if (v.id) base.id = v.id;
+        return base;
+      });
 
-      const variantsPayload = variants.map(v => ({
-        product_id: productId,
-        size: v.size,
-        color: v.color,
-        stock: v.stock,
-        sku: `${slug}-${v.size}-${v.color}`.toUpperCase().replace(/[^A-Z0-9-]/g, '')
-      }));
-
-      if (variantsPayload.length > 0) {
-        const { error: varErr } = await supabase.from('product_variants').insert(variantsPayload);
+      if (variantsToUpsert.length > 0) {
+        const { error: varErr } = await supabase.from('product_variants').upsert(variantsToUpsert);
         if (varErr) throw varErr;
+      }
+      
+      // Preserve history: Instead of deleting removed variants, set stock to 0
+      if (product?.id) {
+        const removedVariants = (product.product_variants || []).filter(
+          pv => !variants.find(v => v.id === pv.id)
+        );
+        
+        if (removedVariants.length > 0) {
+          const { error: delErr } = await supabase.from('product_variants')
+            .update({ stock: 0 })
+            .in('id', removedVariants.map(v => v.id));
+            
+          if (delErr) throw delErr;
+        }
       }
 
       onSuccess();
@@ -213,7 +250,7 @@ const AdminProductForm = ({ onClose, onSuccess, product = null, categories = [] 
               </div>
               <div className={styles.formGrid}>
                 <div style={{ flex: 1 }}>
-                  <label className={styles.inputLabel}>Price ($)</label>
+                  <label className={styles.inputLabel}>Price (₹)</label>
                   <input type="number" step="0.01" name="price" className={styles.inputField} value={formData.price} onChange={handleInputChange} required />
                 </div>
                 <div style={{ flex: 1 }}>
@@ -256,7 +293,19 @@ const AdminProductForm = ({ onClose, onSuccess, product = null, categories = [] 
                 <div key={index} className={styles.variantRow}>
                   <div style={{ flex: 1 }}>
                     <label style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em', display: 'block', marginBottom: '5px' }}>Size</label>
-                    <input type="text" placeholder="e.g. M, L, OS" value={v.size} onChange={(e) => handleVariantChange(index, 'size', e.target.value)} className={styles.inputField} style={{ padding: '10px' }} required />
+                    <CustomSelect 
+                      value={v.size} 
+                      onChange={(e) => handleVariantChange(index, 'size', e.target.value)} 
+                      className={styles.inputField} 
+                      style={{ padding: '10px' }} 
+                      required
+                    >
+                      <option value="">Select Size</option>
+                      {sizingSystem.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                      {v.size && !sizingSystem.options.includes(v.size) && (
+                        <option value={v.size}>{v.size} (Invalid)</option>
+                      )}
+                    </CustomSelect>
                   </div>
                   <div style={{ flex: 1 }}>
                     <label style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em', display: 'block', marginBottom: '5px' }}>Color</label>

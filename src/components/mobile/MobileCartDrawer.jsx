@@ -47,7 +47,7 @@ const MobileCartDrawer = ({ cartError, cartItems, cartTotal, isOpen, onCheckout,
                   <img src={item.product.image_url || DEFAULT_IMAGE} alt={item.product.name} />
                   <div>
                     <h3>{item.product.name}</h3>
-                    <p>{item.variant?.size && `Size ${item.variant.size}`}{item.variant?.color ? ` · ${item.variant.color}` : ''}</p>
+                    <p>{item.variant?.size && `Size: ${item.variant.size}`}{item.variant?.color ? ` · ${item.variant.color}` : ''}</p>
                     <strong>{formatINR(item.product.price * item.quantity)}</strong>
                     <div className={styles.itemActions}>
                       <div className={styles.quantity}>
