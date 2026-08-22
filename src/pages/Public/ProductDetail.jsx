@@ -11,7 +11,7 @@ import { formatINR } from '../../utils/currency';
 import SEO from '../../components/common/SEO';
 import MobileProductDetailView from '../../components/mobile/MobileProductDetailView';
 import { useResponsive } from '../../contexts/ResponsiveContext';
-import { getSizingSystem, formatDisplaySize, getSizeLabel } from '../../utils/sizing';
+import { getSizingSystem, formatDisplaySize, getSizeLabel, getSizesForSystem } from '../../utils/sizing';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop';
 
@@ -144,11 +144,13 @@ const ProductDetail = () => {
   const uniqueColors = [...new Set(product.variants?.map(v => v.color))].filter(Boolean);
   const variantsForColor = product.variants?.filter(v => v.color === selectedColor) || [];
   const totalStock = variantsForColor.reduce((sum, v) => sum + v.stock, 0) || 0;
-  const uniqueSizes = [...new Set(variantsForColor.map(v => v.size))].filter(Boolean);
   
   const system = getSizingSystem(product?.category?.slug);
   const isFootwear = system === 'FOOTWEAR';
   const displaySize = (sizeStr) => formatDisplaySize(sizeStr, system);
+  
+  const validSizes = getSizesForSystem(system);
+  const uniqueSizes = [...new Set(variantsForColor.map(v => v.size))].filter(s => Boolean(s) && validSizes.includes(s));
   
   const displayImages = product.image_url ? [product.image_url, DEFAULT_IMAGE] : [DEFAULT_IMAGE, DEFAULT_IMAGE];
 
