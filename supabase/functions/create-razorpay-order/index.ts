@@ -7,7 +7,7 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS'
 };
 
-const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_CART_ITEMS = 50;
 const MAX_ITEM_QUANTITY = 99;
@@ -127,10 +127,10 @@ serve(async (req) => {
       const quantity = Number(rawItem?.quantity);
 
       if (!UUID_PATTERN.test(productId)
-          || (variantId && !UUID_PATTERN.test(variantId))
-          || !Number.isInteger(quantity)
-          || quantity < 1
-          || quantity > MAX_ITEM_QUANTITY) {
+        || (variantId && !UUID_PATTERN.test(variantId))
+        || !Number.isInteger(quantity)
+        || quantity < 1
+        || quantity > MAX_ITEM_QUANTITY) {
         return jsonResponse({ error: 'The cart contains an invalid item' }, 400);
       }
 
@@ -182,20 +182,13 @@ serve(async (req) => {
       } else {
         const { data: variants, error: variantsError } = await supabaseClient
           .from('product_variants')
-          .select('id, size, color, stock')
-          .eq('product_id', item.product_id);
+          .select('id')
+          .eq('product_id', item.product_id)
+          .limit(1);
 
         if (variantsError) throw variantsError;
-        const matchingVariants = (variants || []).filter((variant) => (
-          (!item.size || variant.size === item.size)
-          && (!item.color || variant.color === item.color)
-        ));
-
-        if (matchingVariants.length === 1) {
-          if (matchingVariants[0].stock < item.quantity) throw new Error('The selected product variant is out of stock');
-          resolvedVariantId = matchingVariants[0].id;
-        } else if ((variants || []).length > 0) {
-          throw new Error('Please select a product size and color before checkout');
+        if (variants && variants.length > 0) {
+          throw new Error('Please select a product variant before checkout');
         }
       }
 
@@ -273,8 +266,8 @@ serve(async (req) => {
       amount: amountInPaise,
       guestAccessToken
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in create-razorpay-order:', error);
-    return jsonResponse({ error: error instanceof Error ? error.message : 'Unable to create order' }, 400);
+    return jsonResponse({ error: error?.message || JSON.stringify(error) }, 400);
   }
 });

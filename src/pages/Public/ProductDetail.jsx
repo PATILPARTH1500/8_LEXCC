@@ -39,7 +39,7 @@ const ProductDetail = () => {
       try {
         const { data, error } = await supabase
           .from('products')
-          .select('*, variants:product_variants(size, color, stock)')
+          .select('*, variants:product_variants(id, size, color, stock)')
           .eq('slug', slug)
           .single();
           
