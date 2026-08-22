@@ -190,8 +190,22 @@ const Checkout = () => {
           }
           setStep(4);
         },
-        onFailure: (err) => {
+        onFailure: async (err) => {
           console.error(err);
+          if (err.message === 'Payment was cancelled.') {
+            try {
+              await supabase.rpc('cancel_razorpay_order', {
+                p_order_id: data.orderId,
+                p_guest_token: data.guestAccessToken || null
+              });
+              setCheckoutError('Payment was cancelled. You can review your order and try again.');
+            } catch (cancelErr) {
+              console.error('Failed to cancel order status:', cancelErr);
+              setCheckoutError('Payment was cancelled.');
+            }
+          } else {
+            setCheckoutError(err.message || 'Payment failed.');
+          }
         }
       });
 

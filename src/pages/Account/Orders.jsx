@@ -104,9 +104,42 @@ const Orders = () => {
                 </div>
                 <div className={styles.orderSummary}>
                   <p className={styles.orderTotal}>{formatINR(order.total_amount)}</p>
-                  <span className={`${styles.badge} ${order.status === 'delivered' ? styles.badgeSuccess : styles.badgeWarning}`} style={{ display: 'inline-block', marginBottom: '10px' }}>
-                    {order.status}
-                  </span>
+                  {(() => {
+                    let displayText = order.status;
+                    let badgeClass = styles.badgeWarning;
+                    
+                    if (order.payment_status === 'failed') {
+                      displayText = 'PAYMENT FAILED';
+                      badgeClass = styles.badgeDanger || styles.badgeWarning;
+                    } else if (order.payment_status === 'cancelled') {
+                      displayText = 'PAYMENT CANCELLED';
+                      badgeClass = styles.badgeNeutral || styles.badgeWarning;
+                    } else if (order.payment_status === 'pending') {
+                      displayText = 'PENDING PAYMENT';
+                      badgeClass = styles.badgeWarning;
+                    } else if (order.status === 'delivered') {
+                      displayText = 'DELIVERED';
+                      badgeClass = styles.badgeSuccess;
+                    } else if (order.status === 'shipped') {
+                      displayText = 'SHIPPED';
+                      badgeClass = styles.badgeInfo || styles.badgeSuccess;
+                    } else if (order.status === 'processing') {
+                      displayText = 'PROCESSING';
+                      badgeClass = styles.badgeInfo || styles.badgeSuccess;
+                    } else if (order.payment_status === 'paid') {
+                      displayText = 'PAID';
+                      badgeClass = styles.badgeSuccess;
+                    } else if (order.status === 'cancelled') {
+                      displayText = 'CANCELLED';
+                      badgeClass = styles.badgeNeutral || styles.badgeWarning;
+                    }
+
+                    return (
+                      <span className={`${styles.badge} ${badgeClass}`} style={{ display: 'inline-block', marginBottom: '10px' }}>
+                        {displayText}
+                      </span>
+                    );
+                  })()}
                   <div>
                     <button 
                       onClick={() => handleDownloadInvoice(order.id)}

@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { FiMinus, FiPlus, FiTrash2, FiX } from 'react-icons/fi';
 import { formatINR } from '../../utils/currency';
@@ -21,7 +22,7 @@ const MobileCartDrawer = ({ cartError, cartItems, cartTotal, isOpen, onCheckout,
     };
   }, [isOpen, onClose]);
 
-  return (
+  const drawerContent = (
     <AnimatePresence>
       {isOpen && (
         <div className={styles.layer} role="dialog" aria-modal="true" aria-labelledby="mobile-cart-title">
@@ -72,6 +73,8 @@ const MobileCartDrawer = ({ cartError, cartItems, cartTotal, isOpen, onCheckout,
       )}
     </AnimatePresence>
   );
+
+  return typeof document !== 'undefined' ? createPortal(drawerContent, document.body) : drawerContent;
 };
 
 export default MobileCartDrawer;

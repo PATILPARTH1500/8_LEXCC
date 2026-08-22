@@ -43,7 +43,7 @@ const CartDrawer = () => {
   return (
     <AnimatePresence>
       {isCartOpen && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', justifyContent: 'flex-end' }}>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 13000, display: 'flex', justifyContent: 'flex-end' }}>
           
           {/* Backdrop */}
           <motion.div 
