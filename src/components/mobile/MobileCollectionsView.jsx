@@ -12,7 +12,6 @@ const FILTER_OPTIONS = {
     ['Collections', 'collections'],
     ['Accessories', 'accessories'],
   ],
-  size: ['XS', 'S', 'M', 'L', 'XL'],
   color: ['Black', 'White', 'Grey', 'Navy', 'Olive'],
   availability: ['In Stock', 'Out Of Stock'],
 };
@@ -24,6 +23,8 @@ const colorMap = {
   Navy: '#1a237e',
   Olive: '#4b5320',
 };
+
+import { getSizingSystem, getSizesForSystem } from '../../utils/sizing';
 
 const MobileFilterPanel = ({ filters, setFilters }) => {
   const toggle = (group, value) => {
@@ -66,17 +67,28 @@ const MobileFilterPanel = ({ filters, setFilters }) => {
       <details className={styles.filterGroup}>
         <summary>Size</summary>
         <div className={styles.chipGrid}>
-          {FILTER_OPTIONS.size.map((size) => (
-            <button
-              type="button"
-              key={size}
-              className={filters.size?.includes(size) ? styles.chipActive : styles.chip}
-              aria-pressed={filters.size?.includes(size) || false}
-              onClick={() => toggle('size', size)}
-            >
-              {size}
-            </button>
-          ))}
+          {(() => {
+            let availableSizes = new Set();
+            if (!filters.category || filters.category.length === 0) {
+              getSizesForSystem('APPAREL').forEach(s => availableSizes.add(s));
+            } else {
+              filters.category.forEach(catSlug => {
+                const system = getSizingSystem(catSlug);
+                getSizesForSystem(system).forEach(s => availableSizes.add(s));
+              });
+            }
+            return Array.from(availableSizes).map((size) => (
+              <button
+                type="button"
+                key={size}
+                className={filters.size?.includes(size) ? styles.chipActive : styles.chip}
+                aria-pressed={filters.size?.includes(size) || false}
+                onClick={() => toggle('size', size)}
+              >
+                {size}
+              </button>
+            ));
+          })()}
         </div>
       </details>
 

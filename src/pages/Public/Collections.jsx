@@ -67,18 +67,26 @@ const Collections = () => {
       const hasVariantFilter = (filters.size && filters.size.length > 0) || (filters.color && filters.color.length > 0);
       const variantJoin = hasVariantFilter ? 'variants:product_variants!inner(id, size, color, stock)' : 'variants:product_variants(id, size, color, stock)';
 
+      let categoryIds = [];
+      if (filters.category && filters.category.length > 0) {
+        const { data: cats, error: catsErr } = await supabase.from('categories').select('id, slug');
+        if (!catsErr && cats) {
+          const allowedSlugs = filters.category.map(c => c.toLowerCase());
+          categoryIds = cats.filter(c => allowedSlugs.includes(c.slug.toLowerCase())).map(c => c.id);
+        }
+      }
+
       let query = supabase
         .from('products')
         .select(`
           *,
-          categories!inner(name, slug),
+          categories(name, slug),
           ${variantJoin}
         `)
         .eq('status', 'active');
 
-      // Category Filter (Inner join on categories table)
-      if (filters.category && filters.category.length > 0) {
-        query = query.in('categories.slug', filters.category.map(c => c.toLowerCase()));
+      if (categoryIds.length > 0) {
+        query = query.in('category_id', categoryIds);
       }
 
       // Size Filter (Inner join on variants table)

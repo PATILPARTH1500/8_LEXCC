@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
 import CustomSelect from '../../components/ui/CustomSelect';
 import { useAccountStyles } from '../Account/useAccountStyles';
+import { getSizingSystem, getSizesForSystem } from '../../utils/sizing';
 
 const AdminProductForm = ({ onClose, onSuccess, product = null, categories = [] }) => {
   const styles = useAccountStyles();
@@ -25,19 +26,10 @@ const AdminProductForm = ({ onClose, onSuccess, product = null, categories = [] 
 
   // Categories logic for sizing
   const selectedCategory = categories.find(c => c.id === formData.category_id);
-  const categoryName = selectedCategory?.name?.toLowerCase() || '';
+  const categorySlug = selectedCategory?.slug || '';
   
-  const getCategorySizing = (catName) => {
-    if (catName.includes('footwear') || catName.includes('shoe') || catName.includes('sneaker')) {
-      return { type: 'footwear', options: ['UK 5', 'UK 6', 'UK 7', 'UK 8', 'UK 9', 'UK 10', 'UK 11', 'UK 12'] };
-    }
-    if (catName.includes('accessori') || catName.includes('collection')) {
-      return { type: 'accessories', options: ['OS'] };
-    }
-    return { type: 'apparel', options: ['XS', 'S', 'M', 'L', 'XL', 'XXL'] };
-  };
-
-  const sizingSystem = getCategorySizing(categoryName);
+  const system = getSizingSystem(categorySlug);
+  const sizingOptions = getSizesForSystem(system);
 
   // Variants State
   const [variants, setVariants] = useState(
@@ -99,8 +91,8 @@ const AdminProductForm = ({ onClose, onSuccess, product = null, categories = [] 
     try {
       // Validate sizes based on category
       for (const v of variants) {
-        if (!sizingSystem.options.includes(v.size)) {
-          throw new Error(`Invalid size "${v.size}" for category type "${sizingSystem.type}". Please update it.`);
+        if (!sizingOptions.includes(v.size)) {
+          throw new Error(`Invalid size "${v.size}" for category type "${system}". Please update it.`);
         }
       }
 
@@ -301,8 +293,8 @@ const AdminProductForm = ({ onClose, onSuccess, product = null, categories = [] 
                       required
                     >
                       <option value="">Select Size</option>
-                      {sizingSystem.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                      {v.size && !sizingSystem.options.includes(v.size) && (
+                      {sizingOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                      {v.size && !sizingOptions.includes(v.size) && (
                         <option value={v.size}>{v.size} (Invalid)</option>
                       )}
                     </CustomSelect>

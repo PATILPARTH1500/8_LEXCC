@@ -11,6 +11,7 @@ import { formatINR } from '../../utils/currency';
 import SEO from '../../components/common/SEO';
 import MobileProductDetailView from '../../components/mobile/MobileProductDetailView';
 import { useResponsive } from '../../contexts/ResponsiveContext';
+import { getSizingSystem, formatDisplaySize, getSizeLabel } from '../../utils/sizing';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop';
 
@@ -40,7 +41,7 @@ const ProductDetail = () => {
       try {
         const { data, error } = await supabase
           .from('products')
-          .select('*, variants:product_variants(id, size, color, stock)')
+          .select('*, category:categories(name, slug), variants:product_variants(id, size, color, stock)')
           .eq('slug', slug)
           .single();
           
@@ -145,13 +146,9 @@ const ProductDetail = () => {
   const totalStock = variantsForColor.reduce((sum, v) => sum + v.stock, 0) || 0;
   const uniqueSizes = [...new Set(variantsForColor.map(v => v.size))].filter(Boolean);
   
-  const isFootwear = product?.category?.name?.toLowerCase()?.includes('footwear') || false;
-  const displaySize = (sizeStr) => {
-    if (isFootwear && sizeStr.startsWith('UK ')) {
-      return sizeStr.replace('UK ', '');
-    }
-    return sizeStr;
-  };
+  const system = getSizingSystem(product?.category?.slug);
+  const isFootwear = system === 'FOOTWEAR';
+  const displaySize = (sizeStr) => formatDisplaySize(sizeStr, system);
   
   const displayImages = product.image_url ? [product.image_url, DEFAULT_IMAGE] : [DEFAULT_IMAGE, DEFAULT_IMAGE];
 
@@ -359,7 +356,7 @@ const ProductDetail = () => {
 
               {/* Size Selection */}
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px', fontSize: '0.75rem', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-                <span style={{ color: 'rgba(255,255,255,0.5)' }}>{isFootwear ? 'UK SIZE' : 'Size'}</span>
+                <span style={{ color: 'rgba(255,255,255,0.5)' }}>{getSizeLabel(system)}</span>
                 <span 
                   style={{ color: 'rgba(255,255,255,0.3)', cursor: 'pointer', transition: 'color 0.4s ease' }} 
                   onMouseOver={e=>e.currentTarget.style.color='#fff'} 

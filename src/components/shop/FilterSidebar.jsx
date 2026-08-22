@@ -59,6 +59,8 @@ const colorMap = {
   'Olive': '#4b5320'
 };
 
+import { getSizingSystem, getSizesForSystem } from '../../utils/sizing';
+
 const FilterSidebar = ({ filters, setFilters }) => {
   
   const handleCheckbox = (category, value) => {
@@ -85,6 +87,19 @@ const FilterSidebar = ({ filters, setFilters }) => {
       }
     }));
   };
+
+  // Determine available sizes based on selected categories
+  let availableSizes = new Set();
+  if (!filters.category || filters.category.length === 0) {
+    // Default to Apparel sizes if no category selected
+    getSizesForSystem('APPAREL').forEach(s => availableSizes.add(s));
+  } else {
+    filters.category.forEach(catSlug => {
+      const system = getSizingSystem(catSlug);
+      getSizesForSystem(system).forEach(s => availableSizes.add(s));
+    });
+  }
+  const sizeOptions = Array.from(availableSizes);
 
   return (
     <aside className={accountStyles.card} style={{ padding: '30px', margin: 0, border: 'none', background: 'rgba(255,255,255,0.01)' }}>
@@ -133,7 +148,7 @@ const FilterSidebar = ({ filters, setFilters }) => {
 
       <FilterAccordion title="Size" defaultOpen={false}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
-          {['XS', 'S', 'M', 'L', 'XL'].map(item => (
+          {sizeOptions.map(item => (
             <button 
               key={item}
               onClick={() => handleCheckbox('size', item)}
