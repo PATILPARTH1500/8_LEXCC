@@ -185,16 +185,6 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
-  const googleSignIn = async () => {
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin + '/account'
-      }
-    });
-    if (error) throw error;
-    return data;
-  };
 
   const verifyEmail = async (token) => {
     // Typically handled automatically via URL clicks to the site from Supabase emails
@@ -485,7 +475,6 @@ export const AuthProvider = ({ children }) => {
     loading,
     signUp,
     signIn,
-    googleSignIn,
     verifyEmail,
     sendOTP,
     verifyOTP,

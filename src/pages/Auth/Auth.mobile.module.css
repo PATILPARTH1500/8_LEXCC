@@ -17,14 +17,9 @@
 .passwordMeter { display: flex; gap: 4px; height: 4px; margin-top: 6px; }
 .meterBar { flex: 1; border-radius: 2px; background: rgba(255, 255, 255, 0.1); }
 .meterLabel { margin-top: 5px; font-size: 0.63rem; font-weight: 600; letter-spacing: 0.05em; text-align: right; text-transform: uppercase; }
-.submitBtn,
-.googleBtn { width: 100%; min-width: 0; min-height: 50px; display: flex; align-items: center; justify-content: center; padding: 0 13px; border: 1px solid #fff; background: #fff; color: #080808; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-align: center; text-transform: uppercase; box-sizing: border-box; }
+.submitBtn { width: 100%; min-width: 0; min-height: 50px; display: flex; align-items: center; justify-content: center; padding: 0 13px; border: 1px solid #fff; background: #fff; color: #080808; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-align: center; text-transform: uppercase; box-sizing: border-box; }
 .submitBtn { margin-top: 5px; }
 .submitBtn:disabled { opacity: 0.5; }
-.googleBtn { gap: 10px; border-color: rgba(255, 255, 255, 0.2); background: transparent; color: #fff; }
-.divider { display: flex; align-items: center; gap: 8px; margin: 23px 0; color: rgba(255, 255, 255, 0.42); font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; }
-.divider::before,
-.divider::after { content: ''; flex: 1; height: 1px; background: rgba(255, 255, 255, 0.1); }
 .authFooter { margin-top: 23px; color: rgba(255, 255, 255, 0.55); font-size: 0.78rem; line-height: 1.7; text-align: center; }
 .authLink { min-height: 44px; display: inline-flex; align-items: center; color: #fff; text-decoration: underline; text-underline-offset: 4px; }
 .authCard a:focus-visible,

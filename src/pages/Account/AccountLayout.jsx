@@ -7,7 +7,7 @@ import MobileAccountLayout from './MobileAccountLayout';
 import { useResponsive } from '../../contexts/ResponsiveContext';
 
 const AccountLayout = () => {
-  const { isMobile } = useResponsive();
+  const { isMobile, responsiveReady } = useResponsive();
   const { logout, profile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -83,6 +83,16 @@ const AccountLayout = () => {
       default: return '';
     }
   };
+
+  if (!responsiveReady) {
+    return (
+      <div style={{ minHeight: '100vh', background: 'var(--secondary-color, #0a0a0a)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ color: 'rgba(255,255,255,0.3)', letterSpacing: '0.1em', fontSize: '0.85rem', textTransform: 'uppercase' }}>
+          Loading Profile...
+        </div>
+      </div>
+    );
+  }
 
   if (isMobile) {
     return (
