@@ -94,22 +94,31 @@ serve(async (req) => {
       first_name: normalizeText(rawAddress.first_name, 80),
       last_name: normalizeText(rawAddress.last_name, 80),
       street: normalizeText(rawAddress.street, 180),
+      address_line_2: normalizeText(rawAddress.address_line_2, 180),
       city: normalizeText(rawAddress.city, 100),
       state: normalizeText(rawAddress.state, 100),
       postal_code: normalizeText(rawAddress.postal_code, 20),
-      country: normalizeText(rawAddress.country, 80),
+      country: 'India',
       email: normalizeText(rawAddress.email || authenticatedEmail, 254).toLowerCase(),
-      phone: normalizeText(rawAddress.phone || authenticatedPhone, 30)
+      phone: normalizeText(rawAddress.phone || authenticatedPhone, 30).replace(/\D/g, '')
     };
 
-    const requiredAddressFields = ['first_name', 'last_name', 'street', 'city', 'state', 'postal_code', 'country'];
+    const requiredAddressFields = ['first_name', 'last_name', 'street', 'city', 'state', 'postal_code'];
     if (requiredAddressFields.some((field) => !shippingAddress[field as keyof typeof shippingAddress])) {
       return jsonResponse({ error: 'The shipping address is incomplete' }, 400);
     }
+    
+    if (shippingAddress.postal_code.length !== 6 || !/^\d{6}$/.test(shippingAddress.postal_code)) {
+      return jsonResponse({ error: 'Please provide a valid 6-digit Indian PIN code' }, 400);
+    }
+    
+    if (shippingAddress.phone.length !== 10 && shippingAddress.phone.length !== 12) {
+      return jsonResponse({ error: 'Please provide a valid Indian phone number' }, 400);
+    }
 
     if (!userId) {
-      if (!EMAIL_PATTERN.test(shippingAddress.email) || shippingAddress.phone.length < 7) {
-        return jsonResponse({ error: 'Guest email and phone number are required' }, 400);
+      if (!EMAIL_PATTERN.test(shippingAddress.email)) {
+        return jsonResponse({ error: 'Guest email is required and must be valid' }, 400);
       }
     }
 

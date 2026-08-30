@@ -12,18 +12,12 @@ import { generateInvoice } from '../../utils/invoiceGenerator';
 import SEO from '../../components/common/SEO';
 import MobileCheckoutView from '../../components/mobile/MobileCheckoutView';
 import { useResponsive } from '../../contexts/ResponsiveContext';
+import { INDIAN_STATES, isValidPinCode, isValidIndianPhone, normalizePhone, getEmptyAddress } from '../../utils/address';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop';
 const EMPTY_GUEST_ADDRESS = {
-  first_name: '',
-  last_name: '',
-  street: '',
-  city: '',
-  state: '',
-  postal_code: '',
-  country: 'India',
-  email: '',
-  phone: ''
+  ...getEmptyAddress(),
+  email: ''
 };
 
 const Checkout = () => {
@@ -106,8 +100,12 @@ const Checkout = () => {
           setCheckoutError('Please enter a valid email address.');
           return;
         }
-        if (guestAddress.phone.replace(/\D/g, '').length < 7) {
-          setCheckoutError('Please enter a valid phone number.');
+        if (!isValidIndianPhone(guestAddress.phone)) {
+          setCheckoutError('Please enter a valid 10-digit Indian phone number.');
+          return;
+        }
+        if (!isValidPinCode(guestAddress.postal_code)) {
+          setCheckoutError('Please enter a valid 6-digit PIN code.');
           return;
         }
       }
@@ -133,7 +131,8 @@ const Checkout = () => {
       const shippingAddress = {
         ...selectedShippingAddress,
         email: selectedShippingAddress.email || user?.email || '',
-        phone: selectedShippingAddress.phone || profile?.phone || ''
+        phone: normalizePhone(selectedShippingAddress.phone || profile?.phone || ''),
+        country: 'India'
       };
 
       // Convert cartItems to send to backend for validation
@@ -364,32 +363,49 @@ const Checkout = () => {
                             Enter the delivery details below, or <Link to="/login" style={{ color: 'var(--accent-color, #D4AF37)' }}>log in</Link> to use a saved address.
                           </p>
                           <div className={accountStyles.formGrid}>
-                            {[
-                              ['first_name', 'First Name', 'text', 'given-name'],
-                              ['last_name', 'Last Name', 'text', 'family-name'],
-                              ['email', 'Email Address', 'email', 'email'],
-                              ['phone', 'Phone Number', 'tel', 'tel'],
-                              ['street', 'Street Address', 'text', 'street-address'],
-                              ['city', 'City', 'text', 'address-level2'],
-                              ['state', 'State', 'text', 'address-level1'],
-                              ['postal_code', 'Postal Code', 'text', 'postal-code'],
-                              ['country', 'Country', 'text', 'country-name']
-                            ].map(([name, label, type, autoComplete]) => (
-                              <div key={name} className={accountStyles.formGroup} style={{ marginBottom: 0 }}>
-                                <label htmlFor={`guest-${name}`} className={accountStyles.formLabel}>{label}</label>
-                                <input
-                                  id={`guest-${name}`}
-                                  name={name}
-                                  type={type}
-                                  autoComplete={autoComplete}
-                                  value={guestAddress[name]}
-                                  onChange={handleGuestAddressChange}
-                                  className={accountStyles.formInput}
-                                  maxLength={name === 'street' ? 180 : 100}
-                                  required
-                                />
-                              </div>
-                            ))}
+                            <div className={accountStyles.formGroup} style={{ marginBottom: 0 }}>
+                              <label htmlFor="guest-first_name" className={accountStyles.formLabel}>First Name</label>
+                              <input id="guest-first_name" name="first_name" type="text" value={guestAddress.first_name} onChange={handleGuestAddressChange} className={accountStyles.formInput} required />
+                            </div>
+                            <div className={accountStyles.formGroup} style={{ marginBottom: 0 }}>
+                              <label htmlFor="guest-last_name" className={accountStyles.formLabel}>Last Name</label>
+                              <input id="guest-last_name" name="last_name" type="text" value={guestAddress.last_name} onChange={handleGuestAddressChange} className={accountStyles.formInput} required />
+                            </div>
+                            <div className={accountStyles.formGroup} style={{ marginBottom: 0 }}>
+                              <label htmlFor="guest-email" className={accountStyles.formLabel}>Email Address</label>
+                              <input id="guest-email" name="email" type="email" value={guestAddress.email} onChange={handleGuestAddressChange} className={accountStyles.formInput} required />
+                            </div>
+                            <div className={accountStyles.formGroup} style={{ marginBottom: 0 }}>
+                              <label htmlFor="guest-phone" className={accountStyles.formLabel}>Phone Number</label>
+                              <input id="guest-phone" name="phone" type="tel" value={guestAddress.phone} onChange={handleGuestAddressChange} className={accountStyles.formInput} required />
+                            </div>
+                            <div className={accountStyles.formGroup} style={{ marginBottom: 0 }}>
+                              <label htmlFor="guest-street" className={accountStyles.formLabel}>Address Line 1 (Street)</label>
+                              <input id="guest-street" name="street" type="text" value={guestAddress.street} onChange={handleGuestAddressChange} className={accountStyles.formInput} maxLength={180} required />
+                            </div>
+                            <div className={accountStyles.formGroup} style={{ marginBottom: 0 }}>
+                              <label htmlFor="guest-address_line_2" className={accountStyles.formLabel}>Address Line 2 (Optional)</label>
+                              <input id="guest-address_line_2" name="address_line_2" type="text" value={guestAddress.address_line_2} onChange={handleGuestAddressChange} className={accountStyles.formInput} maxLength={180} />
+                            </div>
+                            <div className={accountStyles.formGroup} style={{ marginBottom: 0 }}>
+                              <label htmlFor="guest-city" className={accountStyles.formLabel}>City</label>
+                              <input id="guest-city" name="city" type="text" value={guestAddress.city} onChange={handleGuestAddressChange} className={accountStyles.formInput} required />
+                            </div>
+                            <div className={accountStyles.formGroup} style={{ marginBottom: 0 }}>
+                              <label htmlFor="guest-state" className={accountStyles.formLabel}>State</label>
+                              <select id="guest-state" name="state" value={guestAddress.state} onChange={handleGuestAddressChange} className={accountStyles.formInput} required>
+                                <option value="">Select State</option>
+                                {INDIAN_STATES.map(state => <option key={state} value={state}>{state}</option>)}
+                              </select>
+                            </div>
+                            <div className={accountStyles.formGroup} style={{ marginBottom: 0 }}>
+                              <label htmlFor="guest-postal_code" className={accountStyles.formLabel}>PIN Code</label>
+                              <input id="guest-postal_code" name="postal_code" type="text" value={guestAddress.postal_code} onChange={handleGuestAddressChange} className={accountStyles.formInput} maxLength="6" required />
+                            </div>
+                            <div className={accountStyles.formGroup} style={{ marginBottom: 0 }}>
+                              <label htmlFor="guest-country" className={accountStyles.formLabel}>Country</label>
+                              <input id="guest-country" name="country" type="text" value="India" className={accountStyles.formInput} readOnly />
+                            </div>
                           </div>
                           <button onClick={handleNextStep} className={styles.primaryBtn} style={{ marginTop: '30px', width: '100%', maxWidth: '300px' }}>
                             CONTINUE AS GUEST
@@ -423,7 +439,9 @@ const Checkout = () => {
                               <h4 style={{ fontSize: '0.9rem', letterSpacing: '0.1em', marginBottom: '15px', color: '#fff' }}>{addr.title || 'Address'}</h4>
                               <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)', lineHeight: '1.8' }}>
                                 <p>{addr.first_name} {addr.last_name}</p>
+                                {addr.phone && <p>{addr.phone}</p>}
                                 <p>{addr.street}</p>
+                                {addr.address_line_2 && <p>{addr.address_line_2}</p>}
                                 <p>{addr.city}, {addr.state} {addr.postal_code}</p>
                                 <p>{addr.country}</p>
                               </div>
@@ -451,9 +469,12 @@ const Checkout = () => {
                         {selectedShippingAddress ? (
                           <div style={{ fontSize: '0.9rem', lineHeight: '1.8', color: '#fff' }}>
                             <p>{selectedShippingAddress.first_name} {selectedShippingAddress.last_name}</p>
-                            <p>{selectedShippingAddress.street}, {selectedShippingAddress.city}, {selectedShippingAddress.state} {selectedShippingAddress.postal_code}</p>
+                            {!user && <p>{selectedShippingAddress.email}</p>}
+                            <p>{selectedShippingAddress.phone}</p>
+                            <p>{selectedShippingAddress.street}</p>
+                            {selectedShippingAddress.address_line_2 && <p>{selectedShippingAddress.address_line_2}</p>}
+                            <p>{selectedShippingAddress.city}, {selectedShippingAddress.state} {selectedShippingAddress.postal_code}</p>
                             <p>{selectedShippingAddress.country}</p>
-                            {!user && <p>{selectedShippingAddress.email} · {selectedShippingAddress.phone}</p>}
                           </div>
                         ) : <p style={{ color: '#fff' }}>No shipping address selected</p>}
                       </div>

@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import CustomSelect from '../../components/ui/CustomSelect';
 import { useAccountStyles } from './useAccountStyles';
+import { INDIAN_STATES, isValidPinCode, isValidIndianPhone, normalizePhone, getEmptyAddress } from '../../utils/address';
 
 const Addresses = () => {
   const styles = useAccountStyles();
@@ -14,17 +15,7 @@ const Addresses = () => {
   const [editingAddress, setEditingAddress] = useState(null);
   
   // Form State
-  const [formData, setFormData] = useState({
-    title: 'HOME',
-    first_name: '',
-    last_name: '',
-    street: '',
-    city: '',
-    state: '',
-    postal_code: '',
-    country: 'United States',
-    is_default: false
-  });
+  const [formData, setFormData] = useState(getEmptyAddress());
 
   const loadAddresses = async () => {
     setIsLoading(true);
@@ -60,14 +51,7 @@ const Addresses = () => {
     } else {
       setEditingAddress(null);
       setFormData({
-        title: 'HOME',
-        first_name: '',
-        last_name: '',
-        street: '',
-        city: '',
-        state: '',
-        postal_code: '',
-        country: 'United States',
+        ...getEmptyAddress(),
         is_default: addresses.length === 0
       });
     }
@@ -89,11 +73,26 @@ const Addresses = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!isValidPinCode(formData.postal_code)) {
+      alert('Please enter a valid 6-digit PIN code.');
+      return;
+    }
+    if (!isValidIndianPhone(formData.phone)) {
+      alert('Please enter a valid 10-digit Indian phone number.');
+      return;
+    }
+    
+    const submissionData = {
+      ...formData,
+      phone: normalizePhone(formData.phone),
+      country: 'India' // Enforce India
+    };
+
     try {
       if (editingAddress) {
-        await updateAddress(editingAddress.id, formData);
+        await updateAddress(editingAddress.id, submissionData);
       } else {
-        await addAddress(formData);
+        await addAddress(submissionData);
       }
       await loadAddresses();
       handleCloseModal();
@@ -162,7 +161,9 @@ const Addresses = () => {
               
               <div className={styles.addressCopy}>
                 <p className={styles.addressName}>{addr.first_name} {addr.last_name}</p>
+                {addr.phone && <p>{addr.phone}</p>}
                 <p>{addr.street}</p>
+                {addr.address_line_2 && <p>{addr.address_line_2}</p>}
                 <p>{addr.city}, {addr.state} {addr.postal_code}</p>
                 <p className={styles.addressCountry}>{addr.country}</p>
               </div>
@@ -236,8 +237,18 @@ const Addresses = () => {
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label className={styles.formLabel}>Street Address</label>
+                  <label className={styles.formLabel}>Phone Number</label>
+                  <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className={styles.formInput} required />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Address Line 1 (Street)</label>
                   <input type="text" name="street" value={formData.street} onChange={handleChange} className={styles.formInput} required />
+                </div>
+                
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Address Line 2 / Landmark (Optional)</label>
+                  <input type="text" name="address_line_2" value={formData.address_line_2} onChange={handleChange} className={styles.formInput} />
                 </div>
 
                 <div className={styles.formGrid}>
@@ -247,25 +258,23 @@ const Addresses = () => {
                   </div>
                   <div className={styles.formGroup}>
                     <label className={styles.formLabel}>State / Province</label>
-                    <input type="text" name="state" value={formData.state} onChange={handleChange} className={styles.formInput} required />
+                    <CustomSelect name="state" value={formData.state} onChange={handleChange} className={styles.formInput} required>
+                      <option value="">Select State</option>
+                      {INDIAN_STATES.map(state => (
+                        <option key={state} value={state}>{state}</option>
+                      ))}
+                    </CustomSelect>
                   </div>
                 </div>
 
                 <div className={styles.formGrid}>
                   <div className={styles.formGroup}>
-                    <label className={styles.formLabel}>Postal Code</label>
-                    <input type="text" name="postal_code" value={formData.postal_code} onChange={handleChange} className={styles.formInput} required />
+                    <label className={styles.formLabel}>PIN Code</label>
+                    <input type="text" name="postal_code" value={formData.postal_code} onChange={handleChange} className={styles.formInput} maxLength="6" required />
                   </div>
                   <div className={styles.formGroup}>
                     <label className={styles.formLabel}>Country</label>
-                    <CustomSelect name="country" value={formData.country} onChange={handleChange} className={styles.formInput} required>
-                      <option value="United States">United States</option>
-                      <option value="United Kingdom">United Kingdom</option>
-                      <option value="Canada">Canada</option>
-                      <option value="Australia">Australia</option>
-                      <option value="France">France</option>
-                      <option value="Italy">Italy</option>
-                    </CustomSelect>
+                    <input type="text" name="country" value="India" className={styles.formInput} readOnly />
                   </div>
                 </div>
 

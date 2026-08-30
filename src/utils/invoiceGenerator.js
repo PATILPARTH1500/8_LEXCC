@@ -78,6 +78,7 @@ export const generateInvoice = async (orderId, guestAccessToken = null) => {
     if (order.shipping_address) {
       const s = order.shipping_address;
       if (s.street) addrLines.push(s.street);
+      if (s.address_line_2) addrLines.push(s.address_line_2);
       if (s.city || s.state || s.postal_code) {
         addrLines.push(`${s.city || ''} ${s.state || ''} ${s.postal_code || ''}`.trim());
       }

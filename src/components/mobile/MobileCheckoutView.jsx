@@ -5,19 +5,11 @@ import { FiCheck, FiLock } from 'react-icons/fi';
 import SEO from '../common/SEO';
 import { formatINR } from '../../utils/currency';
 import styles from './MobileCheckoutView.module.css';
+import { INDIAN_STATES } from '../../utils/address';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop';
-const GUEST_FIELDS = [
-  ['first_name', 'First name', 'text', 'given-name'],
-  ['last_name', 'Last name', 'text', 'family-name'],
-  ['email', 'Email address', 'email', 'email'],
-  ['phone', 'Phone number', 'tel', 'tel'],
-  ['street', 'Street address', 'text', 'street-address'],
-  ['city', 'City', 'text', 'address-level2'],
-  ['state', 'State', 'text', 'address-level1'],
-  ['postal_code', 'Postal code', 'text', 'postal-code'],
-  ['country', 'Country', 'text', 'country-name'],
-];
+// Guest fields defined explicitly inline instead of array mapping to support dropdown
+
 
 const OrderSummary = ({ cartItems, cartTotal }) => (
   <aside className={styles.summary} aria-labelledby="mobile-order-summary-title">
@@ -131,20 +123,22 @@ const MobileCheckoutView = ({
                   <div className={styles.card}>
                     <p className={styles.intro}>Enter your delivery details, or <Link to="/login">log in</Link> to use a saved address.</p>
                     <div className={styles.formGrid}>
-                      {GUEST_FIELDS.map(([name, label, type, autoComplete]) => (
-                        <label key={name} className={name === 'street' ? styles.fullField : ''}>
-                          <span>{label}</span>
-                          <input
-                            name={name}
-                            type={type}
-                            autoComplete={autoComplete}
-                            value={guestAddress[name]}
-                            onChange={onGuestAddressChange}
-                            maxLength={name === 'street' ? 180 : 100}
-                            required
-                          />
-                        </label>
-                      ))}
+                      <label><span>First name</span><input name="first_name" type="text" value={guestAddress.first_name} onChange={onGuestAddressChange} required /></label>
+                      <label><span>Last name</span><input name="last_name" type="text" value={guestAddress.last_name} onChange={onGuestAddressChange} required /></label>
+                      <label><span>Email address</span><input name="email" type="email" value={guestAddress.email} onChange={onGuestAddressChange} required /></label>
+                      <label><span>Phone number</span><input name="phone" type="tel" value={guestAddress.phone} onChange={onGuestAddressChange} required /></label>
+                      <label className={styles.fullField}><span>Address Line 1 (Street)</span><input name="street" type="text" value={guestAddress.street} onChange={onGuestAddressChange} maxLength={180} required /></label>
+                      <label className={styles.fullField}><span>Address Line 2 (Optional)</span><input name="address_line_2" type="text" value={guestAddress.address_line_2} onChange={onGuestAddressChange} maxLength={180} /></label>
+                      <label><span>City</span><input name="city" type="text" value={guestAddress.city} onChange={onGuestAddressChange} required /></label>
+                      <label>
+                        <span>State</span>
+                        <select name="state" value={guestAddress.state} onChange={onGuestAddressChange} required style={{ width: '100%', padding: '12px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#fff' }}>
+                          <option value="">Select State</option>
+                          {INDIAN_STATES.map(state => <option key={state} value={state}>{state}</option>)}
+                        </select>
+                      </label>
+                      <label><span>PIN Code</span><input name="postal_code" type="text" value={guestAddress.postal_code} onChange={onGuestAddressChange} maxLength={6} required /></label>
+                      <label><span>Country</span><input name="country" type="text" value="India" readOnly /></label>
                     </div>
                     <button type="button" className={styles.primary} onClick={onNext}>Continue as guest</button>
                   </div>
@@ -167,7 +161,8 @@ const MobileCheckoutView = ({
                         >
                           <span>{address.title || 'Address'}</span>
                           <strong>{address.first_name} {address.last_name}</strong>
-                          <p>{address.street}<br />{address.city}, {address.state} {address.postal_code}<br />{address.country}</p>
+                          {address.phone && <p>{address.phone}</p>}
+                          <p>{address.street}<br />{address.address_line_2 && <>{address.address_line_2}<br /></>}{address.city}, {address.state} {address.postal_code}<br />{address.country}</p>
                         </button>
                       ))}
                     </div>
@@ -185,10 +180,12 @@ const MobileCheckoutView = ({
                   {selectedShippingAddress ? (
                     <address>
                       <strong>{selectedShippingAddress.first_name} {selectedShippingAddress.last_name}</strong><br />
+                      {selectedShippingAddress.phone}<br />
                       {selectedShippingAddress.street}<br />
+                      {selectedShippingAddress.address_line_2 && <>{selectedShippingAddress.address_line_2}<br /></>}
                       {selectedShippingAddress.city}, {selectedShippingAddress.state} {selectedShippingAddress.postal_code}<br />
                       {selectedShippingAddress.country}
-                      {!user && <><br />{selectedShippingAddress.email}<br />{selectedShippingAddress.phone}</>}
+                      {!user && <><br />{selectedShippingAddress.email}</>}
                     </address>
                   ) : <p>No address selected.</p>}
                 </div>
