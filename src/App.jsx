@@ -6,6 +6,7 @@ import CustomCursor from './components/animations/CustomCursor';
 import GrainOverlay from './components/animations/GrainOverlay';
 import CartDrawer from './components/shop/CartDrawer';
 import WhatsAppConcierge from './components/ui/WhatsAppConcierge';
+import BotpressChat from './components/ui/BotpressChat';
 
 // Auth & Protected Routes
 import Login from './pages/Auth/Login';
@@ -44,6 +45,7 @@ function App() {
       <GrainOverlay />
       <WhatsAppConcierge />
       <BrowserRouter>
+        <BotpressChat />
         <CartDrawer />
         <Routes>
           <Route path="/" element={<Layout />}>
