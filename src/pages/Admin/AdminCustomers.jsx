@@ -3,9 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
 import { useAccountStyles } from '../Account/useAccountStyles';
 import { formatINR } from '../../utils/currency';
+import { useResponsive } from '../../contexts/ResponsiveContext';
 
 const AdminCustomers = () => {
   const styles = useAccountStyles();
+  const { isMobile } = useResponsive();
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -95,6 +97,51 @@ const AdminCustomers = () => {
 
       {error && <div style={{ color: '#ef4444', marginBottom: '20px', fontSize: '0.85rem' }}>{error}</div>}
 
+      {isMobile ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          <AnimatePresence>
+            {customers.length === 0 ? (
+              <div style={{ padding: '40px', textAlign: 'center', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>No customers found.</div>
+            ) : (
+              customers.map((customer) => (
+                <motion.div 
+                  key={customer.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <h3 style={{ fontSize: '1rem', color: '#fff', margin: '0 0 4px', fontWeight: 500 }}>{customer.first_name || 'Anonymous'} {customer.last_name || 'User'}</h3>
+                      <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.75rem', margin: 0 }}>{customer.email}</p>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 0', borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div>
+                      <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 4px' }}>Joined</p>
+                      <p style={{ color: '#fff', fontSize: '0.85rem', margin: 0 }}>{new Date(customer.created_at).toLocaleDateString()}</p>
+                    </div>
+                    <div>
+                      <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 4px' }}>Orders</p>
+                      <p style={{ color: '#fff', fontSize: '0.85rem', margin: 0 }}>{customer.total_orders}</p>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 4px' }}>LTV</p>
+                      <p style={{ color: 'var(--accent-color, #D4AF37)', fontSize: '0.85rem', margin: 0 }}>{formatINR(customer.lifetime_spend)}</p>
+                    </div>
+                  </div>
+
+                  <button style={{ background: 'rgba(212,175,55,0.1)', border: 'none', color: 'var(--accent-color, #D4AF37)', padding: '10px', borderRadius: '4px', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', width: '100%', cursor: 'pointer' }}>
+                    View Details
+                  </button>
+                </motion.div>
+              ))
+            )}
+          </AnimatePresence>
+        </div>
+      ) : (
       <motion.div variants={itemVariants} className={styles.card} style={{ padding: 0, overflow: 'hidden', margin: 0 }}>
         <div className={styles.responsiveTable} style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
@@ -150,6 +197,7 @@ const AdminCustomers = () => {
           </table>
         </div>
       </motion.div>
+      )}
     </motion.div>
   );
 };

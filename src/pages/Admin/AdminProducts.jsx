@@ -4,9 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAccountStyles } from '../Account/useAccountStyles';
 import { formatINR } from '../../utils/currency';
+import { useResponsive } from '../../contexts/ResponsiveContext';
 
 const AdminProducts = () => {
   const styles = useAccountStyles();
+  const { isMobile } = useResponsive();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -163,6 +165,69 @@ const AdminProducts = () => {
 
       {error && <div style={{ color: '#ef4444', marginBottom: '20px', fontSize: '0.85rem' }}>{error}</div>}
 
+      {isMobile ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          <AnimatePresence>
+            {products.length === 0 ? (
+              <div style={{ padding: '40px', textAlign: 'center', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>No products found in the catalog.</div>
+            ) : (
+              products.map((product) => {
+                const totalStock = product.product_variants?.reduce((sum, v) => sum + v.stock, 0) || 0;
+                return (
+                  <motion.div 
+                    key={product.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}
+                  >
+                    <div style={{ display: 'flex', gap: '15px' }}>
+                      <div style={{ width: '60px', height: '60px', background: '#111', borderRadius: '4px', overflow: 'hidden', flexShrink: 0 }}>
+                        <img src={product.image_url || 'https://via.placeholder.com/60'} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flexGrow: 1, minWidth: 0 }}>
+                        <h3 style={{ fontSize: '1rem', color: '#fff', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{product.name}</h3>
+                        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.75rem', margin: 0 }}>{product.categories?.name || 'Uncategorized'}</p>
+                        <p style={{ color: 'var(--accent-color, #D4AF37)', fontSize: '0.9rem', margin: 0, fontWeight: 500 }}>{formatINR(product.price)}</p>
+                      </div>
+                    </div>
+                    
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '15px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                      <span style={{ 
+                        fontSize: '0.75rem', 
+                        padding: '4px 10px', 
+                        borderRadius: '20px',
+                        background: totalStock > 10 ? 'rgba(34, 197, 94, 0.1)' : totalStock > 0 ? 'rgba(234, 179, 8, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                        color: totalStock > 10 ? '#22c55e' : totalStock > 0 ? '#eab308' : '#ef4444'
+                      }}>
+                        {totalStock} IN STOCK
+                      </span>
+                      <button 
+                        onClick={() => toggleStatus(product.id, product.status)}
+                        style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', padding: 0 }}
+                      >
+                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: product.status === 'active' ? '#22c55e' : '#ef4444' }} />
+                        <span style={{ color: product.status === 'active' ? '#22c55e' : '#ef4444', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                          {product.status}
+                        </span>
+                      </button>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <button onClick={() => handleEdit(product)} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', padding: '10px 16px', borderRadius: '4px', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', flex: 1, marginRight: '10px' }}>
+                        Edit
+                      </button>
+                      <button onClick={() => handleDelete(product)} style={{ background: 'rgba(239, 68, 68, 0.1)', border: 'none', color: '#ef4444', padding: '10px 16px', borderRadius: '4px', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', flex: 1 }}>
+                        {product.status === 'active' ? 'Archive' : 'Delete'}
+                      </button>
+                    </div>
+                  </motion.div>
+                );
+              })
+            )}
+          </AnimatePresence>
+        </div>
+      ) : (
       <motion.div variants={itemVariants} className={styles.card} style={{ padding: 0, overflow: 'hidden', margin: 0 }}>
         <div className={styles.responsiveTable} style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
@@ -267,6 +332,7 @@ const AdminProducts = () => {
           </table>
         </div>
       </motion.div>
+      )}
     </motion.div>
   );
 };

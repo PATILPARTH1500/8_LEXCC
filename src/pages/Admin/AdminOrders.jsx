@@ -6,9 +6,11 @@ import ShipmentTrackingModal from '../../components/admin/ShipmentTrackingModal'
 import { useAccountStyles } from '../Account/useAccountStyles';
 import { formatINR } from '../../utils/currency';
 import { generateInvoice } from '../../utils/invoiceGenerator';
+import { useResponsive } from '../../contexts/ResponsiveContext';
 
 const AdminOrders = () => {
   const styles = useAccountStyles();
+  const { isMobile } = useResponsive();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -223,6 +225,85 @@ const AdminOrders = () => {
 
       {error && <div style={{ color: '#ef4444', marginBottom: '20px', fontSize: '0.85rem' }}>{error}</div>}
 
+      {isMobile ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          <AnimatePresence>
+            {orders.length === 0 ? (
+              <div style={{ padding: '40px', textAlign: 'center', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>No orders found.</div>
+            ) : (
+              orders.map((order) => (
+                <motion.div 
+                  key={order.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <h3 style={{ fontSize: '1rem', color: '#fff', margin: '0 0 4px', fontWeight: 500 }}>{order.order_number}</h3>
+                      <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.75rem', margin: 0 }}>{new Date(order.created_at).toLocaleDateString()}</p>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <p style={{ color: 'var(--accent-color, #D4AF37)', fontSize: '1rem', margin: '0 0 4px', fontWeight: 500 }}>{formatINR(order.total_amount)}</p>
+                      <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.7rem', margin: 0, textTransform: 'uppercase' }}>{order.payment_status}</p>
+                    </div>
+                  </div>
+
+                  <div style={{ padding: '15px 0', borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                    <p style={{ color: '#fff', fontSize: '0.85rem', margin: '0 0 2px' }}>{order.profiles?.first_name} {order.profiles?.last_name}</p>
+                    <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.75rem', margin: '0 0 10px' }}>{order.profiles?.email}</p>
+                    
+                    <CustomSelect 
+                      value={order.status}
+                      onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                      className={styles.inputField}
+                      style={{ padding: '8px 12px', fontSize: '0.8rem', height: 'auto', minHeight: '36px' }}
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="processing">Processing</option>
+                      <option value="shipped">Shipped</option>
+                      <option value="delivered">Delivered</option>
+                      <option value="cancelled">Cancelled</option>
+                    </CustomSelect>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button 
+                      onClick={() => handleDownloadInvoice(order.id)}
+                      disabled={downloadingOrderId === order.id}
+                      style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', padding: '10px', borderRadius: '4px', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', flex: 1, cursor: downloadingOrderId === order.id ? 'not-allowed' : 'pointer', opacity: downloadingOrderId === order.id ? 0.5 : 1 }}
+                    >
+                      {downloadingOrderId === order.id ? '...' : 'PDF'}
+                    </button>
+                    <button 
+                      onClick={() => { setSelectedOrder(order); setIsModalOpen(true); }}
+                      style={{ background: 'rgba(212,175,55,0.1)', border: 'none', color: 'var(--accent-color, #D4AF37)', padding: '10px', borderRadius: '4px', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', flex: 1, cursor: 'pointer' }}
+                    >
+                      View
+                    </button>
+                    {order.payment_status === 'paid' ? (
+                      <button 
+                        onClick={() => handleDeleteOrder(order)}
+                        style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#6b7280', padding: '10px', borderRadius: '4px', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', flex: 1, cursor: 'pointer' }}
+                      >
+                        Archive
+                      </button>
+                    ) : (
+                      <button 
+                        onClick={() => handleDeleteOrder(order)}
+                        style={{ background: 'rgba(239, 68, 68, 0.1)', border: 'none', color: '#ef4444', padding: '10px', borderRadius: '4px', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', flex: 1, cursor: 'pointer' }}
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
+                </motion.div>
+              ))
+            )}
+          </AnimatePresence>
+        </div>
+      ) : (
       <motion.div variants={itemVariants} className={styles.card} style={{ padding: 0, overflow: 'hidden', margin: 0 }}>
         <div className={styles.responsiveTable} style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
@@ -320,6 +401,7 @@ const AdminOrders = () => {
           </table>
         </div>
       </motion.div>
+      )}
 
       <ShipmentTrackingModal 
         isOpen={isModalOpen}

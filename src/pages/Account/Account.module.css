@@ -590,15 +590,33 @@
 
 .adminStatsGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: 1fr;
   gap: 25px;
   margin-bottom: 50px;
 }
 
+@media (min-width: 768px) {
+  .adminStatsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1025px) {
+  .adminStatsGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
 .adminSplitGrid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 1fr;
   gap: 25px;
+}
+
+@media (min-width: 1025px) {
+  .adminSplitGrid {
+    grid-template-columns: 2fr 1fr;
+  }
 }
 
 /* Badges */
