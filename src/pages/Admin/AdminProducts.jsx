@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAccountStyles } from '../Account/useAccountStyles';
-import AdminProductForm from './AdminProductForm';
 import { formatINR } from '../../utils/currency';
 
 const AdminProducts = () => {
@@ -12,8 +12,7 @@ const AdminProducts = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchData();
@@ -63,18 +62,71 @@ const AdminProducts = () => {
   };
 
   const handleCreateNew = () => {
-    setEditingProduct(null);
-    setIsFormOpen(true);
+    navigate('/account/admin/products/new');
   };
 
   const handleEdit = (product) => {
-    setEditingProduct(product);
-    setIsFormOpen(true);
+    navigate(`/account/admin/products/${product.id}/edit`);
   };
 
-  const handleFormSuccess = () => {
-    setIsFormOpen(false);
-    fetchData(); // Refresh the list from the database
+  const handleDelete = async (product) => {
+    if (!window.confirm(`Delete this product?\n\nThis action affects the storefront.\nProduct: ${product.name}`)) {
+      return;
+    }
+
+    try {
+      // Check if product is in any orders
+      const { count, error: orderErr } = await supabase
+        .from('order_items')
+        .select('*', { count: 'exact', head: true })
+        .in('variant_id', product.product_variants.map(v => v.id) || []);
+
+      if (orderErr) throw orderErr;
+
+      if (count > 0) {
+        // Has orders, so safe archive
+        const { error: archiveErr } = await supabase.from('products').update({ status: 'archived' }).eq('id', product.id);
+        if (archiveErr) throw archiveErr;
+        
+        // Audit log
+        await logAdminActivity('PRODUCT_ARCHIVED', { product_id: product.id, reason: 'Safe archival due to order history' });
+        
+        setProducts(prev => prev.map(p => p.id === product.id ? { ...p, status: 'archived' } : p));
+        alert('Product safely archived. It is no longer visible on the storefront but order history is preserved.');
+      } else {
+        // Safe to hard delete
+        const { error: delErr } = await supabase.from('products').delete().eq('id', product.id);
+        if (delErr) throw delErr;
+
+        // Audit log
+        await logAdminActivity('PRODUCT_DELETED', { product_id: product.id, name: product.name });
+        
+        setProducts(prev => prev.filter(p => p.id !== product.id));
+      }
+    } catch (err) {
+      console.error('Failed to delete product', err);
+      alert('Failed to delete product.');
+    }
+  };
+
+  const logAdminActivity = async (action, details) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      
+      const { data: profile } = await supabase.from('profiles').select('id').eq('id', user.id).single();
+      if (!profile) return;
+      
+      await supabase.from('admin_activity_logs').insert([{
+        admin_id: profile.id,
+        action,
+        details,
+        ip_address: '127.0.0.1', // Mock IP as edge functions are better suited for real IPs
+        user_agent: navigator.userAgent
+      }]);
+    } catch (err) {
+      console.error('Failed to log admin activity', err);
+    }
   };
 
   const containerVariants = {
@@ -190,12 +242,21 @@ const AdminProducts = () => {
                           </button>
                         </td>
                         <td style={{ padding: '20px 30px', textAlign: 'right' }} data-label="Actions">
-                          <button 
-                            onClick={() => handleEdit(product)}
-                            style={{ background: 'transparent', border: 'none', color: 'var(--accent-color, #D4AF37)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer' }}
-                          >
-                            Edit
-                          </button>
+                          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                            <button 
+                              onClick={() => handleEdit(product)}
+                              style={{ background: 'transparent', border: 'none', color: 'var(--accent-color, #D4AF37)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer' }}
+                            >
+                              Edit
+                            </button>
+                            <span style={{ color: 'rgba(255,255,255,0.2)' }}>|</span>
+                            <button 
+                              onClick={() => handleDelete(product)}
+                              style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer' }}
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </td>
                       </motion.tr>
                     );
@@ -206,17 +267,6 @@ const AdminProducts = () => {
           </table>
         </div>
       </motion.div>
-
-      <AnimatePresence>
-        {isFormOpen && (
-          <AdminProductForm 
-            onClose={() => setIsFormOpen(false)} 
-            onSuccess={handleFormSuccess}
-            product={editingProduct}
-            categories={categories}
-          />
-        )}
-      </AnimatePresence>
     </motion.div>
   );
 };

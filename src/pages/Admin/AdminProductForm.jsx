@@ -1,28 +1,78 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import CustomSelect from '../../components/ui/CustomSelect';
 import { useAccountStyles } from '../Account/useAccountStyles';
 import { getSizingSystem, getSizesForSystem } from '../../utils/sizing';
 
-const AdminProductForm = ({ onClose, onSuccess, product = null, categories = [] }) => {
+const AdminProductForm = () => {
+  const { productId } = useParams();
+  const navigate = useNavigate();
   const styles = useAccountStyles();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   
+  const [categories, setCategories] = useState([]);
+  const [product, setProduct] = useState(null);
+
   // Form State
   const [formData, setFormData] = useState({
-    name: product?.name || '',
-    description: product?.description || '',
-    price: product?.price || '',
-    category_id: product?.category_id || '',
-    is_featured: product?.is_featured || false,
-    is_new_arrival: product?.is_new_arrival || false,
-    status: product?.status || 'active'
+    name: '',
+    description: '',
+    price: '',
+    category_id: '',
+    is_featured: false,
+    is_new_arrival: false,
+    status: 'active'
   });
 
   const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(product?.image_url || null);
+  const [imagePreview, setImagePreview] = useState(null);
+
+  // Variants State
+  const [variants, setVariants] = useState([{ size: 'OS', color: 'Black', stock: 0 }]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const { data: cats } = await supabase.from('categories').select('*');
+        if (cats) setCategories(cats);
+
+        if (productId) {
+          const { data: prod, error: prodErr } = await supabase
+            .from('products')
+            .select('*, product_variants(*)')
+            .eq('id', productId)
+            .single();
+          
+          if (prodErr) throw prodErr;
+          
+          setProduct(prod);
+          setFormData({
+            name: prod.name || '',
+            description: prod.description || '',
+            price: prod.price || '',
+            category_id: prod.category_id || '',
+            is_featured: prod.is_featured || false,
+            is_new_arrival: prod.is_new_arrival || false,
+            status: prod.status || 'active'
+          });
+          setImagePreview(prod.image_url || null);
+          if (prod.product_variants && prod.product_variants.length > 0) {
+            setVariants(prod.product_variants);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        setError('Failed to load data');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, [productId]);
 
   // Categories logic for sizing
   const selectedCategory = categories.find(c => c.id === formData.category_id);
@@ -30,11 +80,6 @@ const AdminProductForm = ({ onClose, onSuccess, product = null, categories = [] 
   
   const system = getSizingSystem(categorySlug);
   const sizingOptions = getSizesForSystem(system);
-
-  // Variants State
-  const [variants, setVariants] = useState(
-    product?.product_variants || [{ size: 'OS', color: 'Black', stock: 0 }]
-  );
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -155,7 +200,7 @@ const AdminProductForm = ({ onClose, onSuccess, product = null, categories = [] 
         }
       }
 
-      onSuccess();
+      navigate('/account/admin/products');
     } catch (err) {
       console.error(err);
       setError(`Save failed: ${err.message || 'Unknown error'}`);
@@ -166,33 +211,18 @@ const AdminProductForm = ({ onClose, onSuccess, product = null, categories = [] 
 
   return (
     <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      style={{
-        position: 'fixed',
-        top: 0, left: 0, right: 0, bottom: 0,
-        backgroundColor: 'rgba(0,0,0,0.8)',
-        backdropFilter: 'blur(10px)',
-        zIndex: 100,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px'
-      }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className={styles.card}
+      style={{ position: 'relative' }}
     >
-      <motion.div 
-        initial={{ y: 50, opacity: 0, scale: 0.95 }}
-        animate={{ y: 0, opacity: 1, scale: 1 }}
-        exit={{ y: 20, opacity: 0, scale: 0.95 }}
-        className={`${styles.card} ${styles.modalPadding}`}
+      <button 
+        onClick={() => navigate('/account/admin/products')}
+        style={{ position: 'absolute', top: '20px', right: '20px', background: 'transparent', border: 'none', color: '#fff', fontSize: '1.5rem', cursor: 'pointer' }}
       >
-        <button 
-          onClick={onClose}
-          style={{ position: 'absolute', top: '20px', right: '20px', background: 'transparent', border: 'none', color: '#fff', fontSize: '1.5rem', cursor: 'pointer' }}
-        >
-          &times;
-        </button>
+        &times;
+      </button>
         
         <h2 style={{ fontSize: '1.5rem', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 300, marginBottom: '40px', color: '#D4AF37' }}>
           {product ? 'Edit Product' : 'Create New Product'}
@@ -316,14 +346,13 @@ const AdminProductForm = ({ onClose, onSuccess, product = null, categories = [] 
           </div>
 
           <div className={styles.modalActions}>
-            <button type="button" onClick={onClose} className={styles.secondaryBtn}>CANCEL</button>
+            <button type="button" onClick={() => navigate('/account/admin/products')} className={styles.secondaryBtn}>CANCEL</button>
             <button type="submit" className={styles.primaryBtn} disabled={loading}>
               {loading ? 'SAVING...' : 'SAVE PRODUCT'}
             </button>
           </div>
 
         </form>
-      </motion.div>
     </motion.div>
   );
 };

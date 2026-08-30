@@ -18,6 +18,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import AdminProducts from './pages/Admin/AdminProducts';
+import AdminProductForm from './pages/Admin/AdminProductForm';
 import AdminOrders from './pages/Admin/AdminOrders';
 import AdminCustomers from './pages/Admin/AdminCustomers';
 
@@ -70,10 +71,11 @@ function App() {
                 <Route path="addresses" element={<Addresses />} />
                 <Route path="security" element={<Security />} />
                 
-                {/* Embedded Admin Routes */}
                 <Route path="admin" element={<AdminRoute />}>
                   <Route index element={<AdminDashboard />} />
                   <Route path="products" element={<AdminProducts />} />
+                  <Route path="products/new" element={<AdminProductForm />} />
+                  <Route path="products/:productId/edit" element={<AdminProductForm />} />
                   <Route path="orders" element={<AdminOrders />} />
                   <Route path="customers" element={<AdminCustomers />} />
                 </Route>

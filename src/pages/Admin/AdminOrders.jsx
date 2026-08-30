@@ -41,6 +41,7 @@ const AdminOrders = () => {
           *,
           order_items ( id, quantity, price_at_time, products(name) )
         `)
+        .is('is_archived', false)
         .order('created_at', { ascending: false });
         
       if (err) throw err;
@@ -87,6 +88,63 @@ const AdminOrders = () => {
     } catch (err) {
       console.error('Failed to update order status', err);
       fetchOrders(); // Re-fetch to correct UI
+    }
+  };
+
+  const handleDeleteOrder = async (order) => {
+    // If order is paid, we archive it
+    if (order.payment_status === 'paid') {
+      if (!window.confirm(`Archive paid order ${order.order_number}?\n\nPaid orders must be retained for transaction history. They will be hidden from this view but remain in the database.`)) {
+        return;
+      }
+      try {
+        const { error: archiveErr } = await supabase.from('orders').update({ is_archived: true }).eq('id', order.id);
+        if (archiveErr) throw archiveErr;
+        setOrders(prev => prev.filter(o => o.id !== order.id));
+        logAdminActivity('ORDER_ARCHIVED', { order_id: order.id, order_number: order.order_number });
+      } catch (err) {
+        console.error('Failed to archive order', err);
+        alert('Failed to archive order.');
+      }
+      return;
+    }
+
+    // Otherwise, unpaid/test order: we can hard delete
+    if (!window.confirm(`Delete this order permanently?\n\nOrder Number: ${order.order_number}\nCustomer: ${order.profiles?.first_name} ${order.profiles?.last_name}\nAmount: ${formatINR(order.total_amount)}\nPayment Status: ${order.payment_status}`)) {
+      return;
+    }
+
+    try {
+      // First delete notifications if they exist (though cascade might handle it, doing it to be safe)
+      await supabase.from('order_notifications').delete().eq('order_id', order.id);
+      
+      const { error: delErr } = await supabase.from('orders').delete().eq('id', order.id);
+      if (delErr) throw delErr;
+      
+      setOrders(prev => prev.filter(o => o.id !== order.id));
+      logAdminActivity('TEST_ORDER_DELETED', { order_number: order.order_number, previous_status: order.status });
+    } catch (err) {
+      console.error('Failed to delete order', err);
+      alert('Failed to delete order.');
+    }
+  };
+
+  const logAdminActivity = async (action, details) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data: profile } = await supabase.from('profiles').select('id').eq('id', user.id).single();
+      if (!profile) return;
+      
+      await supabase.from('admin_activity_logs').insert([{
+        admin_id: profile.id,
+        action,
+        details,
+        ip_address: '127.0.0.1',
+        user_agent: navigator.userAgent
+      }]);
+    } catch (err) {
+      console.error('Failed to log admin activity', err);
     }
   };
 
@@ -236,6 +294,22 @@ const AdminOrders = () => {
                           >
                             View
                           </button>
+                          <span style={{ color: 'rgba(255,255,255,0.2)' }}>|</span>
+                          {order.payment_status === 'paid' ? (
+                            <button 
+                              onClick={() => handleDeleteOrder(order)}
+                              style={{ background: 'transparent', border: 'none', color: '#6b7280', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer' }}
+                            >
+                              Archive
+                            </button>
+                          ) : (
+                            <button 
+                              onClick={() => handleDeleteOrder(order)}
+                              style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer' }}
+                            >
+                              Delete
+                            </button>
+                          )}
                         </div>
                       </td>
                     </motion.tr>
