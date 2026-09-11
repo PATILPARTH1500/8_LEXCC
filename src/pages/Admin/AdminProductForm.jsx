@@ -184,11 +184,17 @@ const AdminProductForm = () => {
         throw new Error('Please select a product image.');
       }
 
-      // Validate sizes based on category
+      // Validate sizes based on category and check for duplicates
+      const seenVariants = new Set();
       for (const v of variants) {
         if (!sizingOptions.includes(v.size)) {
           throw new Error(`Invalid size "${v.size}" for category type "${system}". Please update it.`);
         }
+        const key = `${v.size.trim().toLowerCase()}-${v.color.trim().toLowerCase()}`;
+        if (seenVariants.has(key)) {
+          throw new Error(`Duplicate variant detected: ${v.size} / ${v.color}`);
+        }
+        seenVariants.add(key);
       }
 
       // 1. Upload Image (if new file selected)
@@ -223,22 +229,34 @@ const AdminProductForm = () => {
         productId = newProd.id;
       }
 
-      // 4. Upsert Variants
-      const variantsToUpsert = variants.map(v => {
+      // 4. Upsert/Insert Variants separately
+      const existingVariantsPayload = [];
+      const newVariantsPayload = [];
+
+      variants.forEach(v => {
         const base = {
           product_id: productId,
           size: v.size,
           color: v.color,
-          stock: v.stock,
+          stock: Number(v.stock),
           sku: `${slug}-${v.size}-${v.color}`.toUpperCase().replace(/[^A-Z0-9-]/g, '')
         };
-        if (v.id) base.id = v.id;
-        return base;
+        if (v.id) {
+          base.id = v.id;
+          existingVariantsPayload.push(base);
+        } else {
+          newVariantsPayload.push(base);
+        }
       });
 
-      if (variantsToUpsert.length > 0) {
-        const { error: varErr } = await supabase.from('product_variants').upsert(variantsToUpsert);
+      if (existingVariantsPayload.length > 0) {
+        const { error: varErr } = await supabase.from('product_variants').upsert(existingVariantsPayload);
         if (varErr) throw varErr;
+      }
+
+      if (newVariantsPayload.length > 0) {
+        const { error: newVarErr } = await supabase.from('product_variants').insert(newVariantsPayload);
+        if (newVarErr) throw newVarErr;
       }
       
       // Preserve history: Instead of deleting removed variants, set stock to 0
