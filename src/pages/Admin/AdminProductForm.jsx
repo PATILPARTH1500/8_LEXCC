@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
@@ -11,7 +11,9 @@ const AdminProductForm = () => {
   const navigate = useNavigate();
   const styles = useAccountStyles();
   const [loading, setLoading] = useState(false);
+  const [loadingText, setLoadingText] = useState('');
   const [error, setError] = useState(null);
+  const imageInputRef = useRef(null);
   
   const [categories, setCategories] = useState([]);
   const [product, setProduct] = useState(null);
@@ -32,6 +34,14 @@ const AdminProductForm = () => {
 
   // Variants State
   const [variants, setVariants] = useState([{ size: 'OS', color: 'Black', stock: 0 }]);
+
+  useEffect(() => {
+    return () => {
+      if (imagePreview && imagePreview.startsWith('blob:')) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, [imagePreview]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -90,11 +100,28 @@ const AdminProductForm = () => {
   };
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      setError("Please upload a JPG, PNG, or WebP image.");
+      e.target.value = '';
+      return;
     }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Image must be smaller than 5 MB.");
+      e.target.value = '';
+      return;
+    }
+
+    setError(null);
+    setImageFile(file);
+    if (imagePreview && imagePreview.startsWith('blob:')) {
+      URL.revokeObjectURL(imagePreview);
+    }
+    setImagePreview(URL.createObjectURL(file));
   };
 
   const handleVariantChange = (index, field, value) => {
@@ -115,25 +142,48 @@ const AdminProductForm = () => {
     if (!imageFile) return product?.image_url;
     
     const fileExt = imageFile.name.split('.').pop();
-    const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
-    const filePath = `${fileName}`;
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+    const filePath = `products/${fileName}`;
 
-    const { error: uploadError } = await supabase.storage
+    const { data, error: uploadError } = await supabase.storage
       .from('product-images')
-      .upload(filePath, imageFile);
+      .upload(filePath, imageFile, {
+        cacheControl: '3600',
+        upsert: false,
+        contentType: imageFile.type
+      });
 
-    if (uploadError) throw uploadError;
+    if (uploadError) {
+      console.error('Product image upload failed:', uploadError);
+      throw new Error(`Image upload failed: ${uploadError.message}`);
+    }
 
-    const { data } = supabase.storage.from('product-images').getPublicUrl(filePath);
-    return data.publicUrl;
+    if (!data?.path) {
+      throw new Error('Image upload completed without a valid file path.');
+    }
+
+    const { data: urlData } = supabase.storage
+      .from('product-images')
+      .getPublicUrl(data.path);
+      
+    if (!urlData?.publicUrl) {
+      throw new Error('Failed to retrieve public URL for uploaded image.');
+    }
+    
+    return urlData.publicUrl;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setLoadingText('UPLOADING IMAGE...');
     setError(null);
 
     try {
+      if (!product && !imageFile) {
+        throw new Error('Please select a product image.');
+      }
+
       // Validate sizes based on category
       for (const v of variants) {
         if (!sizingOptions.includes(v.size)) {
@@ -143,6 +193,12 @@ const AdminProductForm = () => {
 
       // 1. Upload Image (if new file selected)
       const imageUrl = await uploadImage();
+      
+      if (!imageUrl) {
+        throw new Error('Image URL is missing after upload attempt.');
+      }
+      
+      setLoadingText('SAVING...');
 
       // 2. Generate slug
       const slug = formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
@@ -203,9 +259,10 @@ const AdminProductForm = () => {
       navigate('/account/admin/products');
     } catch (err) {
       console.error(err);
-      setError(`Save failed: ${err.message || 'Unknown error'}`);
+      setError(err.message || 'Save failed: Unknown error');
     } finally {
       setLoading(false);
+      setLoadingText('');
     }
   };
 
@@ -247,7 +304,7 @@ const AdminProductForm = () => {
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.border = '1px solid #D4AF37'}
                 onMouseLeave={(e) => e.currentTarget.style.border = '1px solid rgba(212, 175, 55, 0.3)'}
-                onClick={() => document.getElementById('imageUpload').click()}
+                onClick={() => imageInputRef.current?.click()}
               >
                 {imagePreview ? (
                   <img src={imagePreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -255,9 +312,9 @@ const AdminProductForm = () => {
                   <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>+ Upload Image</span>
                 )}
                 <input 
+                  ref={imageInputRef}
                   type="file" 
-                  id="imageUpload" 
-                  accept="image/*" 
+                  accept="image/jpeg,image/png,image/webp" 
                   style={{ display: 'none' }} 
                   onChange={handleImageChange}
                 />
@@ -348,7 +405,7 @@ const AdminProductForm = () => {
           <div className={styles.modalActions}>
             <button type="button" onClick={() => navigate('/account/admin/products')} className={styles.secondaryBtn}>CANCEL</button>
             <button type="submit" className={styles.primaryBtn} disabled={loading}>
-              {loading ? 'SAVING...' : 'SAVE PRODUCT'}
+              {loading ? (loadingText || 'SAVING...') : 'SAVE PRODUCT'}
             </button>
           </div>
 
