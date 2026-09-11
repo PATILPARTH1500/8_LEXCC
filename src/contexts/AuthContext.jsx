@@ -171,16 +171,21 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signIn = async ({ email, password }) => {
-    setLoading(true);
     const { data, error } = await supabase.auth.signInWithPassword({
       email: email.toLowerCase().trim(),
       password
     });
 
     if (error) {
-      setLoading(false);
       throw error;
     }
+
+    if (!data?.session || !data?.user) {
+      throw new Error('Unable to establish an authenticated session.');
+    }
+
+    setSession(data.session);
+    setUser(data.user);
 
     return data;
   };
@@ -473,6 +478,7 @@ export const AuthProvider = ({ children }) => {
     profile,
     session,
     loading,
+    authInitialized,
     signUp,
     signIn,
     verifyEmail,

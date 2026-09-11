@@ -246,7 +246,9 @@ const AdminOrders = () => {
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       <p style={{ color: 'var(--accent-color, #D4AF37)', fontSize: '1rem', margin: '0 0 4px', fontWeight: 500 }}>{formatINR(order.total_amount)}</p>
-                      <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.7rem', margin: 0, textTransform: 'uppercase' }}>{order.payment_status}</p>
+                      <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.7rem', margin: 0, textTransform: 'uppercase' }}>
+                        {order.payment_status} • {order.payment_method === 'cod' ? 'COD' : 'ONLINE'}
+                      </p>
                     </div>
                   </div>
 
@@ -345,7 +347,10 @@ const AdminOrders = () => {
                         </div>
                       </td>
                       <td style={{ padding: '20px 30px', color: '#fff', fontSize: '0.85rem' }} data-label="Total">
-                        {formatINR(order.total_amount)}
+                        <div>{formatINR(order.total_amount)}</div>
+                        <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.75rem', marginTop: '4px', textTransform: 'uppercase' }}>
+                          {order.payment_method === 'cod' ? 'COD' : 'ONLINE'}
+                        </div>
                       </td>
                       <td style={{ padding: '20px 30px' }} data-label="Status">
                         <CustomSelect 

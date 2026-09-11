@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -46,6 +46,7 @@ const Register = () => {
   const { isMobile } = useResponsive();
   const { signUp, verifyTurnstileToken } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [globalError, setGlobalError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
@@ -75,6 +76,8 @@ const Register = () => {
     }
   }, [passwordValue]);
 
+  const from = location.state?.from?.pathname || '/account';
+
   const onSubmit = async (data) => {
     if (!turnstileToken) {
       setGlobalError('Please complete the security check.');
@@ -88,15 +91,19 @@ const Register = () => {
         await verifyTurnstileToken(turnstileToken);
       }
 
-      await signUp({
+      const result = await signUp({
         email: data.email,
         password: data.password,
         firstName: data.firstName,
         lastName: data.lastName,
         phone: data.phone
       });
-      // Verification email is sent.
-      navigate('/verify-email', { replace: true });
+      
+      if (result?.session) {
+        navigate(from, { replace: true });
+      } else {
+        navigate('/verify-email', { replace: true });
+      }
     } catch (error) {
       setGlobalError(error.message || 'Failed to register account.');
     } finally {
@@ -237,7 +244,7 @@ const Register = () => {
 
 
         <div className={styles.authFooter}>
-          <p>Already have an account? <Link to="/login" className={styles.authLink}>Sign in here</Link></p>
+          <p>Already have an account? <Link to="/login" state={{ from: location.state?.from }} className={styles.authLink}>Sign in here</Link></p>
         </div>
       </motion.div>
     </div>

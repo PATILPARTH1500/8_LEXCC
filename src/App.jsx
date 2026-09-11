@@ -54,7 +54,6 @@ function App() {
             <Route path="shop/:category" element={<Collections />} />
             <Route path="product/:slug" element={<ProductDetail />} />
             <Route path="cart" element={<Cart />} />
-            <Route path="checkout" element={<Checkout />} />
             
             {/* Auth Routes */}
             <Route path="login" element={<Login />} />
@@ -65,6 +64,7 @@ function App() {
             
             {/* Protected Routes */}
             <Route element={<ProtectedRoute />}>
+              <Route path="checkout" element={<Checkout />} />
               <Route path="account" element={<AccountLayout />}>
                 <Route index element={<Dashboard />} />
                 <Route path="profile" element={<Profile />} />

@@ -1,0 +1,259 @@
+import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.110.3';
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS'
+};
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const MAX_CART_ITEMS = 50;
+const MAX_ITEM_QUANTITY = 99;
+
+const jsonResponse = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
+  status,
+  headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+});
+
+const normalizeText = (value: unknown, maxLength: number) => (
+  typeof value === 'string' ? value.trim().slice(0, maxLength) : ''
+);
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+  if (req.method !== 'POST') return jsonResponse({ error: 'Method not allowed' }, 405);
+
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+
+    if (!supabaseUrl || !serviceRoleKey) {
+      throw new Error('Service is not configured');
+    }
+
+    const contentLength = Number(req.headers.get('content-length') || 0);
+    if (contentLength > 100_000) return jsonResponse({ error: 'Request is too large' }, 413);
+
+    const supabaseClient = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { persistSession: false, autoRefreshToken: false }
+    });
+
+    let userId: string | null = null;
+    let authenticatedEmail = '';
+    let authenticatedPhone = '';
+    const authHeader = req.headers.get('Authorization');
+
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.slice('Bearer '.length);
+      const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
+      if (authError || !user) return jsonResponse({ error: 'Invalid authentication token' }, 401);
+
+      userId = user.id;
+      authenticatedEmail = user.email || '';
+
+      const { data: profile, error: profileError } = await supabaseClient
+        .from('profiles')
+        .select('phone')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (profileError) throw profileError;
+      authenticatedPhone = profile?.phone || '';
+    }
+
+    // MANDATORY AUTHENTICATION CHECK FOR COD
+    if (!userId) {
+      return jsonResponse({ error: 'Authentication required for Cash on Delivery orders.' }, 401);
+    }
+
+    const payload = await req.json();
+    const rawItems = payload?.items;
+    const rawAddress = payload?.shippingAddress;
+
+    if (!Array.isArray(rawItems) || rawItems.length === 0 || rawItems.length > MAX_CART_ITEMS) {
+      return jsonResponse({ error: 'A valid cart is required' }, 400);
+    }
+    if (!rawAddress || typeof rawAddress !== 'object' || Array.isArray(rawAddress)) {
+      return jsonResponse({ error: 'A shipping address is required' }, 400);
+    }
+
+    const shippingAddress = {
+      first_name: normalizeText(rawAddress.first_name, 80),
+      last_name: normalizeText(rawAddress.last_name, 80),
+      street: normalizeText(rawAddress.street, 180),
+      address_line_2: normalizeText(rawAddress.address_line_2, 180),
+      city: normalizeText(rawAddress.city, 100),
+      state: normalizeText(rawAddress.state, 100),
+      postal_code: normalizeText(rawAddress.postal_code, 20),
+      country: 'India',
+      email: normalizeText(rawAddress.email || authenticatedEmail, 254).toLowerCase(),
+      phone: normalizeText(rawAddress.phone || authenticatedPhone, 30).replace(/\D/g, '')
+    };
+
+    const requiredAddressFields = ['first_name', 'last_name', 'street', 'city', 'state', 'postal_code'];
+    if (requiredAddressFields.some((field) => !shippingAddress[field as keyof typeof shippingAddress])) {
+      return jsonResponse({ error: 'The shipping address is incomplete' }, 400);
+    }
+    
+    if (shippingAddress.postal_code.length !== 6 || !/^\d{6}$/.test(shippingAddress.postal_code)) {
+      return jsonResponse({ error: 'Please provide a valid 6-digit Indian PIN code' }, 400);
+    }
+    
+    if (shippingAddress.phone.length !== 10 && shippingAddress.phone.length !== 12) {
+      return jsonResponse({ error: 'Please provide a valid Indian phone number' }, 400);
+    }
+
+    const combinedItems = new Map<string, {
+      product_id: string;
+      variant_id: string | null;
+      size: string;
+      color: string;
+      quantity: number;
+    }>();
+
+    for (const rawItem of rawItems) {
+      const productId = normalizeText(rawItem?.product_id, 36);
+      const variantId = rawItem?.variant_id ? normalizeText(rawItem.variant_id, 36) : null;
+      const quantity = Number(rawItem?.quantity);
+
+      if (!UUID_PATTERN.test(productId)
+        || (variantId && !UUID_PATTERN.test(variantId))
+        || !Number.isInteger(quantity)
+        || quantity < 1
+        || quantity > MAX_ITEM_QUANTITY) {
+        return jsonResponse({ error: 'The cart contains an invalid item' }, 400);
+      }
+
+      const key = `${productId}:${variantId || normalizeText(rawItem?.size, 50)}:${normalizeText(rawItem?.color, 50)}`;
+      const existing = combinedItems.get(key);
+      const combinedQuantity = (existing?.quantity || 0) + quantity;
+      if (combinedQuantity > MAX_ITEM_QUANTITY) {
+        return jsonResponse({ error: 'Item quantity exceeds the allowed limit' }, 400);
+      }
+
+      combinedItems.set(key, {
+        product_id: productId,
+        variant_id: variantId,
+        size: normalizeText(rawItem?.size, 50),
+        color: normalizeText(rawItem?.color, 50),
+        quantity: combinedQuantity
+      });
+    }
+
+    let totalAmount = 0;
+    const orderItemsData: Array<{
+      product_id: string;
+      variant_id: string | null;
+      quantity: number;
+      price_at_time: number;
+    }> = [];
+
+    // Validation pass
+    for (const item of combinedItems.values()) {
+      const { data: product, error: productError } = await supabaseClient
+        .from('products')
+        .select('price, status')
+        .eq('id', item.product_id)
+        .eq('status', 'active')
+        .single();
+
+      if (productError || !product) throw new Error(`Product is unavailable: ${item.product_id}`);
+
+      let resolvedVariantId = item.variant_id;
+      if (resolvedVariantId) {
+        const { data: variant, error: variantError } = await supabaseClient
+          .from('product_variants')
+          .select('id, product_id, stock')
+          .eq('id', resolvedVariantId)
+          .eq('product_id', item.product_id)
+          .single();
+
+        if (variantError || !variant) throw new Error('The selected product variant is invalid');
+        if (variant.stock < item.quantity) throw new Error('The selected product variant is out of stock');
+      } else {
+        const { data: variants, error: variantsError } = await supabaseClient
+          .from('product_variants')
+          .select('id')
+          .eq('product_id', item.product_id)
+          .limit(1);
+
+        if (variantsError) throw variantsError;
+        if (variants && variants.length > 0) {
+          throw new Error('Please select a product variant before checkout');
+        }
+      }
+
+      const price = Number(product.price);
+      if (!Number.isFinite(price) || price <= 0) throw new Error('Product price is invalid');
+
+      totalAmount += price * item.quantity;
+      orderItemsData.push({
+        product_id: item.product_id,
+        variant_id: resolvedVariantId,
+        quantity: item.quantity,
+        price_at_time: price
+      });
+    }
+
+    const orderNumber = `LEX-${Date.now()}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+
+    // Start Order Creation and Inventory Reservation (Atomic via Postgres functions or sequential check if functions absent)
+    // Note: Deno edge function handles this sequentially: reserve stock -> insert order.
+    
+    // First, decrement the stock for all variants
+    for (const item of orderItemsData) {
+      if (item.variant_id) {
+        const { error: stockError } = await supabaseClient.rpc('decrement_stock', {
+          variant_id_param: item.variant_id,
+          decrement_by: item.quantity
+        });
+        
+        // Fallback if rpc doesn't exist
+        if (stockError && stockError.message.includes('Could not find the function')) {
+           // Basic update
+           const { data: variant } = await supabaseClient.from('product_variants').select('stock').eq('id', item.variant_id).single();
+           if (variant) {
+              await supabaseClient.from('product_variants').update({ stock: variant.stock - item.quantity }).eq('id', item.variant_id);
+           }
+        } else if (stockError) {
+          throw new Error(`Failed to reserve stock: ${stockError.message}`);
+        }
+      }
+    }
+
+    const { data: order, error: orderError } = await supabaseClient
+      .from('orders')
+      .insert([{
+        user_id: userId,
+        order_number: orderNumber,
+        total_amount: totalAmount,
+        shipping_address: shippingAddress,
+        status: 'pending',
+        payment_status: 'pending_cod', // Set to pending_cod initially, or whatever semantic maps to COD
+        payment_method: 'cod'
+      }])
+      .select('id')
+      .single();
+
+    if (orderError) throw orderError;
+
+    const { error: itemsError } = await supabaseClient
+      .from('order_items')
+      .insert(orderItemsData.map((item) => ({ ...item, order_id: order.id })));
+
+    if (itemsError) {
+      await supabaseClient.from('orders').delete().eq('id', order.id);
+      throw itemsError;
+    }
+
+    return jsonResponse({
+      orderNumber,
+      orderId: order.id,
+      amount: Math.round(totalAmount * 100),
+    });
+  } catch (error: any) {
+    console.error('Error in create-cod-order:', error);
+    return jsonResponse({ error: error?.message || JSON.stringify(error) }, 400);
+  }
+});

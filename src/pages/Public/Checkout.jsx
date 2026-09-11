@@ -15,10 +15,6 @@ import { useResponsive } from '../../contexts/ResponsiveContext';
 import { INDIAN_STATES, isValidPinCode, isValidIndianPhone, normalizePhone, getEmptyAddress } from '../../utils/address';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop';
-const EMPTY_GUEST_ADDRESS = {
-  ...getEmptyAddress(),
-  email: ''
-};
 
 const Checkout = () => {
   const { isMobile } = useResponsive();
@@ -32,7 +28,6 @@ const Checkout = () => {
   const [addresses, setAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [loadingAddresses, setLoadingAddresses] = useState(true);
-  const [guestAddress, setGuestAddress] = useState(EMPTY_GUEST_ADDRESS);
   const [checkoutError, setCheckoutError] = useState('');
   
   // Final Order Info
@@ -41,6 +36,7 @@ const Checkout = () => {
   const [guestAccessToken, setGuestAccessToken] = useState(null);
   
   // Payment State
+  const [paymentMethod, setPaymentMethod] = useState('razorpay');
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentVerified, setPaymentVerified] = useState(false);
   const [downloadingOrderId, setDownloadingOrderId] = useState(null);
@@ -89,38 +85,11 @@ const Checkout = () => {
         setCheckoutError('Please select a shipping address.');
         return;
       }
-
-      if (!user) {
-        const requiredFields = ['first_name', 'last_name', 'street', 'city', 'state', 'postal_code', 'country', 'email', 'phone'];
-        if (requiredFields.some((field) => !guestAddress[field]?.trim())) {
-          setCheckoutError('Please complete every guest shipping field.');
-          return;
-        }
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestAddress.email)) {
-          setCheckoutError('Please enter a valid email address.');
-          return;
-        }
-        if (!isValidIndianPhone(guestAddress.phone)) {
-          setCheckoutError('Please enter a valid 10-digit Indian phone number.');
-          return;
-        }
-        if (!isValidPinCode(guestAddress.postal_code)) {
-          setCheckoutError('Please enter a valid 6-digit PIN code.');
-          return;
-        }
-      }
     }
     setStep(prev => prev + 1);
   };
 
-  const handleGuestAddressChange = (event) => {
-    const { name, value } = event.target;
-    setGuestAddress((current) => ({ ...current, [name]: value }));
-  };
-
-  const selectedShippingAddress = user
-    ? addresses.find((address) => address.id === selectedAddressId)
-    : guestAddress;
+  const selectedShippingAddress = addresses.find((address) => address.id === selectedAddressId);
 
   const handlePaymentInit = async () => {
     setIsProcessingPayment(true);
@@ -144,73 +113,95 @@ const Checkout = () => {
         quantity: item.quantity
       }));
       
-      const { data, error } = await supabase.functions.invoke('create-razorpay-order', {
-        body: { 
-          items: itemsPayload,
-          shippingAddress
-        }
-      });
-      
-      if (error) throw error;
-      if (!data?.orderId || !data?.razorpayOrderId) throw new Error('The payment order response was incomplete.');
-      
-      setOrderId(data.orderNumber); // For display
-      setInternalOrderId(data.orderId); // The UUID for generating invoice
-      setGuestAccessToken(data.guestAccessToken || null);
-
-      await initiatePayment({
-        amount: data.amount,
-        currency: "INR",
-        razorpayOrderId: data.razorpayOrderId,
-        customerName: `${shippingAddress.first_name || ''} ${shippingAddress.last_name || ''}`.trim(),
-        customerEmail: shippingAddress.email,
-        customerPhone: shippingAddress.phone
-      }, {
-        onSuccess: async (response) => {
-          const { data: verification, error: verificationError } = await supabase.functions.invoke('verify-razorpay-payment', {
-            body: {
-              orderId: data.orderId,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_signature: response.razorpay_signature,
-              guestAccessToken: data.guestAccessToken || null
-            }
-          });
-
-          if (verificationError) throw verificationError;
-          if (!verification?.verified) throw new Error('Payment could not be verified.');
-
-          setPaymentVerified(true);
-          try {
-            await clearCart();
-          } catch (cartCleanupError) {
-            console.error('Payment verified, but cart cleanup failed:', cartCleanupError);
-            setCheckoutError('Payment was verified, but the cart could not be cleared automatically.');
+      if (paymentMethod === 'cod') {
+        const { data, error } = await supabase.functions.invoke('create-cod-order', {
+          body: { 
+            items: itemsPayload,
+            shippingAddress
           }
-          setStep(4);
-        },
-        onFailure: async (err) => {
-          console.error(err);
-          if (err.message === 'Payment was cancelled.') {
+        });
+
+        if (error) throw error;
+        if (!data?.orderId) throw new Error('Order creation failed.');
+
+        setOrderId(data.orderNumber);
+        setInternalOrderId(data.orderId);
+        
+        try {
+          await clearCart();
+        } catch (cartCleanupError) {
+          console.error('Order created, but cart cleanup failed:', cartCleanupError);
+          setCheckoutError('Order was created, but the cart could not be cleared automatically.');
+        }
+        setStep(4);
+      } else {
+        const { data, error } = await supabase.functions.invoke('create-razorpay-order', {
+          body: { 
+            items: itemsPayload,
+            shippingAddress
+          }
+        });
+        
+        if (error) throw error;
+        if (!data?.orderId || !data?.razorpayOrderId) throw new Error('The payment order response was incomplete.');
+        
+        setOrderId(data.orderNumber); // For display
+        setInternalOrderId(data.orderId); // The UUID for generating invoice
+        setGuestAccessToken(data.guestAccessToken || null);
+
+        await initiatePayment({
+          amount: data.amount,
+          currency: "INR",
+          razorpayOrderId: data.razorpayOrderId,
+          customerName: `${shippingAddress.first_name || ''} ${shippingAddress.last_name || ''}`.trim(),
+          customerEmail: shippingAddress.email,
+          customerPhone: shippingAddress.phone
+        }, {
+          onSuccess: async (response) => {
+            const { data: verification, error: verificationError } = await supabase.functions.invoke('verify-razorpay-payment', {
+              body: {
+                orderId: data.orderId,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+                guestAccessToken: data.guestAccessToken || null
+              }
+            });
+
+            if (verificationError) throw verificationError;
+            if (!verification?.verified) throw new Error('Payment could not be verified.');
+
+            setPaymentVerified(true);
             try {
-              await supabase.rpc('cancel_razorpay_order', {
-                p_order_id: data.orderId,
-                p_guest_token: data.guestAccessToken || null
-              });
-              setCheckoutError('Payment was cancelled. You can review your order and try again.');
-            } catch (cancelErr) {
-              console.error('Failed to cancel order status:', cancelErr);
-              setCheckoutError('Payment was cancelled.');
+              await clearCart();
+            } catch (cartCleanupError) {
+              console.error('Payment verified, but cart cleanup failed:', cartCleanupError);
+              setCheckoutError('Payment was verified, but the cart could not be cleared automatically.');
             }
-          } else {
-            setCheckoutError(err.message || 'Payment failed.');
+            setStep(4);
+          },
+          onFailure: async (err) => {
+            console.error(err);
+            if (err.message === 'Payment was cancelled.') {
+              try {
+                await supabase.rpc('cancel_razorpay_order', {
+                  p_order_id: data.orderId,
+                  p_guest_token: data.guestAccessToken || null
+                });
+                setCheckoutError('Payment was cancelled. You can review your order and try again.');
+              } catch (cancelErr) {
+                console.error('Failed to cancel order status:', cancelErr);
+                setCheckoutError('Payment was cancelled.');
+              }
+            } else {
+              setCheckoutError(err.message || 'Payment failed.');
+            }
           }
-        }
-      });
-
+        });
+      }
     } catch (error) {
-      console.error("Failed to initialize payment:", error);
-      setCheckoutError(error.message || 'Secure payment could not be completed. Please try again.');
+      console.error("Failed to process order:", error);
+      setCheckoutError(error.message || 'Order could not be completed. Please try again.');
     } finally {
       setIsProcessingPayment(false);
     }
@@ -232,17 +223,17 @@ const Checkout = () => {
         cartTotal={cartTotal}
         checkoutError={checkoutError}
         downloadingOrderId={downloadingOrderId}
-        guestAddress={guestAddress}
         internalOrderId={internalOrderId}
         isProcessingPayment={isProcessingPayment}
         loadingAddresses={loadingAddresses}
         onAddressSelect={setSelectedAddressId}
         onDownloadInvoice={handleDownloadInvoice}
-        onGuestAddressChange={handleGuestAddressChange}
         onNext={handleNextStep}
         onPayment={handlePaymentInit}
         onStepChange={setStep}
         orderId={orderId}
+        paymentMethod={paymentMethod}
+        onPaymentMethodChange={setPaymentMethod}
         selectedAddressId={selectedAddressId}
         selectedShippingAddress={selectedShippingAddress}
         step={step}
@@ -357,60 +348,6 @@ const Checkout = () => {
                           <div className={accountStyles.card} style={{ height: '160px', animation: 'pulse 2s infinite', margin: 0 }} />
                           <div className={accountStyles.card} style={{ height: '160px', animation: 'pulse 2s infinite', margin: 0 }} />
                         </div>
-                      ) : !user ? (
-                        <div className={accountStyles.card} style={{ padding: '40px', margin: '0 0 40px 0' }}>
-                          <p style={{ marginBottom: '30px', color: 'rgba(255,255,255,0.7)', lineHeight: '1.6' }}>
-                            Enter the delivery details below, or <Link to="/login" style={{ color: 'var(--accent-color, #D4AF37)' }}>log in</Link> to use a saved address.
-                          </p>
-                          <div className={accountStyles.formGrid}>
-                            <div className={accountStyles.formGroup} style={{ marginBottom: 0 }}>
-                              <label htmlFor="guest-first_name" className={accountStyles.formLabel}>First Name</label>
-                              <input id="guest-first_name" name="first_name" type="text" value={guestAddress.first_name} onChange={handleGuestAddressChange} className={accountStyles.formInput} required />
-                            </div>
-                            <div className={accountStyles.formGroup} style={{ marginBottom: 0 }}>
-                              <label htmlFor="guest-last_name" className={accountStyles.formLabel}>Last Name</label>
-                              <input id="guest-last_name" name="last_name" type="text" value={guestAddress.last_name} onChange={handleGuestAddressChange} className={accountStyles.formInput} required />
-                            </div>
-                            <div className={accountStyles.formGroup} style={{ marginBottom: 0 }}>
-                              <label htmlFor="guest-email" className={accountStyles.formLabel}>Email Address</label>
-                              <input id="guest-email" name="email" type="email" value={guestAddress.email} onChange={handleGuestAddressChange} className={accountStyles.formInput} required />
-                            </div>
-                            <div className={accountStyles.formGroup} style={{ marginBottom: 0 }}>
-                              <label htmlFor="guest-phone" className={accountStyles.formLabel}>Phone Number</label>
-                              <input id="guest-phone" name="phone" type="tel" value={guestAddress.phone} onChange={handleGuestAddressChange} className={accountStyles.formInput} required />
-                            </div>
-                            <div className={accountStyles.formGroup} style={{ marginBottom: 0 }}>
-                              <label htmlFor="guest-street" className={accountStyles.formLabel}>Address Line 1 (Street)</label>
-                              <input id="guest-street" name="street" type="text" value={guestAddress.street} onChange={handleGuestAddressChange} className={accountStyles.formInput} maxLength={180} required />
-                            </div>
-                            <div className={accountStyles.formGroup} style={{ marginBottom: 0 }}>
-                              <label htmlFor="guest-address_line_2" className={accountStyles.formLabel}>Address Line 2 (Optional)</label>
-                              <input id="guest-address_line_2" name="address_line_2" type="text" value={guestAddress.address_line_2} onChange={handleGuestAddressChange} className={accountStyles.formInput} maxLength={180} />
-                            </div>
-                            <div className={accountStyles.formGroup} style={{ marginBottom: 0 }}>
-                              <label htmlFor="guest-city" className={accountStyles.formLabel}>City</label>
-                              <input id="guest-city" name="city" type="text" value={guestAddress.city} onChange={handleGuestAddressChange} className={accountStyles.formInput} required />
-                            </div>
-                            <div className={accountStyles.formGroup} style={{ marginBottom: 0 }}>
-                              <label htmlFor="guest-state" className={accountStyles.formLabel}>State</label>
-                              <select id="guest-state" name="state" value={guestAddress.state} onChange={handleGuestAddressChange} className={accountStyles.formInput} required>
-                                <option value="">Select State</option>
-                                {INDIAN_STATES.map(state => <option key={state} value={state}>{state}</option>)}
-                              </select>
-                            </div>
-                            <div className={accountStyles.formGroup} style={{ marginBottom: 0 }}>
-                              <label htmlFor="guest-postal_code" className={accountStyles.formLabel}>PIN Code</label>
-                              <input id="guest-postal_code" name="postal_code" type="text" value={guestAddress.postal_code} onChange={handleGuestAddressChange} className={accountStyles.formInput} maxLength="6" required />
-                            </div>
-                            <div className={accountStyles.formGroup} style={{ marginBottom: 0 }}>
-                              <label htmlFor="guest-country" className={accountStyles.formLabel}>Country</label>
-                              <input id="guest-country" name="country" type="text" value="India" className={accountStyles.formInput} readOnly />
-                            </div>
-                          </div>
-                          <button onClick={handleNextStep} className={styles.primaryBtn} style={{ marginTop: '30px', width: '100%', maxWidth: '300px' }}>
-                            CONTINUE AS GUEST
-                          </button>
-                        </div>
                       ) : addresses.length === 0 ? (
                         <div className={accountStyles.card} style={{ padding: '40px', margin: '0 0 40px 0' }}>
                           <p style={{ marginBottom: '30px', color: 'rgba(255,255,255,0.7)' }}>You don't have any saved addresses.</p>
@@ -469,7 +406,6 @@ const Checkout = () => {
                         {selectedShippingAddress ? (
                           <div style={{ fontSize: '0.9rem', lineHeight: '1.8', color: '#fff' }}>
                             <p>{selectedShippingAddress.first_name} {selectedShippingAddress.last_name}</p>
-                            {!user && <p>{selectedShippingAddress.email}</p>}
                             <p>{selectedShippingAddress.phone}</p>
                             <p>{selectedShippingAddress.street}</p>
                             {selectedShippingAddress.address_line_2 && <p>{selectedShippingAddress.address_line_2}</p>}
@@ -511,8 +447,51 @@ const Checkout = () => {
                       <h2 style={{ fontSize: '1.8rem', fontWeight: 300, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '40px' }}>Payment Method</h2>
                       
                       <div className={accountStyles.card} style={{ padding: '40px', margin: '0 0 50px 0' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '30px' }}>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '15px', cursor: 'pointer', padding: '15px', border: `1px solid ${paymentMethod === 'razorpay' ? 'var(--accent-color, #D4AF37)' : 'rgba(255,255,255,0.05)'}`, borderRadius: '4px', background: paymentMethod === 'razorpay' ? 'rgba(212,175,55,0.05)' : 'transparent', transition: 'all 0.2s ease' }}>
+                            <input 
+                              type="radio" 
+                              name="paymentMethod" 
+                              value="razorpay"
+                              checked={paymentMethod === 'razorpay'}
+                              onChange={() => setPaymentMethod('razorpay')}
+                              style={{ accentColor: 'var(--accent-color, #D4AF37)', width: '18px', height: '18px' }}
+                            />
+                            <div>
+                              <span style={{ color: '#fff', fontSize: '1rem', display: 'block', marginBottom: '4px' }}>Pay Online</span>
+                              <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem' }}>Secure payment through Razorpay</span>
+                            </div>
+                          </label>
+
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '15px', cursor: selectedShippingAddress?.postal_code?.length === 6 && isValidPinCode(selectedShippingAddress.postal_code) ? 'pointer' : 'not-allowed', padding: '15px', border: `1px solid ${paymentMethod === 'cod' ? 'var(--accent-color, #D4AF37)' : 'rgba(255,255,255,0.05)'}`, borderRadius: '4px', background: paymentMethod === 'cod' ? 'rgba(212,175,55,0.05)' : 'transparent', transition: 'all 0.2s ease', opacity: selectedShippingAddress?.postal_code?.length === 6 && isValidPinCode(selectedShippingAddress.postal_code) ? 1 : 0.5 }}>
+                            <input 
+                              type="radio" 
+                              name="paymentMethod" 
+                              value="cod"
+                              checked={paymentMethod === 'cod'}
+                              onChange={() => {
+                                if (selectedShippingAddress?.postal_code?.length === 6 && isValidPinCode(selectedShippingAddress.postal_code)) {
+                                  setPaymentMethod('cod');
+                                }
+                              }}
+                              disabled={!(selectedShippingAddress?.postal_code?.length === 6 && isValidPinCode(selectedShippingAddress.postal_code))}
+                              style={{ accentColor: 'var(--accent-color, #D4AF37)', width: '18px', height: '18px' }}
+                            />
+                            <div>
+                              <span style={{ color: '#fff', fontSize: '1rem', display: 'block', marginBottom: '4px' }}>Cash on Delivery</span>
+                              <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem' }}>
+                                {!(selectedShippingAddress?.postal_code?.length === 6 && isValidPinCode(selectedShippingAddress.postal_code)) 
+                                  ? 'Not available for the selected PIN code' 
+                                  : 'Pay when your order arrives'}
+                              </span>
+                            </div>
+                          </label>
+                        </div>
+
                         <p style={{ color: 'rgba(255,255,255,0.6)', lineHeight: '1.6', fontSize: '0.9rem', marginBottom: '25px' }}>
-                          You will be securely redirected to our payment provider to complete your purchase.
+                          {paymentMethod === 'razorpay'
+                            ? 'You will be securely redirected to our payment provider to complete your purchase.'
+                            : 'You will place your order and pay when it arrives at your door.'}
                         </p>
                         <motion.button 
                           whileHover={!isProcessingPayment ? { scale: 1.02 } : {}} 
@@ -529,7 +508,9 @@ const Checkout = () => {
                                 <span>PROCESSING...</span>
                               </motion.div>
                             ) : (
-                              <motion.span key="text" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>PAY SECURELY</motion.span>
+                              <motion.span key="text" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                                {paymentMethod === 'razorpay' ? 'PAY SECURELY' : 'PLACE COD ORDER'}
+                              </motion.span>
                             )}
                           </AnimatePresence>
                         </motion.button>

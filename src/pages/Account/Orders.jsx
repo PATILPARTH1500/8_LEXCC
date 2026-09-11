@@ -141,6 +141,9 @@ const Orders = () => {
                       </span>
                     );
                   })()}
+                  <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', letterSpacing: '0.05em', marginBottom: '10px', textTransform: 'uppercase' }}>
+                    {order.payment_method === 'cod' ? 'CASH ON DELIVERY' : 'ONLINE PAYMENT'}
+                  </p>
                   <div>
                     <button 
                       onClick={() => handleDownloadInvoice(order.id)}

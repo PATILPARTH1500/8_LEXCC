@@ -181,7 +181,14 @@ export const generateInvoice = async (orderId, guestAccessToken = null) => {
     doc.setFont('helvetica', 'bold');
     doc.text('Payment Method:', margin, currentY);
     doc.setFont('helvetica', 'normal');
-    const pMethod = order.razorpay_payment_id ? 'Razorpay (Card/UPI/NetBanking)' : 'Online Payment';
+    
+    let pMethod = 'Online Payment';
+    if (order.payment_method === 'cod') {
+      pMethod = 'Cash on Delivery (COD)';
+    } else if (order.razorpay_payment_id) {
+      pMethod = 'Razorpay (Card/UPI/NetBanking)';
+    }
+    
     doc.text(pMethod, margin + 35, currentY);
 
     if (order.razorpay_payment_id) {

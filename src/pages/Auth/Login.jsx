@@ -31,7 +31,16 @@ const Login = () => {
     }
   }, [turnstileKey]);
 
-  const from = location.state?.from?.pathname || '/account';
+  const searchParams = new URLSearchParams(location.search);
+  const queryRedirect = searchParams.get('redirect');
+  const stateRedirect = location.state?.from?.pathname;
+  
+  let from = '/account';
+  if (stateRedirect && stateRedirect.startsWith('/')) {
+    from = stateRedirect;
+  } else if (queryRedirect && queryRedirect.startsWith('/')) {
+    from = queryRedirect;
+  }
 
   const { register, handleSubmit, formState: { errors } } = useHookForm({
     resolver: zodResolver(loginSchema)
@@ -50,8 +59,13 @@ const Login = () => {
         await verifyTurnstileToken(turnstileToken);
       }
       
-      await signIn({ email: data.email, password: data.password });
-      navigate(from, { replace: true });
+      const result = await signIn({ email: data.email, password: data.password });
+      
+      if (result?.session && result?.user) {
+        navigate(from, { replace: true });
+      } else {
+        setGlobalError('Unable to establish an authenticated session.');
+      }
     } catch (error) {
       setGlobalError(error.message || 'Failed to sign in. Please check your credentials.');
     } finally {
@@ -121,7 +135,7 @@ const Login = () => {
 
 
         <div className={styles.authFooter}>
-          <p>Don't have an account? <Link to="/register" className={styles.authLink}>Register here</Link></p>
+          <p>Don't have an account? <Link to="/register" state={{ from: location.state?.from }} className={styles.authLink}>Register here</Link></p>
           <p style={{ marginTop: '10px' }}><Link to="/forgot-password" className={styles.authLink}>Forgot your password?</Link></p>
         </div>
       </motion.div>

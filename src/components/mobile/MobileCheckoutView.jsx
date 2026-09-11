@@ -41,17 +41,16 @@ const MobileCheckoutView = ({
   cartTotal,
   checkoutError,
   downloadingOrderId,
-  guestAddress,
   internalOrderId,
   isProcessingPayment,
   loadingAddresses,
   onAddressSelect,
   onDownloadInvoice,
-  onGuestAddressChange,
   onNext,
   onPayment,
   onStepChange,
-  orderId,
+  paymentMethod,
+  onPaymentMethodChange,
   selectedAddressId,
   selectedShippingAddress,
   step,
@@ -119,29 +118,6 @@ const MobileCheckoutView = ({
                 <div className={styles.sectionTitle}><p>Step 01</p><h2>Shipping address</h2></div>
                 {loadingAddresses ? (
                   <div className={styles.loading} aria-live="polite">Loading saved addresses…</div>
-                ) : !user ? (
-                  <div className={styles.card}>
-                    <p className={styles.intro}>Enter your delivery details, or <Link to="/login">log in</Link> to use a saved address.</p>
-                    <div className={styles.formGrid}>
-                      <label><span>First name</span><input name="first_name" type="text" value={guestAddress.first_name} onChange={onGuestAddressChange} required /></label>
-                      <label><span>Last name</span><input name="last_name" type="text" value={guestAddress.last_name} onChange={onGuestAddressChange} required /></label>
-                      <label><span>Email address</span><input name="email" type="email" value={guestAddress.email} onChange={onGuestAddressChange} required /></label>
-                      <label><span>Phone number</span><input name="phone" type="tel" value={guestAddress.phone} onChange={onGuestAddressChange} required /></label>
-                      <label className={styles.fullField}><span>Address Line 1 (Street)</span><input name="street" type="text" value={guestAddress.street} onChange={onGuestAddressChange} maxLength={180} required /></label>
-                      <label className={styles.fullField}><span>Address Line 2 (Optional)</span><input name="address_line_2" type="text" value={guestAddress.address_line_2} onChange={onGuestAddressChange} maxLength={180} /></label>
-                      <label><span>City</span><input name="city" type="text" value={guestAddress.city} onChange={onGuestAddressChange} required /></label>
-                      <label>
-                        <span>State</span>
-                        <select name="state" value={guestAddress.state} onChange={onGuestAddressChange} required style={{ width: '100%', padding: '12px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#fff' }}>
-                          <option value="">Select State</option>
-                          {INDIAN_STATES.map(state => <option key={state} value={state}>{state}</option>)}
-                        </select>
-                      </label>
-                      <label><span>PIN Code</span><input name="postal_code" type="text" value={guestAddress.postal_code} onChange={onGuestAddressChange} maxLength={6} required /></label>
-                      <label><span>Country</span><input name="country" type="text" value="India" readOnly /></label>
-                    </div>
-                    <button type="button" className={styles.primary} onClick={onNext}>Continue as guest</button>
-                  </div>
                 ) : addresses.length === 0 ? (
                   <div className={styles.card}>
                     <p className={styles.intro}>You do not have a saved shipping address yet.</p>
@@ -185,7 +161,6 @@ const MobileCheckoutView = ({
                       {selectedShippingAddress.address_line_2 && <>{selectedShippingAddress.address_line_2}<br /></>}
                       {selectedShippingAddress.city}, {selectedShippingAddress.state} {selectedShippingAddress.postal_code}<br />
                       {selectedShippingAddress.country}
-                      {!user && <><br />{selectedShippingAddress.email}</>}
                     </address>
                   ) : <p>No address selected.</p>}
                 </div>
@@ -202,13 +177,48 @@ const MobileCheckoutView = ({
 
             {step === 3 && (
               <>
-                <div className={styles.sectionTitle}><p>Step 03</p><h2>Secure payment</h2></div>
+                <div className={styles.sectionTitle}><p>Step 03</p><h2>Payment method</h2></div>
                 <div className={styles.card}>
-                  <FiLock className={styles.lock} aria-hidden="true" />
-                  <h3>Protected checkout</h3>
-                  <p className={styles.intro}>You will be securely redirected to our payment provider to complete your purchase.</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '20px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '15px', border: `1px solid ${paymentMethod === 'razorpay' ? 'var(--accent-color)' : 'rgba(255,255,255,0.1)'}`, borderRadius: '4px', background: paymentMethod === 'razorpay' ? 'rgba(212,175,55,0.05)' : 'transparent' }}>
+                      <input 
+                        type="radio" 
+                        name="mobilePaymentMethod" 
+                        value="razorpay" 
+                        checked={paymentMethod === 'razorpay'} 
+                        onChange={() => onPaymentMethodChange('razorpay')}
+                        style={{ accentColor: 'var(--accent-color)', width: '16px', height: '16px' }}
+                      />
+                      <div>
+                        <span style={{ display: 'block', color: '#fff', fontSize: '0.95rem' }}>Pay Online</span>
+                        <span style={{ display: 'block', color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>Secure payment via Razorpay</span>
+                      </div>
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '15px', border: `1px solid ${paymentMethod === 'cod' ? 'var(--accent-color)' : 'rgba(255,255,255,0.1)'}`, borderRadius: '4px', background: paymentMethod === 'cod' ? 'rgba(212,175,55,0.05)' : 'transparent', opacity: selectedShippingAddress?.postal_code?.length === 6 ? 1 : 0.5 }}>
+                      <input 
+                        type="radio" 
+                        name="mobilePaymentMethod" 
+                        value="cod" 
+                        checked={paymentMethod === 'cod'} 
+                        onChange={() => { if (selectedShippingAddress?.postal_code?.length === 6) onPaymentMethodChange('cod'); }}
+                        disabled={selectedShippingAddress?.postal_code?.length !== 6}
+                        style={{ accentColor: 'var(--accent-color)', width: '16px', height: '16px' }}
+                      />
+                      <div>
+                        <span style={{ display: 'block', color: '#fff', fontSize: '0.95rem' }}>Cash on Delivery</span>
+                        <span style={{ display: 'block', color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>
+                          {selectedShippingAddress?.postal_code?.length === 6 ? 'Pay when order arrives' : 'Unavailable for your PIN'}
+                        </span>
+                      </div>
+                    </label>
+                  </div>
+                  
                   <button type="button" className={styles.primary} onClick={onPayment} disabled={isProcessingPayment}>
-                    {isProcessingPayment ? 'Processing…' : `Pay ${formatINR(cartTotal)} securely`}
+                    {isProcessingPayment 
+                      ? 'Processing…' 
+                      : paymentMethod === 'razorpay' 
+                        ? `Pay ${formatINR(cartTotal)} securely` 
+                        : 'Place COD Order'}
                   </button>
                 </div>
                 <button type="button" className={styles.secondary} onClick={() => onStepChange(2)} disabled={isProcessingPayment}>Back</button>
