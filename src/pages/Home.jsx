@@ -17,7 +17,15 @@ import ClickSpark from '../components/animations/ClickSpark';
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Muted, cohesive luxury editorial imagery
+import whiteNikeEditorial from '../assets/editorial/lexcc-white-nike-editorial.webp';
+import pumaEditorial from '../assets/editorial/lexcc-puma-editorial.webp';
+import newbalanceRedCampaign from '../assets/editorial/lexcc-newbalance-red-campaign.webp';
+import ferrariEditorial from '../assets/editorial/lexcc-ferrari-editorial.webp';
+import racingJacketEditorial from '../assets/editorial/lexcc-racing-jacket-editorial.webp';
+import redbullJacketEditorial from '../assets/editorial/lexcc-redbull-jacket-editorial.webp';
+import whiteChunkySneaker from '../assets/editorial/lexcc-white-chunky-sneaker.webp';
+import nikeRedCampaign from '../assets/editorial/lexcc-nike-red-campaign.webp';
+import jordanRedCampaign from '../assets/editorial/lexcc-jordan-red-campaign.webp';
 
 const bounceImages = [
   { src: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=400&auto=format&fit=crop", label: "Cotton" },
@@ -36,13 +44,22 @@ const domeImages = [
 ];
 
 const instaImages = [
-  "https://images.unsplash.com/photo-1529139574466-a303027c028b?q=80&w=600&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1506152983158-b4a74a01c721?q=80&w=600&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1618886487325-f66503261dd2?q=80&w=600&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1532453288672-3a27e9be9efd?q=80&w=600&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?q=80&w=600&auto=format&fit=crop",
+  { src: whiteChunkySneaker, alt: "White chunky sneaker" },
+  { src: racingJacketEditorial, alt: "LEXCC racing-inspired streetwear campaign" },
+  { src: nikeRedCampaign, alt: "White Nike sneaker on red campaign background" },
+  { src: redbullJacketEditorial, alt: "Red Bull racing jacket editorial" },
+  { src: jordanRedCampaign, alt: "White and red basketball sneaker on red campaign background" },
+  { src: ferrariEditorial, alt: "Male model in red Ferrari jacket" },
 ];
+
+export const editorialImages = {
+  material1: whiteNikeEditorial,
+  material2: pumaEditorial,
+  material3: newbalanceRedCampaign,
+  lead: ferrariEditorial,
+  collage1: racingJacketEditorial,
+  collage2: redbullJacketEditorial,
+};
 
 const Home = () => {
   const heroRef = useRef(null);
@@ -295,6 +312,7 @@ const Home = () => {
           featuredProducts={featuredProducts}
           instaImages={instaImages}
           newsletter={newsletter}
+          editorialImages={editorialImages}
         />
       </div>
     );
@@ -593,40 +611,31 @@ const Home = () => {
                 className={styles.collageWrapper}
                 style={{ rotateX: tiltX, rotateY: tiltY }}
               >
-                {/* Collage Card 1: Foreground Left */}
+                {/* Collage Card 1: BACK / LEFT FRAME */}
                 <motion.div 
                   className={`${styles.collageCard} ${styles.card1}`}
                   animate={{ y: [0, -15, 0] }}
                   transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  <img src="https://images.unsplash.com/photo-1550246140-5119ae4790b8?q=80&w=800&auto=format&fit=crop" alt="Premium Apparel" className={styles.collageImg} />
+                  <img src={whiteNikeEditorial} alt="White Nike sneaker beside Nike box" className={styles.collageImg} loading="lazy" decoding="async" style={{ objectPosition: 'center', objectFit: 'cover', width: '100%', height: '100%' }} />
                 </motion.div>
 
-                {/* Collage Card 2: Background Left */}
+                {/* Collage Card 2: BOTTOM / CENTER FRAME */}
                 <motion.div 
                   className={`${styles.collageCard} ${styles.card2}`}
                   animate={{ y: [0, 10, 0] }}
                   transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1 }}
                 >
-                  <img src="https://images.unsplash.com/photo-1492288991661-058aa541ff43?q=80&w=800&auto=format&fit=crop" alt="Editorial Fashion" className={styles.collageImg} />
+                  <img src={pumaEditorial} alt="White and grey Puma sneakers editorial" className={styles.collageImg} loading="lazy" decoding="async" style={{ objectPosition: 'center', objectFit: 'cover', width: '100%', height: '100%' }} />
                 </motion.div>
 
-                {/* Collage Card 3: Foreground Right */}
+                {/* Collage Card 3: FRONT / RIGHT FRAME */}
                 <motion.div 
                   className={`${styles.collageCard} ${styles.card3}`}
                   animate={{ y: [0, -20, 0] }}
                   transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
                 >
-                  <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800&auto=format&fit=crop" alt="Luxury Fit" className={styles.collageImg} />
-                </motion.div>
-
-                {/* Collage Card 4: Background Right */}
-                <motion.div 
-                  className={`${styles.collageCard} ${styles.card4}`}
-                  animate={{ y: [0, 15, 0] }}
-                  transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
-                >
-                  <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800&auto=format&fit=crop" alt="Heavyweight Fabric" className={styles.collageImg} />
+                  <img src={newbalanceRedCampaign} alt="Black New Balance sneakers on red campaign background" className={styles.collageImg} loading="lazy" decoding="async" style={{ objectPosition: 'center', objectFit: 'cover', width: '100%', height: '100%' }} />
                 </motion.div>
               </motion.div>
             </div>
@@ -666,9 +675,11 @@ const Home = () => {
                   whileInView={{ scale: 1.00 }}
                   viewport={{ once: true, margin: "-100px" }}
                   transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
-                  src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1200&auto=format&fit=crop" 
-                  alt="Luxury Campaign"
+                  src={ferrariEditorial} 
+                  alt="Male model in red Ferrari jacket sitting on red Ferrari"
                   className={styles.campaignImage}
+                  loading="lazy" decoding="async"
+                  style={{ objectPosition: 'center', objectFit: 'cover' }}
                 />
                 <div className={styles.campaignGrain}></div>
               </div>
@@ -736,9 +747,11 @@ const Home = () => {
             {/* Left Hero Image */}
             <div className={`${styles.lookbookCard} ${styles.lookbookCardLeft} lookbook-left`}>
               <img 
-                src="https://images.unsplash.com/photo-1492288991661-058aa541ff43?q=80&w=1200&auto=format&fit=crop" 
-                alt="Outerwear Editorial" 
+                src={racingJacketEditorial} 
+                alt="Male model wearing red and black racing jacket" 
                 className={styles.lookbookImg} 
+                loading="lazy" decoding="async"
+                style={{ objectPosition: 'center', objectFit: 'cover' }}
               />
               <div className={styles.lookbookOverlay}>
                 <div className={styles.lookbookLabel}>OUTERWEAR EDITORIAL</div>
@@ -749,9 +762,11 @@ const Home = () => {
             {/* Right Smaller Image */}
             <div className={`${styles.lookbookCard} ${styles.lookbookCardRight} lookbook-right`}>
               <img 
-                src="https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?q=80&w=1000&auto=format&fit=crop" 
-                alt="FW26 Campaign" 
+                src={redbullJacketEditorial} 
+                alt="Rear view of model wearing navy Red Bull racing jacket" 
                 className={styles.lookbookImg} 
+                loading="lazy" decoding="async"
+                style={{ objectPosition: 'center', objectFit: 'cover' }}
               />
               <div className={styles.lookbookOverlay}>
                 <div className={styles.lookbookLabel}>FW26 CAMPAIGN</div>
@@ -852,7 +867,7 @@ const Home = () => {
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 1.2, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
             >
-              <img src={img} alt="Editorial" className={styles.worldwideImg} />
+              <img src={img.src} alt={img.alt} className={styles.worldwideImg} loading="lazy" decoding="async" style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
               <div className={styles.worldwideOverlay}>
                 <div className={styles.instagramIcon}>
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>

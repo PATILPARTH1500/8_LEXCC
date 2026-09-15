@@ -30,7 +30,7 @@ const reveal = (reduceMotion, delay = 0) => ({
   transition: { duration: reduceMotion ? 0 : 0.5, delay, ease: [0.16, 1, 0.3, 1] },
 });
 
-const MobileHome = ({ customers, featuredProducts, instaImages, newsletter }) => {
+const MobileHome = ({ customers, featuredProducts, instaImages, newsletter, editorialImages }) => {
   const reduceMotion = useReducedMotion();
 
   const scrollPastHero = () => {
@@ -106,9 +106,17 @@ const MobileHome = ({ customers, featuredProducts, instaImages, newsletter }) =>
       </section>
 
       <section className={`${styles.section} ${styles.craft}`}>
-        <motion.div {...reveal(reduceMotion)} className={styles.craftImage}>
-          <img src="https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=1200&auto=format&fit=crop" alt="LEXCC premium fabric and construction" />
-        </motion.div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '4px', width: '100%' }}>
+          <motion.div {...reveal(reduceMotion)} style={{ gridColumn: '1 / -1' }}>
+            <img src={editorialImages?.material1} alt="White Nike sneaker editorial" loading="lazy" decoding="async" style={{ objectFit: 'cover', width: '100%', aspectRatio: '4/5', display: 'block', objectPosition: 'center' }} />
+          </motion.div>
+          <motion.div {...reveal(reduceMotion)}>
+            <img src={editorialImages?.material2} alt="Puma sneakers editorial" loading="lazy" decoding="async" style={{ objectFit: 'cover', width: '100%', aspectRatio: '1/1', display: 'block', objectPosition: 'center' }} />
+          </motion.div>
+          <motion.div {...reveal(reduceMotion)}>
+            <img src={editorialImages?.material3} alt="New Balance red campaign" loading="lazy" decoding="async" style={{ objectFit: 'cover', width: '100%', aspectRatio: '1/1', display: 'block', objectPosition: 'center' }} />
+          </motion.div>
+        </div>
         <motion.div {...reveal(reduceMotion, 0.06)} className={styles.craftContent}>
           <p className={styles.sectionEyebrow}>Material & Craftsmanship</p>
           <h2>Built with intention.</h2>
@@ -123,7 +131,7 @@ const MobileHome = ({ customers, featuredProducts, instaImages, newsletter }) =>
       </section>
 
       <section className={styles.campaign}>
-        <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1200&auto=format&fit=crop" alt="LEXCC limited campaign" />
+        <img src={editorialImages?.lead} alt="Male model in red Ferrari jacket" loading="lazy" decoding="async" style={{ objectPosition: 'center' }} />
         <div className={styles.campaignScrim} />
         <motion.div {...reveal(reduceMotion)} className={styles.campaignContent}>
           <p className={styles.sectionEyebrow}>Limited Drop</p>
@@ -139,11 +147,11 @@ const MobileHome = ({ customers, featuredProducts, instaImages, newsletter }) =>
         </motion.header>
         <div className={styles.lookbookGrid}>
           <motion.figure {...reveal(reduceMotion)}>
-            <img src="https://images.unsplash.com/photo-1492288991661-058aa541ff43?q=80&w=1200&auto=format&fit=crop" alt="Outerwear editorial" />
+            <img src={editorialImages?.collage1} alt="Red and black racing jacket editorial" loading="lazy" decoding="async" style={{ objectPosition: 'center' }} />
             <figcaption>Outerwear Editorial</figcaption>
           </motion.figure>
           <motion.figure {...reveal(reduceMotion, 0.05)}>
-            <img src="https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?q=80&w=1000&auto=format&fit=crop" alt="FW26 campaign" />
+            <img src={editorialImages?.collage2} alt="Red Bull racing jacket editorial" loading="lazy" decoding="async" style={{ objectPosition: 'center' }} />
             <figcaption>FW26 Campaign</figcaption>
           </motion.figure>
         </div>
@@ -171,8 +179,17 @@ const MobileHome = ({ customers, featuredProducts, instaImages, newsletter }) =>
         <motion.header {...reveal(reduceMotion)} className={styles.sectionHeader}>
           <div><p className={styles.sectionEyebrow}>Global Community</p><h2>@LEXCC Worldwide</h2></div>
         </motion.header>
-        <div className={styles.communityGrid}>
-          {instaImages.map((image, index) => <img key={image} src={image} alt={`LEXCC community editorial ${index + 1}`} />)}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '4px', width: '100%' }}>
+          {instaImages.map((image, index) => (
+            <img 
+              key={index} 
+              src={image.src} 
+              alt={image.alt || `LEXCC community editorial ${index + 1}`} 
+              loading="lazy" 
+              decoding="async" 
+              style={{ objectFit: 'cover', width: '100%', aspectRatio: '4/5', display: 'block', objectPosition: 'center' }} 
+            />
+          ))}
         </div>
       </section>
 
