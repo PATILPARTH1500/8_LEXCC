@@ -51,20 +51,33 @@ const MobileProductDetailView = ({
         transition={{ duration: reduceMotion ? 0 : 0.4 }}
       >
         <section className={styles.gallery} aria-label={`${product.name} gallery`}>
-          <div className={styles.imageFrame}>
+          <div className={styles.imageFrame} style={{ background: '#0a0a0a', position: 'relative' }}>
             <AnimatePresence mode="wait">
-              <motion.img
-                key={activeImage}
-                src={activeImage}
-                alt={product.name}
-                initial={reduceMotion ? false : { opacity: 0.25 }}
-                animate={{ opacity: imageLoading ? 0.25 : 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: reduceMotion ? 0 : 0.3 }}
-                onLoad={onImageLoad}
-              />
+              {activeImage ? (
+                <motion.img
+                  key={activeImage}
+                  src={activeImage}
+                  alt={product.name}
+                  initial={reduceMotion ? false : { opacity: 0.25 }}
+                  animate={{ opacity: imageLoading ? 0.25 : 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: reduceMotion ? 0 : 0.3 }}
+                  onLoad={onImageLoad}
+                />
+              ) : (
+                <motion.div 
+                  key="empty"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.2)' }}
+                >
+                  <div style={{ fontSize: '1.5rem', letterSpacing: '0.2em', marginBottom: '10px' }}>LEXCC</div>
+                  <div style={{ fontSize: '0.8rem', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Image Coming Soon</div>
+                </motion.div>
+              )}
             </AnimatePresence>
-            {imageLoading && <span className={styles.imageState}>Loading image…</span>}
+            {imageLoading && activeImage && <span className={styles.imageState}>Loading image…</span>}
           </div>
           {displayImages.length > 1 && (
             <div className={styles.thumbnails} aria-label="Choose product image">

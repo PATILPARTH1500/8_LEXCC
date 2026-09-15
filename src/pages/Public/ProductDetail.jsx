@@ -13,7 +13,7 @@ import MobileProductDetailView from '../../components/mobile/MobileProductDetail
 import { useResponsive } from '../../contexts/ResponsiveContext';
 import { getSizingSystem, formatDisplaySize, getSizeLabel, getSizesForSystem } from '../../utils/sizing';
 
-const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop';
+
 
 const ProductDetail = () => {
   const { isMobile } = useResponsive();
@@ -50,7 +50,7 @@ const ProductDetail = () => {
         if (data?.image_url) {
           setActiveImage(data.image_url);
         } else {
-          setActiveImage(DEFAULT_IMAGE);
+          setActiveImage('');
         }
         
         if (data?.variants?.length > 0) {
@@ -152,14 +152,13 @@ const ProductDetail = () => {
   const validSizes = getSizesForSystem(system);
   const uniqueSizes = [...new Set(variantsForColor.map(v => v.size))].filter(s => Boolean(s) && validSizes.includes(s));
   
-  const displayImages = product.image_url ? [product.image_url, DEFAULT_IMAGE] : [DEFAULT_IMAGE, DEFAULT_IMAGE];
+  const displayImages = product.image_url ? [product.image_url] : [];
 
   const productSchema = {
     "@context": "https://schema.org",
     "@type": "Product",
     "name": product.name,
     "description": product.description,
-    "image": product.image_url || DEFAULT_IMAGE,
     "brand": {
       "@type": "Brand",
       "name": "LEXCC"
@@ -172,6 +171,10 @@ const ProductDetail = () => {
       "availability": totalStock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
     }
   };
+  
+  if (product.image_url) {
+    productSchema.image = product.image_url;
+  }
 
   if (isMobile) {
     return (
@@ -224,7 +227,7 @@ const ProductDetail = () => {
       <SEO 
         title={product.name} 
         description={product.description}
-        image={product.image_url || DEFAULT_IMAGE}
+        image={product.image_url || ''}
         url={`https://lexcc.in/product/${product.slug}`}
         schema={productSchema}
       />
@@ -252,57 +255,68 @@ const ProductDetail = () => {
         
         {/* Left Side: Gallery */}
         <div className={styles.gallerySection}>
-          <div className={styles.thumbnailList}>
-            {displayImages.map((img, idx) => (
-              <motion.div 
-                key={idx}
-                whileHover={{ opacity: 1 }}
-                className={`${styles.thumbnail} ${activeImage === img ? styles.thumbnailActive : ''}`} 
-                onClick={() => {
-                  if (activeImage !== img) {
-                    setImageLoading(true);
-                    setActiveImage(img);
-                  }
-                }}
-                style={{ borderRadius: '4px', overflow: 'hidden', border: activeImage === img ? '1px solid var(--accent-color, #D4AF37)' : '1px solid rgba(255,255,255,0.05)' }}
-              >
-                <img src={img} alt={`Thumbnail ${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              </motion.div>
-            ))}
-          </div>
+          {displayImages.length > 1 && (
+            <div className={styles.thumbnailList}>
+              {displayImages.map((img, idx) => (
+                <motion.div 
+                  key={idx}
+                  whileHover={{ opacity: 1 }}
+                  className={`${styles.thumbnail} ${activeImage === img ? styles.thumbnailActive : ''}`} 
+                  onClick={() => {
+                    if (activeImage !== img) {
+                      setImageLoading(true);
+                      setActiveImage(img);
+                    }
+                  }}
+                  style={{ borderRadius: '4px', overflow: 'hidden', border: activeImage === img ? '1px solid var(--accent-color, #D4AF37)' : '1px solid rgba(255,255,255,0.05)' }}
+                >
+                  <img src={img} alt={`Thumbnail ${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </motion.div>
+              ))}
+            </div>
+          )}
           <div className={styles.mainImageContainer} style={{ borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,0,0,0.5)', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
             <AnimatePresence mode="wait">
               <motion.div
-                key={activeImage}
+                key={activeImage || 'empty'}
                 initial={{ opacity: 0, scale: 1.05 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
                 style={{ width: '100%', height: '100%', position: 'absolute', inset: 0 }}
               >
-                {imageLoading && (
-                  <div style={{ position: 'absolute', inset: 0, background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <motion.div animate={{ opacity: [0.2, 0.5, 0.2] }} transition={{ repeat: Infinity, duration: 1.5 }} style={{ width: '100%', height: '100%', background: 'linear-gradient(90deg, #111, #1a1a1a, #111)' }} />
+                {activeImage ? (
+                  <>
+                    {imageLoading && (
+                      <div style={{ position: 'absolute', inset: 0, background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <motion.div animate={{ opacity: [0.2, 0.5, 0.2] }} transition={{ repeat: Infinity, duration: 1.5 }} style={{ width: '100%', height: '100%', background: 'linear-gradient(90deg, #111, #1a1a1a, #111)' }} />
+                      </div>
+                    )}
+                    <motion.img 
+                      src={activeImage} 
+                      alt={product.name} 
+                      className={styles.mainImage}
+                      onLoad={() => setImageLoading(false)}
+                      style={{ opacity: imageLoading ? 0 : 1, cursor: 'zoom-in' }}
+                      whileHover={{ scale: 1.5 }}
+                      onMouseMove={(e) => {
+                        const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+                        const x = ((e.clientX - left) / width) * 100;
+                        const y = ((e.clientY - top) / height) * 100;
+                        e.currentTarget.style.transformOrigin = `${x}% ${y}%`;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transformOrigin = 'center center';
+                      }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                    />
+                  </>
+                ) : (
+                  <div style={{ position: 'absolute', inset: 0, background: '#0a0a0a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.2)' }}>
+                    <div style={{ fontSize: '1.5rem', letterSpacing: '0.2em', marginBottom: '10px' }}>LEXCC</div>
+                    <div style={{ fontSize: '0.8rem', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Image Coming Soon</div>
                   </div>
                 )}
-                <motion.img 
-                  src={activeImage} 
-                  alt={product.name} 
-                  className={styles.mainImage}
-                  onLoad={() => setImageLoading(false)}
-                  style={{ opacity: imageLoading ? 0 : 1, cursor: 'zoom-in' }}
-                  whileHover={{ scale: 1.5 }}
-                  onMouseMove={(e) => {
-                    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
-                    const x = ((e.clientX - left) / width) * 100;
-                    const y = ((e.clientY - top) / height) * 100;
-                    e.currentTarget.style.transformOrigin = `${x}% ${y}%`;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transformOrigin = 'center center';
-                  }}
-                  transition={{ duration: 0.3, ease: "easeOut" }}
-                />
               </motion.div>
             </AnimatePresence>
           </div>
