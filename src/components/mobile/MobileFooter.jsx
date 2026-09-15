@@ -9,7 +9,7 @@ const MobileFooter = ({ newsletter }) => (
       <h2 className={styles.brand}>LEXCC</h2>
       <p className={styles.tagline}>Own The Streets. Define The Standard.</p>
       <div className={styles.socials}>
-        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="LEXCC on Instagram"><FiInstagram /></a>
+        <a href="https://www.instagram.com/lexcc.in/" target="_blank" rel="noopener noreferrer" aria-label="LEXCC on Instagram"><FiInstagram /></a>
         <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="LEXCC on X"><FiTwitter /></a>
         <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="LEXCC on Facebook"><FiFacebook /></a>
       </div>

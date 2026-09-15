@@ -24,7 +24,7 @@ const Footer = () => {
               Own The Streets. Define The Standard. Premium streetwear crafted for those who dictate the culture.
             </p>
             <div className={styles.socials}>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="LEXCC on Instagram" className={styles.socialIcon}><FiInstagram size={20} /></a>
+              <a href="https://www.instagram.com/lexcc.in/" target="_blank" rel="noopener noreferrer" aria-label="LEXCC on Instagram" className={styles.socialIcon}><FiInstagram size={20} /></a>
               <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="LEXCC on X" className={styles.socialIcon}><FiTwitter size={20} /></a>
               <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="LEXCC on Facebook" className={styles.socialIcon}><FiFacebook size={20} /></a>
             </div>
