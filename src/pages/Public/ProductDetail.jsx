@@ -41,17 +41,17 @@ const ProductDetail = () => {
       try {
         const { data, error } = await supabase
           .from('products')
-          .select('*, category:categories(name, slug), variants:product_variants(id, size, color, stock)')
+          .select('*, category:categories(name, slug), variants:product_variants(id, size, color, stock), images:product_images(id, image_url, display_order)')
           .eq('slug', slug)
+          .order('display_order', { referencedTable: 'product_images', ascending: true })
           .single();
           
         if (error) throw error;
-        setProduct(data);
-        if (data?.image_url) {
-          setActiveImage(data.image_url);
-        } else {
-          setActiveImage('');
-        }
+        const sortedImages = [...(data?.images || [])]
+          .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
+        const hydratedProduct = { ...data, images: sortedImages };
+        setProduct(hydratedProduct);
+        setActiveImage(sortedImages[0]?.image_url || data?.image_url || '');
         
         if (data?.variants?.length > 0) {
           setSelectedColor(data.variants[0].color);
@@ -152,7 +152,12 @@ const ProductDetail = () => {
   const validSizes = getSizesForSystem(system);
   const uniqueSizes = [...new Set(variantsForColor.map(v => v.size))].filter(s => Boolean(s) && validSizes.includes(s));
   
-  const displayImages = product.image_url ? [product.image_url] : [];
+  const galleryImages = (product.images || []).map((image) => image.image_url).filter(Boolean);
+  const displayImages = galleryImages.length > 0
+    ? galleryImages
+    : product.image_url
+      ? [product.image_url]
+      : [];
 
   const productSchema = {
     "@context": "https://schema.org",
@@ -172,8 +177,8 @@ const ProductDetail = () => {
     }
   };
   
-  if (product.image_url) {
-    productSchema.image = product.image_url;
+  if (displayImages.length > 0) {
+    productSchema.image = displayImages;
   }
 
   if (isMobile) {
@@ -227,7 +232,7 @@ const ProductDetail = () => {
       <SEO 
         title={product.name} 
         description={product.description}
-        image={product.image_url || ''}
+        image={displayImages[0] || ''}
         url={`https://lexcc.in/product/${product.slug}`}
         schema={productSchema}
       />

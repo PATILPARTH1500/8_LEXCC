@@ -16,6 +16,33 @@ import { INDIAN_STATES, isValidPinCode, isValidIndianPhone, normalizePhone, getE
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop';
 
+const getCodErrorMessage = async (error) => {
+  const response = error?.context;
+  if (response && typeof response.clone === 'function') {
+    try {
+      const payload = await response.clone().json();
+      if (typeof payload?.error === 'string' && payload.error.trim()) {
+        return payload.error;
+      }
+    } catch {
+      // The function may have returned a non-JSON gateway error.
+    }
+
+    if (response.status === 401) {
+      return 'Session expired. Please sign in again.';
+    }
+  }
+
+  const message = typeof error?.message === 'string' ? error.message : '';
+  if (/jwt|unauthorized|session/i.test(message)) {
+    return 'Session expired. Please sign in again.';
+  }
+  if (/failed to send|fetch/i.test(message)) {
+    return 'Unable to reach Cash on Delivery. Please try again.';
+  }
+  return message || 'Unable to place your order. Please try again.';
+};
+
 const Checkout = () => {
   const { isMobile } = useResponsive();
   const { cartItems, cartTotal, clearCart } = useCart();
@@ -114,14 +141,22 @@ const Checkout = () => {
       }));
       
       if (paymentMethod === 'cod') {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError || !session?.access_token) {
+          throw new Error('Session expired. Please sign in again.');
+        }
+
         const { data, error } = await supabase.functions.invoke('create-cod-order', {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`
+          },
           body: { 
             items: itemsPayload,
             shippingAddress
           }
         });
 
-        if (error) throw error;
+        if (error) throw new Error(await getCodErrorMessage(error));
         if (!data?.orderId) throw new Error('Order creation failed.');
 
         setOrderId(data.orderNumber);

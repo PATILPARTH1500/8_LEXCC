@@ -40,7 +40,7 @@ const MobileProductDetailView = ({
       <SEO
         title={product.name}
         description={product.description}
-        image={product.image_url || activeImage}
+        image={activeImage || product.image_url || ''}
         url={`https://lexcc.in/product/${product.slug}`}
         schema={productSchema}
       />

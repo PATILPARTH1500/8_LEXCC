@@ -1,10 +1,8 @@
 import React from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { NavLink, Outlet } from 'react-router-dom';
 import styles from './MobileAccountLayout.module.css';
 
 const MobileAccountLayout = ({ handleLogout, location, navItems, navLinkRefs, navRef, profile }) => {
-  const reduceMotion = useReducedMotion();
   const initials = `${profile?.first_name?.charAt(0) || 'U'}${profile?.last_name?.charAt(0) || ''}`;
 
   return (
@@ -39,17 +37,9 @@ const MobileAccountLayout = ({ handleLogout, location, navItems, navLinkRefs, na
       </nav>
 
       <main className={styles.content} id="main-content">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={location.pathname}
-            initial={reduceMotion ? false : { opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: reduceMotion ? 0 : 0.25 }}
-          >
-            <Outlet />
-          </motion.div>
-        </AnimatePresence>
+        <div key={location.pathname}>
+          <Outlet />
+        </div>
       </main>
     </div>
   );
