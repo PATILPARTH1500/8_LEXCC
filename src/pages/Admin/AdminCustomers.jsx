@@ -18,6 +18,7 @@ const AdminCustomers = () => {
 
   const fetchCustomers = async () => {
     setLoading(true);
+    setError(null);
     try {
       // Fetch profiles separately
       const { data: profiles, error: err } = await supabase
@@ -95,7 +96,8 @@ const AdminCustomers = () => {
         </motion.div>
       </div>
 
-      {error && <div style={{ color: '#ef4444', marginBottom: '20px', fontSize: '0.85rem' }}>{error}</div>}
+      {error && <div role="alert" style={{ color: '#ef4444', marginBottom: '20px', fontSize: '0.85rem' }}>{error} <button type="button" onClick={fetchCustomers}>Retry</button></div>}
+      {error ? null : <>
 
       {isMobile ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
@@ -133,9 +135,6 @@ const AdminCustomers = () => {
                     </div>
                   </div>
 
-                  <button style={{ background: 'rgba(212,175,55,0.1)', border: 'none', color: 'var(--accent-color, #D4AF37)', padding: '10px', borderRadius: '4px', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', width: '100%', cursor: 'pointer' }}>
-                    View Details
-                  </button>
                 </motion.div>
               ))
             )}
@@ -151,14 +150,13 @@ const AdminCustomers = () => {
                 <th style={{ padding: '20px 30px', fontWeight: 400 }}>Joined</th>
                 <th style={{ padding: '20px 30px', fontWeight: 400 }}>Orders</th>
                 <th style={{ padding: '20px 30px', fontWeight: 400 }}>LTV</th>
-                <th style={{ padding: '20px 30px', fontWeight: 400, textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               <AnimatePresence>
                 {customers.length === 0 ? (
                   <tr>
-                    <td colSpan="5" style={{ padding: '40px', textAlign: 'center', color: 'rgba(255,255,255,0.4)' }}>No customers found.</td>
+                    <td colSpan="4" style={{ padding: '40px', textAlign: 'center', color: 'rgba(255,255,255,0.4)' }}>No customers found.</td>
                   </tr>
                 ) : (
                   customers.map((customer) => (
@@ -184,11 +182,6 @@ const AdminCustomers = () => {
                       <td style={{ padding: '20px 30px', color: 'var(--accent-color, #D4AF37)', fontSize: '0.85rem' }} data-label="LTV">
                         {formatINR(customer.lifetime_spend)}
                       </td>
-                      <td style={{ padding: '20px 30px', textAlign: 'right' }} data-label="Actions">
-                        <button style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer', opacity: 0.7, transition: 'opacity 0.2s', ':hover': { opacity: 1 } }}>
-                          View Details
-                        </button>
-                      </td>
                     </motion.tr>
                   ))
                 )}
@@ -198,6 +191,7 @@ const AdminCustomers = () => {
         </div>
       </motion.div>
       )}
+      </>}
     </motion.div>
   );
 };

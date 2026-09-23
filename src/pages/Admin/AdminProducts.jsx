@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAccountStyles } from '../Account/useAccountStyles';
 import { formatINR } from '../../utils/currency';
@@ -15,6 +15,7 @@ const AdminProducts = () => {
   const [error, setError] = useState(null);
   
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     fetchData();
@@ -22,9 +23,11 @@ const AdminProducts = () => {
 
   const fetchData = async () => {
     setLoading(true);
+    setError(null);
     try {
       // Fetch categories
-      const { data: cats } = await supabase.from('categories').select('*');
+      const { data: cats, error: categoryError } = await supabase.from('categories').select('*');
+      if (categoryError) throw categoryError;
       if (cats) setCategories(cats);
 
       // Fetch products with variants
@@ -55,11 +58,13 @@ const AdminProducts = () => {
     
     // DB Update
     try {
-      await supabase.from('products').update({ status: newStatus }).eq('id', id);
+      const { error: statusError } = await supabase.from('products').update({ status: newStatus }).eq('id', id).select('id').single();
+      if (statusError) throw statusError;
     } catch (err) {
       console.error('Failed to update status', err);
       // Revert on fail
       setProducts(prev => prev.map(p => p.id === id ? { ...p, status: currentStatus } : p));
+      setError('Could not update product status. Please retry.');
     }
   };
 
@@ -163,7 +168,9 @@ const AdminProducts = () => {
         </motion.div>
       </div>
 
-      {error && <div style={{ color: '#ef4444', marginBottom: '20px', fontSize: '0.85rem' }}>{error}</div>}
+      {location.state?.notice && <div role="status" style={{ color: '#22c55e', marginBottom: '20px' }}>{location.state.notice}</div>}
+      {error && <div role="alert" style={{ color: '#ef4444', marginBottom: '20px', fontSize: '0.85rem' }}>{error} <button type="button" onClick={fetchData}>Retry</button></div>}
+      {error && products.length === 0 ? null : <>
 
       {isMobile ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
@@ -333,6 +340,7 @@ const AdminProducts = () => {
         </div>
       </motion.div>
       )}
+      </>}
     </motion.div>
   );
 };

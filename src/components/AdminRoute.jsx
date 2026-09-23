@@ -1,14 +1,16 @@
 import React from 'react';
-import { Navigate, Outlet, NavLink } from 'react-router-dom';
+import { Navigate, Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useResponsive } from '../contexts/ResponsiveContext';
 import { motion } from 'framer-motion';
+import AdminErrorBoundary from './AdminErrorBoundary';
 
 const AdminRoute = () => {
-  const { user, profile, loading } = useAuth();
+  const { user, profile, profileLoading } = useAuth();
   const { isMobile } = useResponsive();
+  const location = useLocation();
 
-  if (loading) {
+  if (profileLoading) {
     return (
       <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a0a', color: '#fff' }}>
         <motion.div 
@@ -16,7 +18,7 @@ const AdminRoute = () => {
           transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
           style={{ letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: '0.85rem' }}
         >
-          Verifying Credentials...
+          Verifying admin access...
         </motion.div>
       </div>
     );
@@ -95,7 +97,7 @@ const AdminRoute = () => {
           </NavLink>
         ))}
       </div>
-      <Outlet />
+      <AdminErrorBoundary key={location.pathname}><Outlet /></AdminErrorBoundary>
     </div>
   );
 };

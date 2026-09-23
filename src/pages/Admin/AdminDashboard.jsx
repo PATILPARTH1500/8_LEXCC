@@ -13,15 +13,19 @@ const AdminDashboard = () => {
     lowStock: 0
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchStats = async () => {
+  const fetchStats = async () => {
+      setLoading(true);
+      setError(null);
       try {
         // Fetch Orders for Revenue & Count & Recent Feed
-        const { data: orders } = await supabase.from('orders').select('id, order_number, created_at, total_amount, status').order('created_at', { ascending: false });
+        const { data: orders, error: ordersError } = await supabase.from('orders').select('id, order_number, created_at, total_amount, status').order('created_at', { ascending: false });
+        if (ordersError) throw ordersError;
         
         // Fetch Products for Count & Stock
-        const { data: products } = await supabase.from('products').select('id, status, product_variants(stock)');
+        const { data: products, error: productsError } = await supabase.from('products').select('id, status, product_variants(stock)');
+        if (productsError) throw productsError;
         
         let totalRev = 0;
         let totalOrd = 0;
@@ -53,11 +57,13 @@ const AdminDashboard = () => {
         });
       } catch (err) {
         console.error("Error fetching admin stats:", err);
+        setError('Unable to load metrics.');
       } finally {
         setLoading(false);
       }
     };
-    
+
+  useEffect(() => {
     fetchStats();
   }, []);
 
@@ -80,6 +86,8 @@ const AdminDashboard = () => {
       </div>
     );
   }
+
+  if (error) return <div role="alert" style={{ color: '#ef4444' }}>Unable to load metrics. <button type="button" onClick={fetchStats}>Retry</button></div>;
 
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible">
@@ -140,23 +148,23 @@ const AdminDashboard = () => {
         </motion.div>
 
         <motion.div variants={itemVariants} className={styles.card} style={{ padding: '40px', margin: 0, minHeight: '300px' }}>
-          <h3 style={{ fontSize: '0.9rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#fff', marginBottom: '20px' }}>System Status</h3>
+          <h3 style={{ fontSize: '0.9rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#fff', marginBottom: '20px' }}>Service Monitoring</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', letterSpacing: '0.05em' }}>Database</span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.75rem', color: '#22c55e', textTransform: 'uppercase', letterSpacing: '0.1em' }}><div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e' }}/> Connected</span>
+              <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}>Not monitored</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', letterSpacing: '0.05em' }}>Authentication</span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.75rem', color: '#22c55e', textTransform: 'uppercase', letterSpacing: '0.1em' }}><div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e' }}/> Active</span>
+              <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}>Not monitored</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', letterSpacing: '0.05em' }}>Storage Buckets</span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.75rem', color: '#22c55e', textTransform: 'uppercase', letterSpacing: '0.1em' }}><div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e' }}/> Online</span>
+              <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}>Not monitored</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', letterSpacing: '0.05em' }}>Payment Gateway</span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.75rem', color: '#22c55e', textTransform: 'uppercase', letterSpacing: '0.1em' }}><div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e' }}/> Connected</span>
+              <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}>Not monitored</span>
             </div>
           </div>
         </motion.div>

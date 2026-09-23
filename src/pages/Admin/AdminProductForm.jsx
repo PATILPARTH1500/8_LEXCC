@@ -44,9 +44,12 @@ const AdminProductForm = () => {
   const navigate = useNavigate();
   const styles = useAccountStyles();
   const imageInputRef = useRef(null);
+  const savingRef = useRef(false);
   const blobUrlsRef = useRef(new Set());
 
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [loadingText, setLoadingText] = useState('');
   const [error, setError] = useState(null);
   const [categories, setCategories] = useState([]);
@@ -62,7 +65,8 @@ const AdminProductForm = () => {
     is_new_arrival: false,
     status: 'active',
   });
-  const [variants, setVariants] = useState([{ size: 'OS', color: 'Black', stock: 0 }]);
+  const [variants, setVariants] = useState([{ clientId: makeLocalId(), size: '', color: 'Black', stock: 0 }]);
+  const [fieldErrors, setFieldErrors] = useState({});
 
   useEffect(() => () => {
     blobUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
@@ -73,7 +77,8 @@ const AdminProductForm = () => {
     let cancelled = false;
 
     const loadData = async () => {
-      setLoading(true);
+      setInitialLoading(true);
+      setLoadError(null);
       setError(null);
 
       try {
@@ -129,13 +134,13 @@ const AdminProductForm = () => {
         setGalleryImages(loadedGallery);
         setInitialGalleryImages(loadedGallery);
         if (prod.product_variants?.length > 0) {
-          setVariants(prod.product_variants);
+          setVariants(prod.product_variants.map((variant) => ({ ...variant, clientId: variant.id })));
         }
       } catch (loadError) {
         console.error(loadError);
-        if (!cancelled) setError('Failed to load product data.');
+        if (!cancelled) setLoadError('Failed to load product data.');
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) setInitialLoading(false);
       }
     };
 
@@ -151,6 +156,15 @@ const AdminProductForm = () => {
 
   const handleInputChange = (event) => {
     const { name, value, type, checked } = event.target;
+    if (name === 'category_id') {
+      const nextCategory = categories.find((category) => category.id === value);
+      const nextSizes = getSizesForSystem(getSizingSystem(nextCategory?.slug || ''));
+      setVariants((current) => current.map((variant) => (
+        !variant.id && variant.size && !nextSizes.includes(variant.size)
+          ? { ...variant, size: '' }
+          : variant
+      )));
+    }
     setFormData((current) => ({
       ...current,
       [name]: type === 'checkbox' ? checked : value,
@@ -219,13 +233,13 @@ const AdminProductForm = () => {
   const handleVariantChange = (index, field, value) => {
     setVariants((current) => current.map((variant, variantIndex) => (
       variantIndex === index
-        ? { ...variant, [field]: field === 'stock' ? parseInt(value, 10) || 0 : value }
+        ? { ...variant, [field]: value }
         : variant
     )));
   };
 
   const addVariant = () => {
-    setVariants((current) => [...current, { size: 'OS', color: 'Black', stock: 0 }]);
+    setVariants((current) => [...current, { clientId: makeLocalId(), size: '', color: 'Black', stock: 0 }]);
   };
 
   const removeVariant = (index) => {
@@ -277,98 +291,56 @@ const AdminProductForm = () => {
     return persistedImages;
   };
 
-  const persistGallery = async (savedProductId, images) => {
-    const existingRows = images
-      .map((image, index) => image.id ? {
-        id: image.id,
-        product_id: savedProductId,
-        image_url: image.imageUrl,
-        display_order: index,
-      } : null)
-      .filter(Boolean);
-
-    const newRows = images
-      .map((image, index) => !image.id ? {
-        product_id: savedProductId,
-        image_url: image.imageUrl,
-        display_order: index,
-      } : null)
-      .filter(Boolean);
-
-    if (existingRows.length > 0) {
-      const { error: updateError } = await supabase
-        .from('product_images')
-        .upsert(existingRows, { onConflict: 'id' });
-      if (updateError) throw updateError;
-    }
-
-    if (newRows.length > 0) {
-      const { error: insertError } = await supabase.from('product_images').insert(newRows);
-      if (insertError) throw insertError;
-    }
-
-    const retainedIds = new Set(images.map((image) => image.id).filter(Boolean));
-    const removedIds = (product?.product_images || [])
-      .filter((image) => !retainedIds.has(image.id))
-      .map((image) => image.id);
-
-    if (removedIds.length > 0) {
-      const { error: deleteError } = await supabase
-        .from('product_images')
-        .delete()
-        .in('id', removedIds);
-      if (deleteError) throw deleteError;
-    }
-  };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (savingRef.current) return;
+    savingRef.current = true;
     setLoading(true);
     setLoadingText('VALIDATING...');
     setError(null);
+    setFieldErrors({});
 
-    let createdProductId = null;
-    let savedProductId = product?.id || null;
-    let galleryRowsWritten = false;
+    const savedProductId = product?.id || makeLocalId();
     const uploadedPaths = [];
 
     try {
+      const errors = {};
+      if (!formData.name.trim()) errors.name = 'Enter a product name.';
+      if (!formData.description.trim()) errors.description = 'Enter a description.';
+      if (!Number.isFinite(Number(formData.price)) || Number(formData.price) <= 0) errors.price = 'Enter a price greater than zero.';
+      if (!formData.category_id) errors.category_id = 'Select a category.';
       if (galleryImages.length === 0) {
-        throw new Error('Please add at least one product image.');
+        errors.images = 'Please add at least one product image.';
       }
       if (galleryImages.length > MAX_PRODUCT_IMAGES) {
-        throw new Error(`A product can have no more than ${MAX_PRODUCT_IMAGES} images.`);
+        errors.images = `A product can have no more than ${MAX_PRODUCT_IMAGES} images.`;
       }
-
+      if (variants.length === 0) errors.variants = 'Add at least one variant.';
       const seenVariants = new Set();
-      for (const variant of variants) {
-        if (!sizingOptions.includes(variant.size)) {
-          throw new Error(`Invalid size "${variant.size}" for category type "${system}". Please update it.`);
-        }
-        const variantKey = `${variant.size.trim().toLowerCase()}-${variant.color.trim().toLowerCase()}`;
+      variants.forEach((variant, index) => {
+        if (!variant.size) errors[`size-${index}`] = `Select a size for variant ${index + 1}.`;
+        else if (!sizingOptions.includes(variant.size)) errors[`size-${index}`] = system === 'FOOTWEAR' ? 'UK/Footwear size is invalid.' : `Size is invalid for this category.`;
+        if (!variant.color?.trim()) errors[`color-${index}`] = `Enter a color for variant ${index + 1}.`;
+        if (variant.stock === '' || !Number.isInteger(Number(variant.stock)) || Number(variant.stock) < 0) errors[`stock-${index}`] = 'Stock must be zero or greater.';
+        const variantKey = `${variant.size?.trim().toLowerCase()}\u001f${variant.color?.trim().toLowerCase()}`;
         if (seenVariants.has(variantKey)) {
-          throw new Error(`Duplicate variant detected: ${variant.size} / ${variant.color}`);
+          errors[`size-${index}`] = `Duplicate size/color: ${variant.size} / ${variant.color}.`;
         }
         seenVariants.add(variantKey);
+      });
+      if (Object.keys(errors).length > 0) {
+        setFieldErrors(errors);
+        throw new Error(Object.values(errors)[0]);
       }
 
       const slug = formData.name
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)+/g, '');
-      const productPayload = { ...formData, slug };
-
-      if (!savedProductId) {
-        setLoadingText('CREATING PRODUCT...');
-        const { data: newProduct, error: createError } = await supabase
-          .from('products')
-          .insert([{ ...productPayload, image_url: null }])
-          .select()
-          .single();
-        if (createError) throw createError;
-        savedProductId = newProduct.id;
-        createdProductId = newProduct.id;
-      }
+      if (!slug) throw new Error('Enter a product name containing letters or numbers.');
+      const { data: slugMatch, error: slugError } = await supabase.from('products').select('id').eq('slug', slug).neq('id', savedProductId).limit(1);
+      if (slugError) throw slugError;
+      if (slugMatch?.length) throw new Error('A product with this name already exists.');
 
       setLoadingText('UPLOADING IMAGES...');
       const persistedImages = await uploadGalleryImages(savedProductId, galleryImages, uploadedPaths);
@@ -376,61 +348,14 @@ const AdminProductForm = () => {
         throw new Error('One or more images are missing a public URL.');
       }
 
-      setLoadingText('SAVING GALLERY...');
-      await persistGallery(savedProductId, persistedImages);
-      galleryRowsWritten = true;
-
-      const primaryImageUrl = persistedImages[0].imageUrl;
-      const { error: productError } = await supabase
-        .from('products')
-        .update({ ...productPayload, image_url: primaryImageUrl })
-        .eq('id', savedProductId);
-      if (productError) throw productError;
-
-      setLoadingText('SAVING INVENTORY...');
-      const existingVariantsPayload = [];
-      const newVariantsPayload = [];
-
-      variants.forEach((variant) => {
-        const variantPayload = {
-          product_id: savedProductId,
-          size: variant.size,
-          color: variant.color,
-          stock: Number(variant.stock),
-          sku: `${slug}-${variant.size}-${variant.color}`.toUpperCase().replace(/[^A-Z0-9-]/g, ''),
-        };
-        if (variant.id) {
-          existingVariantsPayload.push({ ...variantPayload, id: variant.id });
-        } else {
-          newVariantsPayload.push(variantPayload);
-        }
+      setLoadingText('SAVING PRODUCT & VARIANTS...');
+      const { error: saveError } = await supabase.rpc('save_admin_product_atomic', {
+        p_product_id: savedProductId,
+        p_product: { ...formData, slug, name: formData.name.trim(), description: formData.description.trim(), price: Number(formData.price) },
+        p_variants: variants.map((variant) => ({ id: variant.id || null, size: variant.size, color: variant.color.trim(), stock: Number(variant.stock) })),
+        p_images: persistedImages.map((image) => ({ id: image.id || null, image_url: image.imageUrl })),
       });
-
-      if (existingVariantsPayload.length > 0) {
-        const { error: variantError } = await supabase
-          .from('product_variants')
-          .upsert(existingVariantsPayload);
-        if (variantError) throw variantError;
-      }
-
-      if (newVariantsPayload.length > 0) {
-        const { error: newVariantError } = await supabase
-          .from('product_variants')
-          .insert(newVariantsPayload);
-        if (newVariantError) throw newVariantError;
-      }
-
-      if (product?.id) {
-        const removedVariants = (product.product_variants || [])
-          .filter((savedVariant) => !variants.some((variant) => variant.id === savedVariant.id));
-        if (removedVariants.length > 0) {
-          const { error: removedVariantError } = await supabase
-            .from('product_variants')
-            .update({ stock: 0 })
-            .in('id', removedVariants.map((variant) => variant.id));
-          if (removedVariantError) throw removedVariantError;
-        }
-      }
+      if (saveError) throw saveError;
 
       const retainedUrls = new Set(persistedImages.map((image) => image.imageUrl));
       const removedStoragePaths = initialGalleryImages
@@ -446,31 +371,29 @@ const AdminProductForm = () => {
         }
       }
 
-      navigate('/account/admin/products');
+      navigate('/account/admin/products', { state: { notice: 'Product saved successfully.' } });
     } catch (saveError) {
       console.error(saveError);
-
-      if (createdProductId) {
-        const { error: rollbackError } = await supabase
-          .from('products')
-          .delete()
-          .eq('id', createdProductId);
-        if (rollbackError) console.error('Unable to roll back new product:', rollbackError);
-      }
-
-      if (uploadedPaths.length > 0 && (createdProductId || !galleryRowsWritten)) {
+      if (uploadedPaths.length > 0) {
         const { error: cleanupError } = await supabase.storage
           .from('product-images')
           .remove(uploadedPaths);
         if (cleanupError) console.error('Unable to clean up uploaded images:', cleanupError);
       }
 
-      setError(saveError.message || 'Save failed. Please try again.');
+      const message = saveError.code === '23505'
+        ? saveError.message?.includes('products_slug_key') ? 'A product with this name already exists.' : 'A conflicting product variant already exists.'
+        : saveError.message || 'Save failed. Please try again.';
+      setError(message);
     } finally {
+      savingRef.current = false;
       setLoading(false);
       setLoadingText('');
     }
   };
+
+  if (initialLoading) return <div role="status" style={{ color: '#fff', padding: '32px' }}>Loading product editor...</div>;
+  if (loadError) return <div role="alert" style={{ color: '#ef4444', padding: '32px' }}>{loadError} <button type="button" onClick={() => window.location.reload()}>Retry</button></div>;
 
   return (
     <motion.div
@@ -495,7 +418,7 @@ const AdminProductForm = () => {
 
       {error && <div role="alert" style={{ color: '#ef4444', marginBottom: '20px', fontSize: '0.85rem' }}>{error}</div>}
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%', minWidth: 0 }}>
+      <form noValidate onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%', minWidth: 0 }}>
         <div className={styles.adminFormLayout}>
           <div className={styles.imageUploadContainer}>
             <div className={styles.galleryHeader}>
@@ -520,6 +443,7 @@ const AdminProductForm = () => {
               onChange={handleImageChange}
             />
             <p className={styles.imageUploadHelp}>JPEG, PNG, or WebP · 5 MB each · up to 8 images</p>
+            {fieldErrors.images && <p role="alert" style={{ color: '#ef4444' }}>{fieldErrors.images}</p>}
 
             <div className={styles.galleryPreviewGrid}>
               {galleryImages.map((image, index) => (
@@ -563,24 +487,28 @@ const AdminProductForm = () => {
           <div style={{ minWidth: 0, flex: 1, display: 'flex', flexDirection: 'column', gap: '15px' }}>
             <div>
               <label className={styles.inputLabel}>Product Name</label>
-              <input type="text" name="name" className={styles.inputField} value={formData.name} onChange={handleInputChange} required />
+              <input type="text" name="name" className={styles.inputField} value={formData.name} onChange={handleInputChange} />
+              {fieldErrors.name && <p role="alert" style={{ color: '#ef4444' }}>{fieldErrors.name}</p>}
             </div>
             <div className={styles.formGrid}>
               <div style={{ minWidth: 0, flex: 1 }}>
                 <label className={styles.inputLabel}>Price (₹)</label>
-                <input type="number" min="0.01" step="0.01" name="price" className={styles.inputField} value={formData.price} onChange={handleInputChange} required />
+                <input type="number" min="0.01" step="0.01" name="price" className={styles.inputField} value={formData.price} onChange={handleInputChange} />
+                {fieldErrors.price && <p role="alert" style={{ color: '#ef4444' }}>{fieldErrors.price}</p>}
               </div>
               <div style={{ minWidth: 0, flex: 1 }}>
                 <label className={styles.inputLabel}>Category</label>
-                <CustomSelect name="category_id" className={styles.inputField} value={formData.category_id} onChange={handleInputChange} required>
+                <CustomSelect name="category_id" className={styles.inputField} value={formData.category_id} onChange={handleInputChange}>
                   <option value="">Select Category</option>
                   {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
                 </CustomSelect>
+                {fieldErrors.category_id && <p role="alert" style={{ color: '#ef4444' }}>{fieldErrors.category_id}</p>}
               </div>
             </div>
             <div>
               <label className={styles.inputLabel}>Description</label>
-              <textarea name="description" className={styles.inputField} value={formData.description} onChange={handleInputChange} style={{ minHeight: '80px', resize: 'vertical' }} required />
+              <textarea name="description" className={styles.inputField} value={formData.description} onChange={handleInputChange} style={{ minHeight: '80px', resize: 'vertical' }} />
+              {fieldErrors.description && <p role="alert" style={{ color: '#ef4444' }}>{fieldErrors.description}</p>}
             </div>
 
             <div className={styles.productFlags}>
@@ -603,10 +531,15 @@ const AdminProductForm = () => {
             <label className={styles.inputLabel} style={{ marginBottom: 0 }}>Inventory Variants</label>
             <button type="button" onClick={addVariant} disabled={loading}>+ Add Variant</button>
           </div>
+          {variants.some((variant) => variant.id && !sizingOptions.includes(variant.size)) && (
+            <p role="alert" style={{ color: '#eab308', marginBottom: '12px' }}>
+              Existing variant sizes do not match this category. They were not changed automatically; select valid sizes or restore the previous category before saving.
+            </p>
+          )}
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
             {variants.map((variant, index) => (
-              <div key={variant.id || index} className={styles.variantRow}>
+              <div key={variant.id || variant.clientId} className={styles.variantRow}>
                 <div style={{ flex: 1 }}>
                   <label className={styles.variantLabel}>Size</label>
                   <CustomSelect
@@ -614,7 +547,6 @@ const AdminProductForm = () => {
                     onChange={(event) => handleVariantChange(index, 'size', event.target.value)}
                     className={styles.inputField}
                     style={{ padding: '10px' }}
-                    required
                   >
                     <option value="">Select Size</option>
                     {sizingOptions.map((option) => <option key={option} value={option}>{option}</option>)}
@@ -622,14 +554,17 @@ const AdminProductForm = () => {
                       <option value={variant.size}>{variant.size} (Invalid)</option>
                     )}
                   </CustomSelect>
+                  {fieldErrors[`size-${index}`] && <p role="alert" style={{ color: '#ef4444' }}>{fieldErrors[`size-${index}`]}</p>}
                 </div>
                 <div style={{ flex: 1 }}>
                   <label className={styles.variantLabel}>Color</label>
-                  <input type="text" placeholder="e.g. Black" value={variant.color} onChange={(event) => handleVariantChange(index, 'color', event.target.value)} className={styles.inputField} style={{ padding: '10px' }} required />
+                  <input type="text" placeholder="e.g. Black" value={variant.color} onChange={(event) => handleVariantChange(index, 'color', event.target.value)} className={styles.inputField} style={{ padding: '10px' }} />
+                  {fieldErrors[`color-${index}`] && <p role="alert" style={{ color: '#ef4444' }}>{fieldErrors[`color-${index}`]}</p>}
                 </div>
                 <div>
                   <label className={styles.variantLabel}>Stock</label>
-                  <input type="number" min="0" placeholder="0" value={variant.stock} onChange={(event) => handleVariantChange(index, 'stock', event.target.value)} className={styles.inputField} style={{ padding: '10px', width: '100%' }} required />
+                  <input type="number" min="0" placeholder="0" value={variant.stock} onChange={(event) => handleVariantChange(index, 'stock', event.target.value)} className={styles.inputField} style={{ padding: '10px', width: '100%' }} />
+                  {fieldErrors[`stock-${index}`] && <p role="alert" style={{ color: '#ef4444' }}>{fieldErrors[`stock-${index}`]}</p>}
                 </div>
                 <button type="button" aria-label={`Remove variant ${index + 1}`} onClick={() => removeVariant(index)} className={styles.removeVariantBtn}>
                   &times;
@@ -637,6 +572,7 @@ const AdminProductForm = () => {
               </div>
             ))}
           </div>
+          {fieldErrors.variants && <p role="alert" style={{ color: '#ef4444' }}>{fieldErrors.variants}</p>}
         </div>
 
         <div className={styles.modalActions}>

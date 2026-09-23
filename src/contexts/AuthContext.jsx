@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext();
@@ -8,8 +8,10 @@ export const AuthProvider = ({ children }) => {
   const [profile, setProfile] = useState(null);
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(true);
   const [authInitialized, setAuthInitialized] = useState(false);
   const [wishlistItems, setWishlistItems] = useState([]);
+  const authUserIdRef = useRef(null);
 
   const fetchProfile = useCallback(async (userId) => {
     const { data, error } = await supabase
@@ -73,6 +75,10 @@ export const AuthProvider = ({ children }) => {
 
     const applySession = (nextSession) => {
       if (!mounted) return;
+      if (nextSession?.user?.id !== authUserIdRef.current) {
+        setProfileLoading(Boolean(nextSession?.user));
+        authUserIdRef.current = nextSession?.user?.id ?? null;
+      }
       setSession(nextSession);
       setUser(nextSession?.user ?? null);
 
@@ -118,10 +124,12 @@ export const AuthProvider = ({ children }) => {
         setProfile(null);
         setWishlistItems([]);
         setLoading(false);
+        setProfileLoading(false);
         return;
       }
 
       setLoading(true);
+      setProfileLoading(true);
       const results = await Promise.allSettled([
         fetchProfile(user.id),
         fetchWishlist(user.id)
@@ -136,6 +144,7 @@ export const AuthProvider = ({ children }) => {
         }
       });
       setLoading(false);
+      setProfileLoading(false);
     };
 
     hydrateAuthenticatedUser();
@@ -185,6 +194,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     setSession(data.session);
+    setProfileLoading(true);
     setUser(data.user);
 
     return data;
@@ -478,6 +488,7 @@ export const AuthProvider = ({ children }) => {
     profile,
     session,
     loading,
+    profileLoading,
     authInitialized,
     signUp,
     signIn,
@@ -504,7 +515,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {authInitialized && children}
     </AuthContext.Provider>
   );
 };

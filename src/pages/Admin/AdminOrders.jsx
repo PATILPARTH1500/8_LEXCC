@@ -8,6 +8,12 @@ import { formatINR } from '../../utils/currency';
 import { generateInvoice } from '../../utils/invoiceGenerator';
 import { useResponsive } from '../../contexts/ResponsiveContext';
 
+const allowedNextStatuses = (order) => {
+  const next = { pending: ['processing'], processing: ['shipped'], shipped: ['delivered'] }[order.status] || [];
+  if (order.payment_method === 'cod' && order.payment_status === 'pending' && ['pending', 'processing'].includes(order.status)) next.push('cancelled');
+  return next;
+};
+
 const AdminOrders = () => {
   const styles = useAccountStyles();
   const { isMobile } = useResponsive();
@@ -36,6 +42,7 @@ const AdminOrders = () => {
 
   const fetchOrders = async () => {
     setLoading(true);
+    setError(null);
     try {
       const { data: ords, error: err } = await supabase
         .from('orders')
@@ -58,7 +65,8 @@ const AdminOrders = () => {
           .select('id, first_name, last_name, email')
           .in('id', userIds);
           
-        if (!profErr && profiles) {
+        if (profErr) throw profErr;
+        if (profiles) {
           profiles.forEach(p => {
             profilesMap[p.id] = p;
           });
@@ -80,54 +88,35 @@ const AdminOrders = () => {
   };
 
   const updateOrderStatus = async (id, newStatus) => {
-    // Optimistic Update
-    setOrders(prev => prev.map(o => o.id === id ? { ...o, status: newStatus } : o));
-    
-    // DB Update
+    const order = orders.find((item) => item.id === id);
+    if (!order || !allowedNextStatuses(order).includes(newStatus)) {
+      setError('This order status change is not allowed.');
+      return;
+    }
     try {
-      const { error } = await supabase.from('orders').update({ status: newStatus }).eq('id', id);
+      const { data, error } = newStatus === 'cancelled'
+        ? await supabase.rpc('cancel_cod_order', { p_order_id: id })
+        : await supabase.from('orders').update({ status: newStatus }).eq('id', id).eq('status', order.status).select('id').single();
       if (error) throw error;
+      if (newStatus === 'cancelled' && data !== true) throw new Error('Order was already cancelled.');
+      setOrders(prev => prev.map(o => o.id === id ? { ...o, status: newStatus, ...(newStatus === 'cancelled' ? { payment_status: 'cancelled' } : {}) } : o));
     } catch (err) {
       console.error('Failed to update order status', err);
-      fetchOrders(); // Re-fetch to correct UI
+      await fetchOrders();
+      setError('Could not update order status. The previous status was kept.');
     }
   };
 
   const handleDeleteOrder = async (order) => {
-    // If order is paid, we archive it
-    if (order.payment_status === 'paid') {
-      if (!window.confirm(`Archive paid order ${order.order_number}?\n\nPaid orders must be retained for transaction history. They will be hidden from this view but remain in the database.`)) {
-        return;
-      }
-      try {
-        const { error: archiveErr } = await supabase.from('orders').update({ is_archived: true }).eq('id', order.id);
-        if (archiveErr) throw archiveErr;
-        setOrders(prev => prev.filter(o => o.id !== order.id));
-        logAdminActivity('ORDER_ARCHIVED', { order_id: order.id, order_number: order.order_number });
-      } catch (err) {
-        console.error('Failed to archive order', err);
-        alert('Failed to archive order.');
-      }
-      return;
-    }
-
-    // Otherwise, unpaid/test order: we can hard delete
-    if (!window.confirm(`Delete this order permanently?\n\nOrder Number: ${order.order_number}\nCustomer: ${order.profiles?.first_name} ${order.profiles?.last_name}\nAmount: ${formatINR(order.total_amount)}\nPayment Status: ${order.payment_status}`)) {
-      return;
-    }
-
+    if (!window.confirm(`Archive order ${order.order_number}? It will be hidden here but retained in the database.`)) return;
     try {
-      // First delete notifications if they exist (though cascade might handle it, doing it to be safe)
-      await supabase.from('order_notifications').delete().eq('order_id', order.id);
-      
-      const { error: delErr } = await supabase.from('orders').delete().eq('id', order.id);
-      if (delErr) throw delErr;
-      
+      const { error: archiveError } = await supabase.from('orders').update({ is_archived: true }).eq('id', order.id);
+      if (archiveError) throw archiveError;
       setOrders(prev => prev.filter(o => o.id !== order.id));
-      logAdminActivity('TEST_ORDER_DELETED', { order_number: order.order_number, previous_status: order.status });
+      await logAdminActivity('ORDER_ARCHIVED', { order_id: order.id, order_number: order.order_number });
     } catch (err) {
-      console.error('Failed to delete order', err);
-      alert('Failed to delete order.');
+      console.error('Failed to archive order', err);
+      setError('Failed to archive order.');
     }
   };
 
@@ -165,29 +154,17 @@ const AdminOrders = () => {
 
   const handleMarkShipped = async (id, carrier, trackingNumber) => {
     try {
+      const order = orders.find((item) => item.id === id);
+      if (!order || !allowedNextStatuses(order).includes('shipped')) throw new Error('Order must be processing before shipment.');
       const now = new Date().toISOString();
       const updates = { status: 'shipped', carrier, tracking_number: trackingNumber, shipped_at: now };
       
       const { error } = await supabase.from('orders').update(updates).eq('id', id);
       if (error) throw error;
       
-      // Attempt to invoke edge function (fail silently for UI but log it)
-      const order = orders.find(o => o.id === id);
-      if (order && order.profiles?.email) {
-        supabase.functions.invoke('send-transactional-email', {
-          body: {
-            type: 'order_shipped',
-            order: order.order_number,
-            customerName: order.profiles.first_name || 'Customer',
-            email: order.profiles.email,
-            trackingNumber,
-            carrier
-          }
-        }).catch(e => console.error('Edge function error:', e));
-      }
-
       setOrders(prev => prev.map(o => o.id === id ? { ...o, ...updates } : o));
       setIsModalOpen(false);
+      setError('Shipment saved. Email notification is unavailable.');
     } catch (err) {
       console.error('Failed to mark as shipped', err);
       setError('Failed to mark as shipped.');
@@ -223,7 +200,8 @@ const AdminOrders = () => {
         </motion.div>
       </div>
 
-      {error && <div style={{ color: '#ef4444', marginBottom: '20px', fontSize: '0.85rem' }}>{error}</div>}
+      {error && <div role="alert" style={{ color: '#ef4444', marginBottom: '20px', fontSize: '0.85rem' }}>{error} <button type="button" onClick={fetchOrders}>Retry</button></div>}
+      {error && orders.length === 0 ? null : <>
 
       {isMobile ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
@@ -262,11 +240,8 @@ const AdminOrders = () => {
                       className={styles.inputField}
                       style={{ padding: '8px 12px', fontSize: '0.8rem', height: 'auto', minHeight: '36px' }}
                     >
-                      <option value="pending">Pending</option>
-                      <option value="processing">Processing</option>
-                      <option value="shipped">Shipped</option>
-                      <option value="delivered">Delivered</option>
-                      <option value="cancelled">Cancelled</option>
+                      <option value={order.status}>{order.status}</option>
+                      {allowedNextStatuses(order).map((status) => <option key={status} value={status}>{status}</option>)}
                     </CustomSelect>
                   </div>
 
@@ -284,21 +259,7 @@ const AdminOrders = () => {
                     >
                       View
                     </button>
-                    {order.payment_status === 'paid' ? (
-                      <button 
-                        onClick={() => handleDeleteOrder(order)}
-                        style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#6b7280', padding: '10px', borderRadius: '4px', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', flex: 1, cursor: 'pointer' }}
-                      >
-                        Archive
-                      </button>
-                    ) : (
-                      <button 
-                        onClick={() => handleDeleteOrder(order)}
-                        style={{ background: 'rgba(239, 68, 68, 0.1)', border: 'none', color: '#ef4444', padding: '10px', borderRadius: '4px', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', flex: 1, cursor: 'pointer' }}
-                      >
-                        Delete
-                      </button>
-                    )}
+                    <button onClick={() => handleDeleteOrder(order)} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#6b7280', padding: '10px', borderRadius: '4px', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', flex: 1, cursor: 'pointer' }}>Archive</button>
                   </div>
                 </motion.div>
               ))
@@ -358,11 +319,8 @@ const AdminOrders = () => {
                           onChange={(e) => updateOrderStatus(order.id, e.target.value)}
                           className={styles.inputField}
                         >
-                          <option value="pending">Pending</option>
-                          <option value="processing">Processing</option>
-                          <option value="shipped">Shipped</option>
-                          <option value="delivered">Delivered</option>
-                          <option value="cancelled">Cancelled</option>
+                          <option value={order.status}>{order.status}</option>
+                          {allowedNextStatuses(order).map((status) => <option key={status} value={status}>{status}</option>)}
                         </CustomSelect>
                       </td>
                       <td style={{ padding: '20px 30px', textAlign: 'right' }} data-label="Actions">
@@ -381,21 +339,7 @@ const AdminOrders = () => {
                             View
                           </button>
                           <span style={{ color: 'rgba(255,255,255,0.2)' }}>|</span>
-                          {order.payment_status === 'paid' ? (
-                            <button 
-                              onClick={() => handleDeleteOrder(order)}
-                              style={{ background: 'transparent', border: 'none', color: '#6b7280', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer' }}
-                            >
-                              Archive
-                            </button>
-                          ) : (
-                            <button 
-                              onClick={() => handleDeleteOrder(order)}
-                              style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer' }}
-                            >
-                              Delete
-                            </button>
-                          )}
+                          <button onClick={() => handleDeleteOrder(order)} style={{ background: 'transparent', border: 'none', color: '#6b7280', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer' }}>Archive</button>
                         </div>
                       </td>
                     </motion.tr>
@@ -407,6 +351,7 @@ const AdminOrders = () => {
         </div>
       </motion.div>
       )}
+      </>}
 
       <ShipmentTrackingModal 
         isOpen={isModalOpen}

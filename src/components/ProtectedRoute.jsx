@@ -3,10 +3,10 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const ProtectedRoute = () => {
-  const { session, loading, authInitialized } = useAuth();
+  const { session, authInitialized } = useAuth();
   const location = useLocation();
 
-  if (!authInitialized || loading) {
+  if (!authInitialized) {
     return (
       <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--primary-color)' }}>
         <div style={{ color: 'var(--accent-color)', fontSize: '0.9rem', letterSpacing: '0.2em', fontWeight: 600 }}>AUTHENTICATING...</div>
