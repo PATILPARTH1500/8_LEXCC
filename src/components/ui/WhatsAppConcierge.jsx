@@ -4,13 +4,13 @@ import { FaWhatsapp } from 'react-icons/fa';
 import styles from './WhatsAppConcierge.module.css';
 import MobileWhatsAppConcierge from '../mobile/MobileWhatsAppConcierge';
 import { useResponsive } from '../../contexts/ResponsiveContext';
+import { SUPPORT_WHATSAPP_URL } from '../../config/support';
 
-const STORE_PHONE_NUMBER = '919082951928'; // Updated to provided number
-const PREFILLED_MESSAGE = encodeURIComponent('Hello LEXCC,\n\nI have a question regarding your products.');
+const PREFILLED_MESSAGE = encodeURIComponent('Hello LEXCC, I need help with my order/product.');
 
 const WhatsAppConcierge = () => {
   const { isMobile } = useResponsive();
-  const href = `https://wa.me/${STORE_PHONE_NUMBER}?text=${PREFILLED_MESSAGE}`;
+  const href = `${SUPPORT_WHATSAPP_URL}?text=${PREFILLED_MESSAGE}`;
 
   if (isMobile) return <MobileWhatsAppConcierge href={href} />;
 

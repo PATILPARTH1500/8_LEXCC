@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FiFacebook, FiInstagram, FiTwitter } from 'react-icons/fi';
+import { FiInstagram } from 'react-icons/fi';
+import { SUPPORT_PHONE, SUPPORT_PHONE_URL, SUPPORT_WHATSAPP_URL } from '../../config/support';
 import styles from './MobileFooter.module.css';
 
 const MobileFooter = ({ newsletter }) => (
@@ -10,8 +11,6 @@ const MobileFooter = ({ newsletter }) => (
       <p className={styles.tagline}>Own The Streets. Define The Standard.</p>
       <div className={styles.socials}>
         <a href="https://www.instagram.com/lexcc.in/" target="_blank" rel="noopener noreferrer" aria-label="LEXCC on Instagram"><FiInstagram /></a>
-        <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="LEXCC on X"><FiTwitter /></a>
-        <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="LEXCC on Facebook"><FiFacebook /></a>
       </div>
     </div>
 
@@ -29,10 +28,11 @@ const MobileFooter = ({ newsletter }) => (
     <details className={styles.group}>
       <summary>Support</summary>
       <div className={styles.links}>
-        <span>FAQ — Coming soon</span>
-        <span>Shipping & Returns — Coming soon</span>
+        <Link to="/faq">FAQ</Link>
+        <Link to="/shipping-returns">Shipping & Returns</Link>
         <Link to="/account/orders">Track Order</Link>
-        <span>Contact Us — Coming soon</span>
+        <a href={SUPPORT_WHATSAPP_URL} target="_blank" rel="noopener noreferrer">Contact Us</a>
+        <a href={SUPPORT_PHONE_URL}>{SUPPORT_PHONE}</a>
       </div>
     </details>
 
@@ -63,7 +63,10 @@ const MobileFooter = ({ newsletter }) => (
 
     <div className={styles.bottom}>
       <p>&copy; {new Date().getFullYear()} LEXCC</p>
-      <p>Privacy & Terms — Coming soon</p>
+      <div className={styles.legalLinks}>
+        <Link to="/privacy-policy">Privacy Policy</Link>
+        <Link to="/terms">Terms & Conditions</Link>
+      </div>
     </div>
   </footer>
 );

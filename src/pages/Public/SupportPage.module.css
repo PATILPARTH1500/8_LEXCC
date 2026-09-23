@@ -1,0 +1,16 @@
+.page {
+  width: min(100%, 880px);
+  margin: 0 auto;
+  padding: 120px 24px 72px;
+  color: #fff;
+  overflow-wrap: anywhere;
+}
+.page h1 { font-size: clamp(1.7rem, 5vw, 2.6rem); font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; margin: 24px 0 16px; }
+.intro, .section p { color: rgba(255, 255, 255, 0.68); line-height: 1.8; }
+.intro { margin-bottom: 36px; }
+.section { border-top: 1px solid rgba(255, 255, 255, 0.12); padding: 24px 0; }
+.section h2 { font-size: 1rem; font-weight: 500; margin-bottom: 12px; }
+.section p + p { margin-top: 12px; }
+.page a { color: #D4AF37; text-decoration: underline; text-underline-offset: 4px; }
+.page a:focus-visible { outline: 2px solid #D4AF37; outline-offset: 4px; }
+.back { display: inline-flex; align-items: center; min-height: 44px; font-size: 0.8rem; }

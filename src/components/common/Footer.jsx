@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FiInstagram, FiTwitter, FiFacebook } from 'react-icons/fi';
+import { FiInstagram } from 'react-icons/fi';
+import { SUPPORT_PHONE, SUPPORT_PHONE_URL, SUPPORT_WHATSAPP_URL } from '../../config/support';
 import { useNewsletterSubscription } from '../../hooks/useNewsletterSubscription';
 import styles from './Footer.module.css';
 import MobileFooter from '../mobile/MobileFooter';
@@ -25,8 +26,6 @@ const Footer = () => {
             </p>
             <div className={styles.socials}>
               <a href="https://www.instagram.com/lexcc.in/" target="_blank" rel="noopener noreferrer" aria-label="LEXCC on Instagram" className={styles.socialIcon}><FiInstagram size={20} /></a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="LEXCC on X" className={styles.socialIcon}><FiTwitter size={20} /></a>
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="LEXCC on Facebook" className={styles.socialIcon}><FiFacebook size={20} /></a>
             </div>
           </div>
           
@@ -44,10 +43,11 @@ const Footer = () => {
           <div>
             <h3 className={styles.colTitle}>Support</h3>
             <ul className={styles.linkList}>
-              <li><span className={styles.linkPending} title="Support page coming soon">FAQ — Coming soon</span></li>
-              <li><span className={styles.linkPending} title="Support page coming soon">Shipping & Returns — Coming soon</span></li>
+              <li><Link to="/faq" className={styles.link}>FAQ</Link></li>
+              <li><Link to="/shipping-returns" className={styles.link}>Shipping & Returns</Link></li>
               <li><Link to="/account/orders" className={styles.link}>Track Order</Link></li>
-              <li><span className={styles.linkPending} title="Support page coming soon">Contact Us — Coming soon</span></li>
+              <li><a href={SUPPORT_WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className={styles.link}>Contact Us</a></li>
+              <li><a href={SUPPORT_PHONE_URL} className={styles.link}>{SUPPORT_PHONE}</a></li>
             </ul>
           </div>
 
@@ -83,8 +83,8 @@ const Footer = () => {
             &copy; {new Date().getFullYear()} LEXCC. All rights reserved.
           </p>
           <div className={styles.legalLinks}>
-            <span className={styles.legalPending}>Privacy Policy — Coming soon</span>
-            <span className={styles.legalPending}>Terms of Service — Coming soon</span>
+            <Link to="/privacy-policy">Privacy Policy</Link>
+            <Link to="/terms">Terms & Conditions</Link>
           </div>
         </div>
       </div>

@@ -13,9 +13,15 @@
 
 @media (min-width: 768px) {
   .grid {
-    grid-template-columns: 2fr 1fr 1fr 1.5fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+@media (min-width: 1100px) {
+  .grid { grid-template-columns: 2fr 1fr 1fr 1.5fr; }
+}
+
+.grid > div { min-width: 0; }
 
 .brandName {
   font-size: 24px;
@@ -94,6 +100,8 @@
 }
 
 .input {
+  min-width: 0;
+  width: 100%;
   background: transparent;
   border: none;
   padding: 12px 0;
@@ -172,6 +180,7 @@
 
 .legalLinks {
   display: flex;
+  flex-wrap: wrap;
   gap: 24px;
   font-size: 12px;
   color: var(--text-muted);
@@ -183,4 +192,15 @@
 
 .legalLinks a:hover {
   color: #fff;
+}
+
+.link, .legalLinks a, .socialIcon {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.link:focus-visible, .legalLinks a:focus-visible, .socialIcon:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 4px;
 }

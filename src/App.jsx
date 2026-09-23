@@ -29,6 +29,7 @@ import ProductDetail from './pages/Public/ProductDetail';
 import Cart from './pages/Public/Cart';
 import Checkout from './pages/Public/Checkout';
 import NotFound from './pages/Public/NotFound';
+import SupportPage from './pages/Public/SupportPage';
 
 // Account Pages
 import AccountLayout from './pages/Account/AccountLayout';
@@ -54,6 +55,10 @@ function App() {
             <Route path="shop/:category" element={<Collections />} />
             <Route path="product/:slug" element={<ProductDetail />} />
             <Route path="cart" element={<Cart />} />
+            <Route path="faq" element={<SupportPage page="faq" />} />
+            <Route path="shipping-returns" element={<SupportPage page="shipping" />} />
+            <Route path="privacy-policy" element={<SupportPage page="privacy" />} />
+            <Route path="terms" element={<SupportPage page="terms" />} />
             
             {/* Auth Routes */}
             <Route path="login" element={<Login />} />
